@@ -1,3 +1,4 @@
+
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { UserProfile } from '../types';
 import { initializeApp, getApps, FirebaseApp } from 'firebase/app';
@@ -12,15 +13,22 @@ import {
   User
 } from 'firebase/auth';
 
-// Helper to get env variables with fallbacks
+// Helper to get env variables with multiple fallbacks for Vite/Browser environments
 const getEnv = (key: string) => {
+  // 1. Try process.env (Vite define or Node-like env)
   if (typeof process !== 'undefined' && process.env && process.env[key]) {
     return process.env[key];
+  }
+  // 2. Try import.meta.env (Standard Vite)
+  // @ts-ignore
+  if (typeof import.meta !== 'undefined' && import.meta.env && import.meta.env[key]) {
+    // @ts-ignore
+    return import.meta.env[key];
   }
   return undefined;
 };
 
-// Firebase configuration using environment variables
+// Firebase configuration
 const firebaseConfig = {
   apiKey: getEnv('VITE_FIREBASE_API_KEY') || getEnv('FIREBASE_API_KEY'),
   authDomain: getEnv('VITE_FIREBASE_AUTH_DOMAIN') || getEnv('FIREBASE_AUTH_DOMAIN'),
@@ -30,7 +38,6 @@ const firebaseConfig = {
   appId: getEnv('VITE_FIREBASE_APP_ID') || getEnv('FIREBASE_APP_ID')
 };
 
-// Initialize Firebase using the Modular API
 let auth: Auth | null = null;
 const googleProvider = new GoogleAuthProvider();
 googleProvider.addScope('profile');
@@ -68,10 +75,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // Retry init if it failed earlier
     if (!auth) initFirebase();
     
     if (!auth) {
+      console.warn("Auth system not ready. Verify Firebase environment variables.");
       setLoading(false);
       return;
     }
@@ -97,11 +104,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   }, []);
 
   const signInWithGoogle = async () => {
-    // Try to re-init if auth is missing
     if (!auth) initFirebase();
-
     if (!auth) {
-      alert("Auth system not initialized. Please verify that your environment variables (FIREBASE_API_KEY, etc.) are correctly set in the .env file.");
+      alert("Auth system not initialized. Check console for details.");
       return;
     }
     
@@ -109,25 +114,13 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       await signInWithPopup(auth, googleProvider);
     } catch (error: any) {
       console.error("Google Sign-In Error:", error);
-      
-      if (error.code === 'auth/unauthorized-domain') {
-        const domain = window.location.hostname;
-        alert(`Authentication failed: Domain "${domain}" is not authorized in your Firebase console. \n\nTo fix this: Go to Firebase Console > Authentication > Settings > Authorized Domains and add "${domain}".`);
-      } else if (error.code === 'auth/popup-blocked') {
-        alert("The sign-in popup was blocked by your browser. Please allow popups for this site.");
-      } else if (error.code === 'auth/operation-not-allowed') {
-        alert("Google sign-in is not enabled in your Firebase project. Please enable it in the Authentication > Sign-in method tab.");
-      } else {
-        alert(`Sign-in failed: ${error.message}`);
-      }
+      alert(`Sign-in failed: ${error.message}`);
     }
   };
 
   const signInAsGuest = async () => {
     if (!auth) initFirebase();
-
     if (!auth) {
-      // Fallback local session if Firebase is totally unavailable
       const mockUser = { uid: 'guest-local-' + Date.now(), displayName: 'Local Adventurer', email: null, photoURL: null };
       setUser(mockUser);
       setLoading(false);
@@ -138,12 +131,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       await signInAnonymously(auth);
     } catch (error: any) {
       console.error("Guest Sign-In Error:", error);
-      const mockUser = { 
-        uid: 'guest-' + Math.random().toString(36).substr(2, 5), 
-        displayName: 'Guest Adventurer', 
-        email: null, 
-        photoURL: null 
-      };
+      const mockUser = { uid: 'guest-' + Math.random().toString(36).substr(2, 5), displayName: 'Guest Adventurer', email: null, photoURL: null };
       setUser(mockUser);
       setLoading(false);
     }
@@ -157,8 +145,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     try {
       await signOut(auth);
     } catch (error) {
-      console.error("Logout Error:", error);
-      setUser(null); // Force clear state anyway
+      setUser(null);
     }
   };
 
