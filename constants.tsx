@@ -75,22 +75,64 @@ export const DND_ALIGNMENTS: string[] = [
   'Chaotic Evil',
 ];
 
-// Basic Shop Inventory (SRD)
+// Comprehensive Shop Inventory
 export const SHOP_INVENTORY: Item[] = [
+  // --- WEAPONS ---
   { name: "Dagger", cost: 2, weight: 1, type: "Weapon", quantity: 1, notes: "1d4 piercing, Finesse, Light" },
+  { name: "Handaxe", cost: 5, weight: 2, type: "Weapon", quantity: 1, notes: "1d6 slashing, Light, Thrown (20/60)" },
+  { name: "Shortsword", cost: 10, weight: 2, type: "Weapon", quantity: 1, notes: "1d6 piercing, Finesse, Light" },
   { name: "Longsword", cost: 15, weight: 3, type: "Weapon", quantity: 1, notes: "1d8 slashing, Versatile (1d10)" },
-  { name: "Shortbow", cost: 25, weight: 2, type: "Weapon", quantity: 1, notes: "1d6 piercing, Two-handed" },
+  { name: "Rapier", cost: 25, weight: 2, type: "Weapon", quantity: 1, notes: "1d8 piercing, Finesse" },
+  { name: "Greataxe", cost: 30, weight: 7, type: "Weapon", quantity: 1, notes: "1d12 slashing, Heavy, Two-handed" },
   { name: "Greatsword", cost: 50, weight: 6, type: "Weapon", quantity: 1, notes: "2d6 slashing, Heavy, Two-handed" },
-  { name: "Leather Armor", cost: 10, weight: 10, type: "Armor", quantity: 1, notes: "AC 11, Light Armor" },
-  { name: "Chain Shirt", cost: 50, weight: 20, type: "Armor", quantity: 1, notes: "AC 13, Medium Armor" },
-  { name: "Plate Armor", cost: 1500, weight: 65, type: "Armor", quantity: 1, notes: "AC 18, Heavy Armor, Str 15" },
+  { name: "Warhammer", cost: 15, weight: 2, type: "Weapon", quantity: 1, notes: "1d8 bludgeoning, Versatile (1d10)" },
+  { name: "Maul", cost: 10, weight: 10, type: "Weapon", quantity: 1, notes: "2d6 bludgeoning, Heavy, Two-handed" },
+  { name: "Shortbow", cost: 25, weight: 2, type: "Weapon", quantity: 1, notes: "1d6 piercing, Range 80/320, Two-handed" },
+  { name: "Longbow", cost: 50, weight: 2, type: "Weapon", quantity: 1, notes: "1d8 piercing, Range 150/600, Heavy, Two-handed" },
+  { name: "Hand Crossbow", cost: 75, weight: 3, type: "Weapon", quantity: 1, notes: "1d6 piercing, Range 30/120, Light, Loading" },
+
+  // --- ARMOR ---
+  { name: "Padded Armor", cost: 5, weight: 8, type: "Armor", quantity: 1, notes: "AC 11 + Dex, Stealth Disadv." },
+  { name: "Leather Armor", cost: 10, weight: 10, type: "Armor", quantity: 1, notes: "AC 11 + Dex" },
+  { name: "Studded Leather", cost: 45, weight: 13, type: "Armor", quantity: 1, notes: "AC 12 + Dex" },
+  { name: "Hide Armor", cost: 10, weight: 12, type: "Armor", quantity: 1, notes: "AC 12 + Dex (max 2)" },
+  { name: "Chain Shirt", cost: 50, weight: 20, type: "Armor", quantity: 1, notes: "AC 13 + Dex (max 2)" },
+  { name: "Scale Mail", cost: 50, weight: 45, type: "Armor", quantity: 1, notes: "AC 14 + Dex (max 2), Stealth Disadv." },
+  { name: "Breastplate", cost: 400, weight: 20, type: "Armor", quantity: 1, notes: "AC 14 + Dex (max 2)" },
+  { name: "Half Plate", cost: 750, weight: 40, type: "Armor", quantity: 1, notes: "AC 15 + Dex (max 2), Stealth Disadv." },
+  { name: "Ring Mail", cost: 30, weight: 40, type: "Armor", quantity: 1, notes: "AC 14, Stealth Disadv." },
+  { name: "Chain Mail", cost: 75, weight: 55, type: "Armor", quantity: 1, notes: "AC 16, Str 13 req, Stealth Disadv." },
+  { name: "Splint Armor", cost: 200, weight: 60, type: "Armor", quantity: 1, notes: "AC 17, Str 15 req, Stealth Disadv." },
+  { name: "Plate Armor", cost: 1500, weight: 65, type: "Armor", quantity: 1, notes: "AC 18, Str 15 req, Stealth Disadv." },
   { name: "Shield", cost: 10, weight: 6, type: "Armor", quantity: 1, notes: "+2 AC" },
+
+  // --- SPELLCASTING FOCI ---
+  { name: "Arcane Focus (Wand)", cost: 10, weight: 1, type: "Gear", quantity: 1, notes: "Wizard/Sorcerer/Warlock Focus" },
+  { name: "Arcane Focus (Staff)", cost: 5, weight: 4, type: "Gear", quantity: 1, notes: "Wizard/Sorcerer/Warlock Focus" },
+  { name: "Arcane Focus (Crystal)", cost: 10, weight: 1, type: "Gear", quantity: 1, notes: "Wizard/Sorcerer/Warlock Focus" },
+  { name: "Druidic Focus (Totem)", cost: 1, weight: 0, type: "Gear", quantity: 1, notes: "Druid Focus" },
+  { name: "Druidic Focus (Wooden Staff)", cost: 5, weight: 4, type: "Gear", quantity: 1, notes: "Druid Focus" },
+  { name: "Holy Symbol (Amulet)", cost: 5, weight: 1, type: "Gear", quantity: 1, notes: "Cleric/Paladin Focus" },
+  { name: "Holy Symbol (Emblem)", cost: 5, weight: 0, type: "Gear", quantity: 1, notes: "Cleric/Paladin Focus" },
+  { name: "Component Pouch", cost: 25, weight: 2, type: "Gear", quantity: 1, notes: "Universal Spellcasting Focus" },
+
+  // --- TOOLS & KITS ---
+  { name: "Thieves' Tools", cost: 25, weight: 1, type: "Gear", quantity: 1, notes: "Essential for Rogue checks" },
+  { name: "Healer's Kit", cost: 5, weight: 3, type: "Gear", quantity: 1, notes: "Stabilize creature without check (10 uses)" },
+  { name: "Poisoner's Kit", cost: 50, weight: 2, type: "Gear", quantity: 1, notes: "Create and apply poisons" },
+  { name: "Cook's Utensils", cost: 1, weight: 8, type: "Gear", quantity: 1, notes: "Proficiency adds to health during rest" },
+  { name: "Lute", cost: 35, weight: 2, type: "Gear", quantity: 1, notes: "Bardic Focus" },
+
+  // --- GEAR & CONSUMABLES ---
   { name: "Potion of Healing", cost: 50, weight: 0.5, type: "Consumable", quantity: 1, notes: "Heals 2d4+2 HP" },
   { name: "Rations (1 day)", cost: 0.5, weight: 2, type: "Consumable", quantity: 1 },
   { name: "Rope, Hempen (50ft)", cost: 1, weight: 10, type: "Gear", quantity: 1 },
+  { name: "Grappling Hook", cost: 2, weight: 4, type: "Gear", quantity: 1 },
+  { name: "Manacles", cost: 2, weight: 6, type: "Gear", quantity: 1 },
   { name: "Torch", cost: 0.01, weight: 1, type: "Gear", quantity: 1, notes: "Burns for 1 hour" },
   { name: "Backpack", cost: 2, weight: 5, type: "Gear", quantity: 1 },
   { name: "Bedroll", cost: 1, weight: 7, type: "Gear", quantity: 1 },
+  { name: "Tent, Two-person", cost: 2, weight: 20, type: "Gear", quantity: 1 },
 ];
 
 export const RACIAL_BONUSES: Record<string, Partial<Record<StatKey, number>>> = {
@@ -250,74 +292,4 @@ export const VESPER_DATA: CharacterData = {
   journal: [
     { id: '1', timestamp: Date.now(), type: 'note', content: 'We arrived in the Underdark. The air is stale and cold.' },
   ]
-};
-
-export const createNewCharacter = (name: string, race: string, charClass: string, background?: string, alignment?: string): CharacterData => {
-  const defaultSkills: Skill[] = [
-    { name: "Acrobatics", ability: "DEX", modifier: 0, proficiency: "none" },
-    { name: "Animal Handling", ability: "WIS", modifier: 0, proficiency: "none" },
-    { name: "Arcana", ability: "INT", modifier: 0, proficiency: "none" },
-    { name: "Athletics", ability: "STR", modifier: 0, proficiency: "none" },
-    { name: "Deception", ability: "CHA", modifier: 0, proficiency: "none" },
-    { name: "History", ability: "INT", modifier: 0, proficiency: "none" },
-    { name: "Insight", ability: "WIS", modifier: 0, proficiency: "none" },
-    { name: "Intimidation", ability: "CHA", modifier: 0, proficiency: "none" },
-    { name: "Investigation", ability: "INT", modifier: 0, proficiency: "none" },
-    { name: "Medicine", ability: "WIS", modifier: 0, proficiency: "none" },
-    { name: "Nature", ability: "INT", modifier: 0, proficiency: "none" },
-    { name: "Perception", ability: "WIS", modifier: 0, proficiency: "none" },
-    { name: "Performance", ability: "CHA", modifier: 0, proficiency: "none" },
-    { name: "Persuasion", ability: "CHA", modifier: 0, proficiency: "none" },
-    { name: "Religion", ability: "INT", modifier: 0, proficiency: "none" },
-    { name: "Sleight of Hand", ability: "DEX", modifier: 0, proficiency: "none" },
-    { name: "Stealth", ability: "DEX", modifier: 0, proficiency: "none" },
-    { name: "Survival", ability: "WIS", modifier: 0, proficiency: "none" },
-  ];
-
-  const classData = getClassData(charClass);
-  const hitDie = classData?.hitDie ?? 8;
-  const speed = getRaceSpeed(race);
-  const proficientSaves = classData?.savingThrows ?? ['STR', 'CON'];
-
-  const baseStats: Record<StatKey, { score: number; modifier: number; save: number; proficientSave: boolean }> = {
-    STR: { score: 10, modifier: 0, save: 0, proficientSave: proficientSaves.includes('STR') },
-    DEX: { score: 10, modifier: 0, save: 0, proficientSave: proficientSaves.includes('DEX') },
-    CON: { score: 10, modifier: 0, save: 0, proficientSave: proficientSaves.includes('CON') },
-    INT: { score: 10, modifier: 0, save: 0, proficientSave: proficientSaves.includes('INT') },
-    WIS: { score: 10, modifier: 0, save: 0, proficientSave: proficientSaves.includes('WIS') },
-    CHA: { score: 10, modifier: 0, save: 0, proficientSave: proficientSaves.includes('CHA') },
-  };
-
-  const id = generateId();
-
-  return {
-    id: id,
-    campaign: "New Campaign",
-    name: name || "Unknown Hero",
-    nickname: "",
-    race: race || "Human",
-    class: charClass || "Fighter",
-    level: 1,
-    portraitUrl: `https://picsum.photos/seed/${id}/400/600`,
-    stats: baseStats,
-    hp: { current: hitDie, max: hitDie },
-    hitDice: { current: 1, max: 1, die: `1d${hitDie}` },
-    ac: 10 + baseStats.DEX.modifier,
-    initiative: baseStats.DEX.modifier,
-    speed: speed,
-    passivePerception: 10 + baseStats.WIS.modifier,
-    skills: defaultSkills,
-    attacks: [
-      { name: "Unarmed Strike", bonus: baseStats.STR.modifier + 2, damage: `1${baseStats.STR.modifier >= 0 ? '+' : ''}${baseStats.STR.modifier}`, type: "Bludgeoning" }
-    ],
-    features: [],
-    spells: [],
-    spellSlots: [],
-    inventory: {
-      gold: 150, // Standard starting gold
-      items: [],
-      load: "Light"
-    },
-    journal: []
-  };
 };

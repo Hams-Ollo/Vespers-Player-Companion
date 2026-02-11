@@ -658,7 +658,7 @@ const CharacterCreationWizard: React.FC<WizardProps> = ({ campaigns, onCreate, o
     const hitDie = classData?.hitDie ?? 8;
     const speed = getRaceSpeed(state.race);
     const profBonus = 2;
-    // Fix: Using type assertion for the stats object as it's populated immediately after initialization.
+    // Using type assertion for the stats object as it's populated immediately after initialization.
     const stats = {} as Record<StatKey, any>;
     STAT_KEYS.forEach(stat => {
       let base = state.statMethod === 'standard' ? (state.standardAssignment[stat] ?? 8) : state.baseStats[stat];
@@ -672,7 +672,7 @@ const CharacterCreationWizard: React.FC<WizardProps> = ({ campaigns, onCreate, o
 
     const character: CharacterData = {
       id: generateId(),
-      campaign: state.campaign,
+      campaign: state.campaign === 'NEW_PROMPT' ? 'New Adventure' : (state.campaign || 'Solo Adventure'),
       name: state.name,
       nickname: "",
       race: state.race,
@@ -693,7 +693,7 @@ const CharacterCreationWizard: React.FC<WizardProps> = ({ campaigns, onCreate, o
       features: [],
       spells: [],
       spellSlots: [],
-      inventory: { gold: 0, items: [], load: "Light" },
+      inventory: { gold: 150, items: [], load: "Light" },
       journal: []
     };
 
