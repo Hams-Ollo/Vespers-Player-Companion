@@ -55,26 +55,13 @@ npm install
 
 ### 2️⃣ Configure Environment
 
-Create a `.env` file in the project root:
+Copy the example file and fill in your keys:
 
-```env
-# 🔑 Gemini API Key (required)
-GEMINI_API_KEY=your_gemini_api_key
-
-# 🔥 Firebase Configuration (required for auth)
-VITE_FIREBASE_API_KEY=your_firebase_api_key
-VITE_FIREBASE_AUTH_DOMAIN=your_project.firebaseapp.com
-VITE_FIREBASE_PROJECT_ID=your_project_id
-VITE_FIREBASE_STORAGE_BUCKET=your_project.firebasestorage.app
-VITE_FIREBASE_MESSAGING_SENDER_ID=your_sender_id
-VITE_FIREBASE_APP_ID=your_app_id
-
-# 📚 Gemini File URIs (optional — set after running upload-pdfs)
-VITE_GEMINI_FILE_URI_BASIC=
-VITE_GEMINI_FILE_URI_DMG=
-VITE_GEMINI_FILE_URI_MM=
-VITE_GEMINI_FILE_URI_PHB=
+```bash
+cp .env.example .env
 ```
+
+Then edit `.env` with your Gemini API key and Firebase config. See [`.env.example`](.env.example) for all available variables with descriptions.
 
 > ⚠️ **Never commit `.env` to version control.** It's already in `.gitignore`.
 

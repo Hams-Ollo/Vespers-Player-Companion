@@ -6,21 +6,13 @@
 
 ## 📐 High-Level Architecture
 
-```
-┌─────────────────────────────────────────────────────┐
-│                    Browser (Client)                  │
-│                                                     │
-│  ┌──────────┐   ┌──────────────┐   ┌─────────────┐ │
-│  │ Firebase  │   │   React App  │   │  localStorage│ │
-│  │   Auth    │◄─►│  (Vite SPA)  │◄─►│  (persisted) │ │
-│  └──────────┘   └──────┬───────┘   └─────────────┘ │
-│                        │                            │
-│                        ▼                            │
-│              ┌─────────────────┐                    │
-│              │  Google Gemini  │                    │
-│              │   API (REST)    │                    │
-│              └─────────────────┘                    │
-└─────────────────────────────────────────────────────┘
+```mermaid
+flowchart TB
+    subgraph Browser["🌐 Browser (Client)"]
+        FA["🔐 Firebase Auth"] <--> RA["⚛️ React App (Vite SPA)"]
+        RA <--> LS["💽 localStorage"]
+    end
+    RA -->|"REST API calls"| GEM["🤖 Google Gemini API"]
 ```
 
 The app is a **fully client-side SPA** — no backend server. All state persists in `localStorage`. AI calls go directly from the browser to Google's Gemini API. Firebase handles authentication only.
@@ -29,39 +21,39 @@ The app is a **fully client-side SPA** — no backend server. All state persists
 
 ## 🔄 Application Flow
 
-```
-🚪 LoginScreen
-   │
-   ├─ Google Sign-In ──► Firebase Auth
-   └─ Guest Mode ──────► Anonymous Auth / Local Fallback
-         │
-         ▼
-📜 CharacterSelection
-   │
-   ├─ Select existing ──► Dashboard
-   ├─ Delete character
-   └─ Create new ──────► CharacterCreationWizard
-                              │
-                              ▼
-                        🧙 Wizard (6 steps)
-                          1. Identity (name, race, class, bg, alignment)
-                          2. Ability Scores (standard/pointbuy/manual)
-                          3. Skill Proficiencies
-                          4. Spells & Cantrips (data-driven PHB lists)
-                          5. Character Concept (appearance, backstory)
-                          6. Review + AI portrait generation
-                              │
-                              ▼
-                        📋 Dashboard
-                          ├── CardStack (swipeable cards)
-                          ├── DetailOverlay (fullscreen views)
-                          ├── DiceRollModal
-                          ├── LevelUpModal
-                          ├── RestModal
-                          ├── ShopModal
-                          ├── AskDMModal
-                          ├── SettingsModal
-                          └── PortraitGenerator
+```mermaid
+flowchart TD
+    Login["🚪 LoginScreen"] -->|Google Sign-In| FA["🔐 Firebase Auth"]
+    Login -->|Guest Mode| Anon["👤 Anonymous Auth / Local Fallback"]
+    FA --> CS["📜 CharacterSelection"]
+    Anon --> CS
+
+    CS -->|Select existing| Dash["📋 Dashboard"]
+    CS -->|Create new| Wiz["🧙 CharacterCreationWizard"]
+    CS -->|Delete| CS
+
+    subgraph Wizard["🧙 Creation Wizard (6 Steps)"]
+        W1["1. Identity"] --> W2["2. Ability Scores"]
+        W2 --> W3["3. Skill Proficiencies"]
+        W3 --> W4["4. Spells & Cantrips"]
+        W4 --> W5["5. Character Concept"]
+        W5 --> W6["6. Review + AI Portrait"]
+    end
+    Wiz --> W1
+    W6 --> Dash
+
+    subgraph DashboardModals["📋 Dashboard"]
+        Cards["🃏 CardStack"]
+        Detail["🔍 DetailOverlay"]
+        Dice["🎲 DiceRollModal"]
+        LvlUp["⬆️ LevelUpModal"]
+        Rest["🛏️ RestModal"]
+        Shop["🏪 ShopModal"]
+        DM["🤖 AskDMModal"]
+        Settings["⚙️ SettingsModal"]
+        Portrait["🎨 PortraitGenerator"]
+    end
+    Dash --> Cards
 ```
 
 ---
