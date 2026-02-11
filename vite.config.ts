@@ -32,6 +32,10 @@ export default defineConfig(({ mode }) => {
         'process.env.VITE_FIREBASE_STORAGE_BUCKET': JSON.stringify(getVar('VITE_FIREBASE_STORAGE_BUCKET')),
         'process.env.VITE_FIREBASE_MESSAGING_SENDER_ID': JSON.stringify(getVar('VITE_FIREBASE_MESSAGING_SENDER_ID')),
         'process.env.VITE_FIREBASE_APP_ID': JSON.stringify(getVar('VITE_FIREBASE_APP_ID')),
+        'process.env.VITE_GEMINI_FILE_URI_BASIC': JSON.stringify(getVar('VITE_GEMINI_FILE_URI_BASIC')),
+        'process.env.VITE_GEMINI_FILE_URI_DMG': JSON.stringify(getVar('VITE_GEMINI_FILE_URI_DMG')),
+        'process.env.VITE_GEMINI_FILE_URI_MM': JSON.stringify(getVar('VITE_GEMINI_FILE_URI_MM')),
+        'process.env.VITE_GEMINI_FILE_URI_PHB': JSON.stringify(getVar('VITE_GEMINI_FILE_URI_PHB')),
       },
       resolve: {
         alias: {
