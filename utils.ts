@@ -16,21 +16,29 @@ export const calculateModifier = (score: number) => Math.floor((score - 10) / 2)
  * Use this after stat changes, level ups, or AI generation.
  */
 export const recalculateCharacterStats = (data: CharacterData): CharacterData => {
-  const profBonus = Math.ceil(data.level / 4) + 1;
+  if (!data) return data;
+  
+  const level = data.level || 1;
+  const profBonus = Math.ceil(level / 4) + 1;
   
   // 1. Update individual Stat Modifiers and Saving Throws
   const stats = { ...data.stats };
-  (Object.keys(stats) as StatKey[]).forEach(k => {
+  const statKeys: StatKey[] = ['STR', 'DEX', 'CON', 'INT', 'WIS', 'CHA'];
+  
+  statKeys.forEach(k => {
+    if (!stats[k]) {
+        stats[k] = { score: 10, modifier: 0, save: 0, proficientSave: false };
+    }
     stats[k].modifier = calculateModifier(stats[k].score);
     stats[k].save = stats[k].modifier + (stats[k].proficientSave ? profBonus : 0);
   });
 
   // 2. Update Skill Modifiers and Abilities
-  const skills = data.skills.map(skill => {
+  const skills = (data.skills || []).map(skill => {
     // Find the standard ability for this skill if missing or incorrect
     const standardSkill = DND_SKILLS.find(s => s.name.toLowerCase() === skill.name.toLowerCase());
-    const ability = standardSkill ? standardSkill.ability : skill.ability;
-    const baseMod = stats[ability].modifier;
+    const ability = standardSkill ? standardSkill.ability : (skill.ability || 'STR');
+    const baseMod = stats[ability]?.modifier || 0;
     
     let totalMod = baseMod;
     if (skill.proficiency === 'proficient') totalMod += profBonus;
@@ -45,26 +53,27 @@ export const recalculateCharacterStats = (data: CharacterData): CharacterData =>
 
   // 3. Update AC based on equipped gear
   let ac = 10 + stats.DEX.modifier;
-  const armor = data.inventory.items.find(i => i.type === 'Armor' && i.equipped && i.name !== 'Shield');
-  const shield = data.inventory.items.find(i => i.name === 'Shield' && i.equipped);
+  const items = data.inventory?.items || [];
+  const armor = items.find(i => i.type === 'Armor' && i.equipped && i.name !== 'Shield');
+  const shield = items.find(i => i.name === 'Shield' && i.equipped);
   
   if (armor) {
     if (armor.name.includes("Leather")) ac = 11 + stats.DEX.modifier;
-    if (armor.name.includes("Studded")) ac = 12 + stats.DEX.modifier;
-    if (armor.name.includes("Chain Shirt")) ac = 13 + Math.min(2, stats.DEX.modifier);
-    if (armor.name.includes("Scale Mail")) ac = 14 + Math.min(2, stats.DEX.modifier);
-    if (armor.name.includes("Plate")) ac = 18;
+    else if (armor.name.includes("Studded")) ac = 12 + stats.DEX.modifier;
+    else if (armor.name.includes("Chain Shirt")) ac = 13 + Math.min(2, stats.DEX.modifier);
+    else if (armor.name.includes("Scale Mail")) ac = 14 + Math.min(2, stats.DEX.modifier);
+    else if (armor.name.includes("Plate")) ac = 18;
   }
   if (shield) ac += 2;
 
   // 4. Update Attacks based on equipped weapons
-  const attacks: Attack[] = data.inventory.items
+  const attacks: Attack[] = items
     .filter(i => i.type === 'Weapon' && i.equipped)
     .map(w => {
         const isFinesse = w.notes?.toLowerCase().includes('finesse');
         const isRanged = w.notes?.toLowerCase().includes('range') || w.name.includes('Bow') || w.name.includes('Crossbow');
         const ability = (isFinesse || isRanged) ? 'DEX' : 'STR';
-        const mod = stats[ability].modifier;
+        const mod = stats[ability]?.modifier || 0;
         const damageMatch = w.notes?.match(/(\d+d\d+)/);
         const damageDice = damageMatch ? damageMatch[1] : '1d4';
         
@@ -81,16 +90,16 @@ export const recalculateCharacterStats = (data: CharacterData): CharacterData =>
   if (attacks.length === 0) {
       attacks.push({ 
         name: "Unarmed Strike", 
-        bonus: stats.STR.modifier + profBonus, 
-        damage: `1${stats.STR.modifier >= 0 ? '+' : ''}${stats.STR.modifier}`, 
+        bonus: (stats.STR?.modifier || 0) + profBonus, 
+        damage: `1${(stats.STR?.modifier || 0) >= 0 ? '+' : ''}${(stats.STR?.modifier || 0)}`, 
         type: "Bludgeoning" 
       });
   }
 
   // 5. Update Spell Slots if missing (e.g. for Level 1 quick roll)
-  let spellSlots = data.spellSlots;
-  if (!spellSlots || spellSlots.length === 0) {
-      spellSlots = getSpellSlotsForLevel(data.class, data.level).map(s => ({
+  let spellSlots = data.spellSlots || [];
+  if (spellSlots.length === 0) {
+      spellSlots = getSpellSlotsForLevel(data.class, level).map(s => ({
           level: s.level,
           max: s.max,
           current: s.max
@@ -99,7 +108,11 @@ export const recalculateCharacterStats = (data: CharacterData): CharacterData =>
 
   // 6. Update Passive Perception
   const perceptionSkill = skills.find(s => s.name === 'Perception');
-  const passivePerception = 10 + (perceptionSkill?.modifier || stats.WIS.modifier);
+  const passivePerception = 10 + (perceptionSkill?.modifier || stats.WIS?.modifier || 0);
+
+  // 7. Update HP based on stats if current/max is 0 or malformed
+  const currentHp = data.hp?.current || 1;
+  const maxHp = data.hp?.max || 1;
 
   return {
     ...data,
@@ -109,6 +122,7 @@ export const recalculateCharacterStats = (data: CharacterData): CharacterData =>
     attacks,
     spellSlots,
     passivePerception,
-    initiative: stats.DEX.modifier
+    hp: { current: currentHp, max: maxHp },
+    initiative: stats.DEX?.modifier || 0
   };
 };
