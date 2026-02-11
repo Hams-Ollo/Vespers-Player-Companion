@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { StackType } from '../types';
 
@@ -10,54 +11,54 @@ interface CardStackProps {
   icon?: React.ReactNode;
 }
 
-const CardStack: React.FC<CardStackProps> = ({ type, title, color, children, onClick, icon }) => {
-  // Map color strings to tailwind classes
+const CardStack: React.FC<CardStackProps> = ({ title, color, children, onClick, icon }) => {
   const colorMap: Record<string, string> = {
-    red: "border-l-red-500 shadow-red-900/10",
-    orange: "border-l-orange-500 shadow-orange-900/10",
-    blue: "border-l-blue-500 shadow-blue-900/10",
-    purple: "border-l-purple-500 shadow-purple-900/10",
-    amber: "border-l-amber-600 shadow-amber-900/10",
-    cyan: "border-l-cyan-500 shadow-cyan-900/10",
+    red: "border-l-red-600 shadow-red-900/10 hover:border-red-500",
+    orange: "border-l-orange-600 shadow-orange-900/10 hover:border-orange-500",
+    blue: "border-l-blue-600 shadow-blue-900/10 hover:border-blue-500",
+    purple: "border-l-purple-600 shadow-purple-900/10 hover:border-purple-500",
+    amber: "border-l-amber-600 shadow-amber-900/10 hover:border-amber-500",
+    cyan: "border-l-cyan-600 shadow-cyan-900/10 hover:border-cyan-500",
   };
 
-  const bgHoverMap: Record<string, string> = {
-    red: "hover:bg-red-950/20",
-    orange: "hover:bg-orange-950/20",
-    blue: "hover:bg-blue-950/20",
-    purple: "hover:bg-purple-950/20",
-    amber: "hover:bg-amber-950/20",
-    cyan: "hover:bg-cyan-950/20",
+  const glowMap: Record<string, string> = {
+    red: "group-hover:shadow-red-500/5",
+    orange: "group-hover:shadow-orange-500/5",
+    blue: "group-hover:shadow-blue-500/5",
+    purple: "group-hover:shadow-purple-500/5",
+    amber: "group-hover:shadow-amber-500/5",
+    cyan: "group-hover:shadow-cyan-500/5",
   };
 
-  const borderColor = colorMap[color] || "border-l-zinc-500";
-  const hoverColor = bgHoverMap[color] || "hover:bg-zinc-800";
+  const borderColor = colorMap[color] || "border-l-zinc-700";
+  const glowShadow = glowMap[color] || "";
 
   return (
     <div 
       onClick={onClick}
       className={`
-        relative bg-zinc-900/80 rounded-xl p-4 lg:p-5 cursor-pointer 
-        border-l-4 border-y border-r border-y-zinc-800 border-r-zinc-800 
-        shadow-lg backdrop-blur-sm transition-all duration-300 transform hover:-translate-y-1 active:scale-[0.98]
-        ${borderColor} ${hoverColor}
+        relative bg-zinc-900/80 rounded-2xl p-4 lg:p-5 cursor-pointer 
+        border-l-4 border-y border-r border-zinc-800/50 
+        shadow-2xl backdrop-blur-md transition-all duration-300 transform 
+        hover:-translate-y-1 hover:bg-zinc-800/80 active:scale-[0.98]
+        ${borderColor} ${glowShadow}
         group h-full flex flex-col justify-between overflow-hidden
       `}
     >
-      <div className="flex justify-between items-start mb-2 opacity-80 group-hover:opacity-100 transition-opacity">
-        <h3 className="font-display font-bold text-lg tracking-wide uppercase text-zinc-300">{title}</h3>
-        {icon && <div className="text-zinc-500 group-hover:text-zinc-300 transition-colors">{icon}</div>}
+      <div className="flex justify-between items-start mb-3">
+        <h3 className="font-display font-bold text-sm tracking-widest uppercase text-zinc-400 group-hover:text-zinc-200 transition-colors">
+          {title}
+        </h3>
+        {icon && <div className="text-zinc-600 group-hover:text-zinc-300 transition-colors">{icon}</div>}
       </div>
       
-      <div className="flex-grow">
+      <div className="flex-grow flex flex-col justify-center">
         {children}
       </div>
 
-      <div className="absolute right-0 top-0 h-full w-12 bg-gradient-to-l from-black/20 to-transparent pointer-events-none"></div>
-      
-      {/* Visual "Stack" effect */}
-      <div className="absolute -bottom-1 left-2 right-2 h-1 bg-zinc-800 rounded-b-lg -z-10"></div>
-      <div className="absolute -bottom-2 left-4 right-4 h-1 bg-zinc-800/60 rounded-b-lg -z-20"></div>
+      {/* Decorative layering effect */}
+      <div className="absolute -bottom-1.5 left-3 right-3 h-1 bg-zinc-800/40 rounded-b-xl -z-10 group-hover:bottom-[-8px] transition-all"></div>
+      <div className="absolute -bottom-3 left-6 right-6 h-1 bg-zinc-800/20 rounded-b-xl -z-20 group-hover:bottom-[-14px] transition-all"></div>
     </div>
   );
 };

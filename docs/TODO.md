@@ -2,7 +2,7 @@
 
 > Living document tracking planned features, enhancements, and community requests for The Player's Companion.
 >
-> **Last updated:** 2026-02-11
+> **Last updated:** 2026-02-12
 
 ---
 
@@ -18,19 +18,16 @@
 
 ---
 
-## 🚀 Next Up (v0.2.0)
+## 🚀 Next Up (v0.2.1)
 
 ### 🔴 Critical
 
 - [ ] **Backend API proxy** — Move Gemini API key to a server-side proxy so it's not embedded in the client bundle
-- [x] **Error boundaries** — Add React error boundaries around AI calls, detail views, and modals to prevent full-app crashes _(v0.2.0 — 2026-02-11)_
 
 ### 🟠 High
 
 - [ ] **Spellbook management** — Prepare/swap spells on long rest for prepared casters (Cleric, Druid, Wizard, Paladin)
 - [ ] **Firestore cloud sync** — Persist characters to Firebase Firestore so data survives across devices/browsers
-- [x] **Tailwind build pipeline** — Replace CDN script tag with proper Tailwind v4/Vite build for tree-shaking and purging _(v0.2.0 — 2026-02-11)_
-- [x] **SettingsModal stat cascade** — When editing stats in settings, recalculate initiative, AC, skills, saves automatically _(v0.2.0 — 2026-02-11)_
 
 ### 🟡 Medium
 
@@ -75,19 +72,20 @@
 
 > Move items here as they're finished. Include the version/date.
 
+- [x] **Advanced Dice Roller** — Support for complex expressions (e.g., `2d6+1d4+2`) and Advantage/Disadvantage logic for d20 rolls with detailed UI _(v0.2.1 — 2026-02-12)_
+- [x] **Error boundaries** — React error boundaries on all detail views and AI-powered modals _(v0.2.0 — 2026-02-11)_
+- [x] **SettingsModal stat cascade** — Stat edits now recalculate AC, initiative, skills, saves, attacks _(v0.2.0 — 2026-02-11)_
+- [x] **Tailwind build pipeline** — Replaced CDN with `@tailwindcss/vite` plugin, tree-shaken CSS _(v0.2.0 — 2026-02-11)_
 - [x] **Data-driven spell selection** — Replaced AI-suggestion spell picker with PHB cantrip/spell lists _(v0.1.1 — 2026-02-11)_
 - [x] **Spell slot progression tables** — Full/half/pact caster slots from PHB _(v0.1.1 — 2026-02-11)_
 - [x] **Accessibility fixes** — `aria-label` on icon buttons, `htmlFor`/`id` on all form controls _(v0.1.1 — 2026-02-11)_
+- [x] **Project documentation** — README, Architecture, API, Contributing docs _(v0.1.1 — 2026-02-11)_
 - [x] **Starter equipment shop** — Roll starting gold, buy gear after character creation _(v0.1.0 — 2026-02-10)_
 - [x] **Racial traits data** — Full PHB racial traits, languages, darkvision, racial spells _(v0.1.0 — 2026-02-10)_
 - [x] **Class feature progression** — All 12 classes, levels 1–20 _(v0.1.0 — 2026-02-10)_
 - [x] **Firebase authentication** — Google sign-in + anonymous guest mode _(v0.1.0 — 2026-02-10)_
 - [x] **Gemini AI integration** — Portrait generation, DM chat, level-up assist, item lookup _(v0.1.0 — 2026-02-10)_
 - [x] **Campaign manager** — Create/join with shareable codes _(v0.1.0 — 2026-02-10)_
-- [x] **Project documentation** — README, Architecture, API, Contributing docs _(v0.1.1 — 2026-02-11)_
-- [x] **Error boundaries** — React error boundaries on all detail views and AI-powered modals _(v0.2.0 — 2026-02-11)_
-- [x] **SettingsModal stat cascade** — Stat edits now recalculate AC, initiative, skills, saves, attacks _(v0.2.0 — 2026-02-11)_
-- [x] **Tailwind build pipeline** — Replaced CDN with `@tailwindcss/vite` plugin, tree-shaken CSS _(v0.2.0 — 2026-02-11)_
 
 ---
 

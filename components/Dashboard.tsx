@@ -1,5 +1,6 @@
+
 import React, { useState } from 'react';
-import { CharacterData, StackType, RollResult, Item, Feature, Spell } from '../types';
+import { CharacterData, StackType, RollResult, Item, Feature, Spell, RollMode, DiceGroup } from '../types';
 import CardStack from './CardStack';
 import DetailOverlay from './DetailOverlay';
 import VitalsDetail from './details/VitalsDetail';
@@ -18,7 +19,7 @@ import LevelUpModal from './LevelUpModal';
 import ItemDetailModal from './ItemDetailModal';
 import RestModal from './RestModal';
 import ErrorBoundary from './ErrorBoundary';
-import { Heart, Sword, Brain, Sparkles, Backpack, Edit2, MessageSquare, Settings, LogOut, Book, ShoppingBag, Wand2 } from 'lucide-react';
+import { Heart, Sword, Brain, Sparkles, Backpack, Edit2, MessageSquare, Settings, LogOut, Book, ShoppingBag, Wand2, ChevronDown } from 'lucide-react';
 
 interface DashboardProps {
   data: CharacterData;
@@ -30,6 +31,7 @@ interface DashboardProps {
 const Dashboard: React.FC<DashboardProps> = ({ data, onUpdatePortrait, onUpdateData, onExit }) => {
   const [activeStack, setActiveStack] = useState<StackType | null>(null);
   const [rollResult, setRollResult] = useState<RollResult | null>(null);
+  const [rollMode, setRollMode] = useState<RollMode>('normal');
   const [showPortraitGen, setShowPortraitGen] = useState(false);
   const [showAskDM, setShowAskDM] = useState(false);
   const [showSettings, setShowSettings] = useState(false);
@@ -38,38 +40,68 @@ const Dashboard: React.FC<DashboardProps> = ({ data, onUpdatePortrait, onUpdateD
   const [showRest, setShowRest] = useState(false);
   const [selectedItemForDetail, setSelectedItemForDetail] = useState<Item | Feature | Spell | null>(null);
 
-  const handleRoll = (label: string, modifier: number, die: string) => {
-    const diceMatch = die.match(/^(\d+)?d(\d+)([+-]\d+)?$/i);
-    const rolls: number[] = [];
+  const handleRoll = (label: string, baseModifier: number, expression: string) => {
+    // Regex to find all dice groups and flat modifiers
+    // e.g. "1d20+5", "2d6 + 1d4 + 2"
+    const parts = expression.replace(/\s+/g, '').split(/(?=[+-])/);
+    const diceGroups: DiceGroup[] = [];
     let total = 0;
-    let displayDie = die;
+    let finalModifier = baseModifier;
 
-    if (diceMatch) {
-      const numDice = parseInt(diceMatch[1]) || 1;
-      const sides = parseInt(diceMatch[2]);
-      const embeddedMod = diceMatch[3] ? parseInt(diceMatch[3]) : 0;
-      displayDie = `${numDice}d${sides}`;
+    parts.forEach(part => {
+      const diceMatch = part.match(/^([+-]?\d+)?d(\d+)$/i);
+      const modMatch = part.match(/^([+-]\d+)$/);
 
-      for (let i = 0; i < numDice; i++) {
-        const roll = Math.floor(Math.random() * sides) + 1;
-        rolls.push(roll);
-        total += roll;
+      if (diceMatch) {
+        const sign = part.startsWith('-') ? -1 : 1;
+        const numDice = Math.abs(parseInt(diceMatch[1])) || 1;
+        const sides = parseInt(diceMatch[2]);
+        const rolls: number[] = [];
+
+        // Special handling for d20 Advantage/Disadvantage
+        if (sides === 20 && numDice === 1 && rollMode !== 'normal') {
+          const r1 = Math.floor(Math.random() * 20) + 1;
+          const r2 = Math.floor(Math.random() * 20) + 1;
+          
+          if (rollMode === 'advantage') {
+            const high = Math.max(r1, r2);
+            const low = Math.min(r1, r2);
+            rolls.push(high);
+            total += high * sign;
+            diceGroups.push({ sides, rolls: [high], dropped: low });
+          } else {
+            const high = Math.max(r1, r2);
+            const low = Math.min(r1, r2);
+            rolls.push(low);
+            total += low * sign;
+            diceGroups.push({ sides, rolls: [low], dropped: high });
+          }
+        } else {
+          for (let i = 0; i < numDice; i++) {
+            const roll = Math.floor(Math.random() * sides) + 1;
+            rolls.push(roll);
+            total += roll * sign;
+          }
+          diceGroups.push({ sides, rolls });
+        }
+      } else if (modMatch) {
+        finalModifier += parseInt(modMatch[1]);
+      } else if (!part.includes('d')) {
+        // Fallback for flat numbers without signs if first part
+        const val = parseInt(part);
+        if (!isNaN(val)) finalModifier += val;
       }
-      total += modifier + embeddedMod;
-      modifier += embeddedMod;
-    } else {
-      const flat = parseInt(die) || 0;
-      rolls.push(flat);
-      total = flat + modifier;
-      displayDie = 'flat';
-    }
+    });
+
+    total += finalModifier;
 
     setRollResult({
-        label,
-        total,
-        die: displayDie,
-        rolls,
-        modifier
+      label,
+      total,
+      expression,
+      diceGroups,
+      modifier: finalModifier,
+      mode: rollMode
     });
   };
 
@@ -77,221 +109,144 @@ const Dashboard: React.FC<DashboardProps> = ({ data, onUpdatePortrait, onUpdateD
   const currentSlots = data.spellSlots.reduce((sum, s) => sum + s.current, 0);
 
   return (
-    <div className="min-h-screen bg-[#111] pb-8 relative overflow-hidden">
-       {/* Background Decoration */}
-       <div className="absolute top-0 left-0 w-full h-96 bg-gradient-to-b from-indigo-950/20 to-transparent pointer-events-none" />
+    <div className="min-h-screen bg-obsidian text-zinc-300 pb-20 selection:bg-indigo-500/30">
+       <div className="absolute top-0 left-0 w-full h-[500px] bg-gradient-to-b from-indigo-900/10 via-obsidian/50 to-obsidian pointer-events-none" />
 
-       <div className="max-w-md md:max-w-2xl lg:max-w-4xl xl:max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 pt-6 lg:pt-10 relative z-10">
-         {/* Top Banner */}
-         <header className="flex items-center gap-3 sm:gap-4 lg:gap-6 mb-8 lg:mb-12">
-            <button 
-                onClick={onExit}
-                className="p-2 text-zinc-500 hover:text-white transition-colors mr-1"
-                title="Switch Character"
-            >
-                <LogOut size={20} className="transform rotate-180" />
+       <div className="max-w-4xl mx-auto px-4 sm:px-6 pt-8 lg:pt-12 relative z-10">
+         {/* Character Header */}
+         <header className="flex flex-wrap items-center gap-4 lg:gap-8 mb-10 lg:mb-16">
+            <button onClick={onExit} className="p-2 text-zinc-600 hover:text-white transition-colors">
+                <LogOut size={22} className="rotate-180" />
             </button>
-            <div className="relative group cursor-pointer shrink-0" onClick={() => setShowPortraitGen(true)}>
-              <div className="w-16 h-16 md:w-20 md:h-20 lg:w-24 lg:h-24 rounded-full overflow-hidden border-2 border-zinc-600 shadow-xl ring-2 ring-black/50 relative">
-                 <img src={data.portraitUrl} alt={data.name} className="w-full h-full object-cover" />
+            
+            <div className="relative group cursor-pointer" onClick={() => setShowPortraitGen(true)}>
+              <div className="w-20 h-20 lg:w-28 lg:h-28 rounded-3xl overflow-hidden border-2 border-white/5 shadow-2xl ring-1 ring-white/10 group-hover:ring-amber-500/50 transition-all duration-500">
+                 <img src={data.portraitUrl} alt={data.name} className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" />
                  <div className="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
-                    <Edit2 size={16} className="text-white" />
+                    <Edit2 size={20} className="text-white" />
                  </div>
               </div>
-              <div className="absolute -bottom-1 -right-1 bg-zinc-900 text-[10px] font-bold px-1.5 py-0.5 rounded-full border border-zinc-700">
-                Lvl {data.level}
+              <div className="absolute -bottom-2 -right-2 bg-obsidian text-[10px] font-black px-2 py-1 rounded-lg border border-zinc-800 shadow-xl text-amber-500 tracking-tighter">
+                LVL {data.level}
               </div>
             </div>
+
             <div className="flex-grow min-w-0">
-              <h1 className="text-2xl md:text-3xl lg:text-4xl font-display font-bold text-white leading-none mb-1 truncate">{data.name}</h1>
-              <p className="text-zinc-400 font-medium text-xs md:text-sm truncate">{data.race} / {data.class}</p>
-              {data.campaign && <p className="text-[10px] md:text-xs text-amber-500/80 uppercase tracking-wider truncate mt-1">{data.campaign}</p>}
+              <h1 className="text-3xl lg:text-5xl font-display font-black text-white leading-none tracking-tight truncate drop-shadow-md">{data.name}</h1>
+              <div className="flex items-center gap-3 mt-2">
+                <span className="text-zinc-500 font-bold text-xs uppercase tracking-widest">{data.race} &bull; {data.class}</span>
+              </div>
             </div>
-            <div className="flex gap-2 shrink-0">
-                <button 
-                    onClick={() => setShowAskDM(true)}
-                    className="p-2.5 bg-amber-900/20 text-amber-500 border border-amber-500/30 rounded-full hover:bg-amber-900/40 transition-colors"
-                    aria-label="Ask the DM"
-                    title="Ask the DM"
-                >
-                    <MessageSquare size={18} />
+
+            <div className="flex items-center gap-2 w-full sm:w-auto sm:justify-end">
+                {/* Roll Mode Selector */}
+                <div className="flex p-1 bg-zinc-900 border border-zinc-800 rounded-xl">
+                   {(['advantage', 'normal', 'disadvantage'] as RollMode[]).map((mode) => (
+                     <button
+                        key={mode}
+                        onClick={() => setRollMode(mode)}
+                        className={`px-3 py-1.5 rounded-lg text-[10px] font-black uppercase tracking-tighter transition-all ${
+                          rollMode === mode 
+                          ? mode === 'advantage' ? 'bg-green-600 text-white shadow-lg shadow-green-900/40' :
+                            mode === 'disadvantage' ? 'bg-red-600 text-white shadow-lg shadow-red-900/40' :
+                            'bg-zinc-700 text-white'
+                          : 'text-zinc-500 hover:text-zinc-300'
+                        }`}
+                     >
+                       {mode === 'normal' ? 'Norm' : mode === 'advantage' ? 'Adv' : 'Dis'}
+                     </button>
+                   ))}
+                </div>
+
+                <div className="h-10 w-px bg-zinc-800 mx-2" />
+
+                <button onClick={() => setShowAskDM(true)} className="p-3 bg-amber-950/20 text-amber-500 border border-amber-500/20 rounded-xl hover:bg-amber-900/40 transition-all">
+                    <MessageSquare size={20} className="mx-auto" />
                 </button>
-                <button 
-                    onClick={() => setShowSettings(true)}
-                    className="p-2.5 bg-zinc-800 text-zinc-400 border border-zinc-700 rounded-full hover:bg-zinc-700 hover:text-white transition-colors"
-                    aria-label="Settings"
-                    title="Settings"
-                >
-                    <Settings size={18} />
+                <button onClick={() => setShowSettings(true)} className="p-3 bg-zinc-900 text-zinc-500 border border-zinc-800 rounded-xl hover:text-white transition-all">
+                    <Settings size={20} className="mx-auto" />
                 </button>
             </div>
          </header>
 
-         {/* Stacks Grid */}
-         <div className="space-y-4 lg:space-y-6">
+         {/* Grid Layout */}
+         <div className="grid grid-cols-2 md:grid-cols-4 gap-4 lg:gap-6">
             
-            {/* Row 1: Vitals (Full Width) */}
-            <div className="h-32 lg:h-40">
-                <CardStack 
-                    type="vitals" 
-                    title="Vitals & Stats" 
-                    color="red" 
-                    onClick={() => setActiveStack('vitals')}
-                    icon={<Heart size={20} />}
-                >
-                    <div className="flex items-center justify-between h-full px-2">
-                        <div className="flex flex-col">
-                            <span className="text-xs lg:text-sm text-zinc-500 uppercase font-bold">Health</span>
-                            <div className="flex items-baseline gap-1">
-                                <span className="text-2xl lg:text-4xl font-mono text-green-400 font-bold">{data.hp.current}</span>
-                                <span className="text-sm lg:text-lg text-zinc-600">/ {data.hp.max}</span>
-                            </div>
-                            <div className="w-24 h-1.5 bg-zinc-800 rounded-full mt-1 overflow-hidden">
-                                <div className="h-full bg-green-500 w-full"></div>
+            {/* Vitals - Large span */}
+            <div className="col-span-2 h-44">
+                <CardStack type="vitals" title="Vitality" color="red" onClick={() => setActiveStack('vitals')} icon={<Heart size={18} />}>
+                    <div className="flex items-center justify-around h-full">
+                        <div className="text-center">
+                            <span className="block text-[10px] font-black text-zinc-600 uppercase tracking-widest mb-1">Health Points</span>
+                            <div className="flex items-baseline justify-center gap-1">
+                                <span className="text-4xl font-mono text-green-400 font-black">{data.hp.current}</span>
+                                <span className="text-lg text-zinc-600 font-bold">/ {data.hp.max}</span>
                             </div>
                         </div>
-
-                        <div className="h-10 w-[1px] bg-zinc-800 mx-2"></div>
-
-                        <div className="flex flex-col items-center">
-                            <span className="text-xs lg:text-sm text-zinc-500 uppercase font-bold">AC</span>
-                            <span className="text-2xl lg:text-4xl font-display font-bold text-white">{data.ac}</span>
-                        </div>
-
-                        <div className="h-10 lg:h-14 w-[1px] bg-zinc-800 mx-2 lg:mx-4"></div>
-
-                        <div className="flex flex-col items-center">
-                            <span className="text-xs lg:text-sm text-zinc-500 uppercase font-bold">Init</span>
-                            <span className="text-2xl lg:text-4xl font-display font-bold text-yellow-500">{data.initiative >= 0 ? '+' : ''}{data.initiative}</span>
+                        <div className="w-px h-12 bg-zinc-800" />
+                        <div className="text-center">
+                            <span className="block text-[10px] font-black text-zinc-600 uppercase tracking-widest mb-1">Defense</span>
+                            <span className="text-4xl font-display font-black text-white">{data.ac}</span>
                         </div>
                     </div>
                 </CardStack>
             </div>
 
-            {/* Row 2: Combat & Skills */}
-            <div className="grid grid-cols-2 gap-4 lg:gap-6 h-40 lg:h-48">
-                <CardStack 
-                    type="combat" 
-                    title="Combat" 
-                    color="orange" 
-                    onClick={() => setActiveStack('combat')}
-                    icon={<Sword size={20} />}
-                >
-                    <div className="space-y-2 mt-1">
-                        {data.attacks.length > 0 ? data.attacks.slice(0, 2).map((atk, i) => (
-                            <div key={i} className="flex justify-between items-center text-sm border-b border-zinc-800/50 pb-1 last:border-0">
-                                <span className="text-zinc-300 font-medium truncate w-16">{atk.name}</span>
-                                <div className="flex gap-2 text-xs">
-                                    <span className="text-orange-400 font-bold">+{atk.bonus}</span>
-                                    <span className="text-zinc-500">{atk.damage}</span>
-                                </div>
-                            </div>
-                        )) : <div className="text-zinc-600 text-xs text-center mt-4 italic">No attacks configured</div>}
+            {/* Initiative */}
+            <div className="h-44">
+                <CardStack type="combat" title="Initiative" color="orange" onClick={() => handleRoll('Initiative', data.initiative, '1d20')} icon={<Sword size={18} />}>
+                    <div className="text-center">
+                        <span className="text-5xl font-display font-black text-orange-400 drop-shadow-[0_0_15px_rgba(251,146,60,0.2)]">
+                            {data.initiative >= 0 ? '+' : ''}{data.initiative}
+                        </span>
+                        <p className="text-[9px] text-zinc-600 font-bold uppercase mt-2">Tap to Roll</p>
                     </div>
                 </CardStack>
+            </div>
 
-                <CardStack 
-                    type="skills" 
-                    title="Skills" 
-                    color="blue" 
-                    onClick={() => setActiveStack('skills')}
-                    icon={<Brain size={20} />}
-                >
-                    <div className="flex flex-col justify-between h-full py-1">
-                        <div className="flex justify-between items-center">
-                            <span className="text-xs text-zinc-500">Dex Check</span>
-                            <span className="text-lg font-bold text-blue-400">+{data.stats.DEX.modifier}</span>
+            {/* Proficiency */}
+            <div className="h-44">
+                <CardStack type="skills" title="Talents" color="blue" onClick={() => setActiveStack('skills')} icon={<Brain size={18} />}>
+                    <div className="text-center space-y-1">
+                        <span className="text-4xl font-display font-black text-blue-400">
+                            +{Math.ceil(data.level / 4) + 1}
+                        </span>
+                        <p className="text-[9px] text-zinc-600 font-bold uppercase tracking-tighter">Proficiency Bonus</p>
+                    </div>
+                </CardStack>
+            </div>
+
+            {/* row 2 */}
+            <div className="col-span-2 h-40">
+                 <CardStack type="spells" title="Grimoire" color="cyan" onClick={() => setActiveStack('spells')} icon={<Wand2 size={18} />}>
+                    <div className="flex justify-between items-center px-2">
+                        <div className="space-y-1">
+                            <span className="block text-2xl font-mono text-cyan-400 font-black">{currentSlots}/{totalSlots}</span>
+                            <span className="text-[10px] text-zinc-600 uppercase font-black tracking-widest">Slots Available</span>
                         </div>
-                         <div className="flex justify-between items-center">
-                            <span className="text-xs text-zinc-500">Wis Check</span>
-                            <span className="text-lg font-bold text-blue-400">+{data.stats.WIS.modifier}</span>
-                        </div>
-                        <div className="mt-2 text-xs text-blue-200/80">
-                             <div className="flex justify-between"><span>Stealth</span> <span>+{data.skills.find(s=>s.name === 'Stealth')?.modifier || 0}</span></div>
-                             <div className="flex justify-between"><span>Perception</span> <span>+{data.skills.find(s=>s.name === 'Perception')?.modifier || 0}</span></div>
+                        <div className="text-right">
+                             <span className="block text-sm font-bold text-white truncate max-w-[120px]">{data.spells[0]?.name || "N/A"}</span>
+                             <span className="text-[9px] text-zinc-600 uppercase font-black">Top spell</span>
                         </div>
                     </div>
                 </CardStack>
             </div>
 
-            {/* Row 3: Spells & Features */}
-            <div className="grid grid-cols-2 gap-4 lg:gap-6 h-32 lg:h-40">
-                 <CardStack 
-                    type="spells" 
-                    title="Spells" 
-                    color="cyan" 
-                    onClick={() => setActiveStack('spells')}
-                    icon={<Wand2 size={20} />}
-                >
-                    <div className="flex flex-col justify-center h-full gap-1">
-                        <div className="flex items-center gap-2">
-                             <div className={`w-2 h-2 rounded-full ${currentSlots > 0 ? 'bg-cyan-400 animate-pulse' : 'bg-zinc-700'}`}></div>
-                             <span className="text-sm font-bold text-cyan-100">{currentSlots} / {totalSlots} Slots</span>
-                        </div>
-                        <div className="flex items-center gap-2">
-                             <div className="w-2 h-2 rounded-full bg-purple-600"></div>
-                             <span className="text-xs text-zinc-400 truncate">
-                                {data.spells.length > 0 ? `${data.spells[0].name}` : "No spells known"}
-                             </span>
-                        </div>
-                    </div>
-                </CardStack>
-
-                <CardStack 
-                    type="features" 
-                    title="Traits" 
-                    color="purple" 
-                    onClick={() => setActiveStack('features')}
-                    icon={<Sparkles size={20} />}
-                >
-                    <div className="flex flex-wrap gap-1 mt-1">
-                        {data.features.length > 0 ? (
-                            data.features.slice(0,3).map((f, i) => (
-                                <span key={i} className="text-[10px] bg-purple-900/30 text-purple-200 px-1.5 py-0.5 rounded border border-purple-500/20 truncate max-w-full">{f.name}</span>
-                            ))
-                        ) : <span className="text-[10px] text-zinc-600 italic">No features</span>}
+            <div className="h-40">
+                <CardStack type="inventory" title="Pouch" color="amber" onClick={() => setActiveStack('inventory')} icon={<ShoppingBag size={18} />}>
+                    <div className="text-center">
+                         <span className="block text-xl font-mono font-black text-amber-400">{data.inventory.gold.toFixed(0)} GP</span>
+                         <p className="text-[9px] text-zinc-600 uppercase font-black mt-1">Currency</p>
                     </div>
                 </CardStack>
             </div>
 
-            {/* Row 4: Inventory & Journal */}
-            <div className="grid grid-cols-2 gap-4 lg:gap-6 h-28 lg:h-32">
-                <CardStack 
-                    type="inventory" 
-                    title="Bag" 
-                    color="amber" 
-                    onClick={() => setActiveStack('inventory')}
-                    icon={<Backpack size={20} />}
-                >
-                     <div className="flex flex-col justify-center h-full gap-1">
-                        <div className="flex items-center gap-2">
-                             <div className="w-2 h-2 rounded-full bg-amber-400"></div>
-                             <span className="text-sm font-bold text-amber-100">{data.inventory.gold.toFixed(2)} gp</span>
-                        </div>
-                         <div className="flex items-center gap-2">
-                             <div className="w-2 h-2 rounded-full bg-zinc-600"></div>
-                             <span className="text-xs text-zinc-400 truncate">
-                                {data.inventory.items[0]?.name || "Empty"}
-                             </span>
-                        </div>
-                     </div>
-                </CardStack>
-
-                <CardStack 
-                    type="journal" 
-                    title="Journal" 
-                    color="orange" 
-                    onClick={() => setActiveStack('journal')}
-                    icon={<Book size={20} />}
-                >
-                    <div className="p-1">
-                        {data.journal && data.journal.length > 0 ? (
-                            <div className="text-[10px] text-zinc-400 line-clamp-2 italic">
-                                "{data.journal[data.journal.length - 1].content}"
-                            </div>
-                        ) : (
-                            <div className="text-[10px] text-zinc-600 italic">No entries yet...</div>
-                        )}
+            <div className="h-40">
+                <CardStack type="journal" title="Legacy" color="purple" onClick={() => setActiveStack('journal')} icon={<Book size={18} />}>
+                    <div className="text-center opacity-50 px-2 overflow-hidden">
+                        <p className="text-[10px] italic leading-tight line-clamp-3">
+                           {data.journal[0]?.content || "Your legend begins here..."}
+                        </p>
                     </div>
                 </CardStack>
             </div>
@@ -299,165 +254,27 @@ const Dashboard: React.FC<DashboardProps> = ({ data, onUpdatePortrait, onUpdateD
        </div>
 
        {/* Overlays */}
-       <DetailOverlay 
-          isOpen={activeStack === 'vitals'} 
-          onClose={() => setActiveStack(null)} 
-          type="vitals" 
-          title="Vitals & Stats"
-          color="red"
-        >
-          <ErrorBoundary fallbackTitle="Vitals failed to load">
-            <VitalsDetail 
-              data={data} 
-              onUpdate={onUpdateData} 
-              onLevelUp={() => setShowLevelUp(true)} 
-              onRest={() => setShowRest(true)} 
-            />
-          </ErrorBoundary>
-       </DetailOverlay>
+       {activeStack && (
+         <DetailOverlay isOpen={!!activeStack} onClose={() => setActiveStack(null)} type={activeStack} title={activeStack.toUpperCase()} color="indigo">
+            {activeStack === 'vitals' && <VitalsDetail data={data} onUpdate={onUpdateData} onLevelUp={() => setShowLevelUp(true)} onRest={() => setShowRest(true)} />}
+            {activeStack === 'combat' && <CombatDetail data={data} onRoll={handleRoll} />}
+            {activeStack === 'skills' && <SkillsDetail data={data} onRoll={handleRoll} />}
+            {activeStack === 'spells' && <SpellsDetail data={data} onUpdate={onUpdateData} onInspect={setSelectedItemForDetail} />}
+            {activeStack === 'features' && <FeaturesDetail data={data} onInspect={setSelectedItemForDetail} />}
+            {activeStack === 'inventory' && <InventoryDetail data={data} onShop={() => setShowShop(true)} onInspect={setSelectedItemForDetail} onUpdate={onUpdateData} />}
+            {activeStack === 'journal' && <JournalDetail data={data} onUpdate={onUpdateData} />}
+         </DetailOverlay>
+       )}
 
-       <DetailOverlay 
-          isOpen={activeStack === 'combat'} 
-          onClose={() => setActiveStack(null)} 
-          type="combat" 
-          title="Actions & Combat"
-          color="orange"
-        >
-          <ErrorBoundary fallbackTitle="Combat failed to load">
-            <CombatDetail data={data} onRoll={handleRoll} />
-          </ErrorBoundary>
-       </DetailOverlay>
-       
-       <DetailOverlay 
-          isOpen={activeStack === 'skills'} 
-          onClose={() => setActiveStack(null)} 
-          type="skills" 
-          title="Skills & Checks"
-          color="blue"
-        >
-          <ErrorBoundary fallbackTitle="Skills failed to load">
-            <SkillsDetail data={data} onRoll={handleRoll} />
-          </ErrorBoundary>
-       </DetailOverlay>
-
-        <DetailOverlay 
-          isOpen={activeStack === 'spells'} 
-          onClose={() => setActiveStack(null)} 
-          type="spells" 
-          title="Spells & Cantrips"
-          color="cyan"
-        >
-          <ErrorBoundary fallbackTitle="Spells failed to load">
-            <SpellsDetail 
-              data={data} 
-              onUpdate={onUpdateData} 
-              onInspect={setSelectedItemForDetail} 
-            />
-          </ErrorBoundary>
-       </DetailOverlay>
-
-        <DetailOverlay 
-          isOpen={activeStack === 'features'} 
-          onClose={() => setActiveStack(null)} 
-          type="features" 
-          title="Features & Traits"
-          color="purple"
-        >
-          <ErrorBoundary fallbackTitle="Features failed to load">
-            <FeaturesDetail data={data} onInspect={setSelectedItemForDetail} />
-          </ErrorBoundary>
-       </DetailOverlay>
-
-        <DetailOverlay 
-          isOpen={activeStack === 'inventory'} 
-          onClose={() => setActiveStack(null)} 
-          type="inventory" 
-          title="Inventory"
-          color="amber"
-        >
-          <ErrorBoundary fallbackTitle="Inventory failed to load">
-            <InventoryDetail 
-              data={data} 
-              onShop={() => setShowShop(true)} 
-              onInspect={setSelectedItemForDetail}
-              onUpdate={onUpdateData}
-            />
-          </ErrorBoundary>
-       </DetailOverlay>
-
-       <DetailOverlay 
-          isOpen={activeStack === 'journal'} 
-          onClose={() => setActiveStack(null)} 
-          type="journal" 
-          title="Adventure Journal"
-          color="orange"
-        >
-          <ErrorBoundary fallbackTitle="Journal failed to load">
-            <JournalDetail data={data} onUpdate={onUpdateData} />
-          </ErrorBoundary>
-       </DetailOverlay>
-
+       {/* Utility Modals */}
        <DiceRollModal result={rollResult} onClose={() => setRollResult(null)} />
-       
-       {showPortraitGen && (
-         <ErrorBoundary fallbackTitle="Portrait generator error" onReset={() => setShowPortraitGen(false)}>
-           <PortraitGenerator 
-              currentPortrait={data.portraitUrl}
-              onUpdate={onUpdatePortrait}
-              onClose={() => setShowPortraitGen(false)}
-              characterDescription={`${data.race} ${data.class} named ${data.name}.`}
-           />
-         </ErrorBoundary>
-       )}
-
-       {showAskDM && (
-         <ErrorBoundary fallbackTitle="AI DM error" onReset={() => setShowAskDM(false)}>
-           <AskDMModal onClose={() => setShowAskDM(false)} />
-         </ErrorBoundary>
-       )}
-
-       {showSettings && (
-         <SettingsModal 
-            data={data} 
-            onSave={onUpdateData} 
-            onClose={() => setShowSettings(false)} 
-         />
-       )}
-
-       {showShop && (
-         <ShopModal 
-            data={data}
-            onUpdate={onUpdateData}
-            onClose={() => setShowShop(false)}
-         />
-       )}
-
-       {showLevelUp && (
-         <ErrorBoundary fallbackTitle="Level up error" onReset={() => setShowLevelUp(false)}>
-           <LevelUpModal
-              data={data}
-              onUpdate={onUpdateData}
-              onClose={() => setShowLevelUp(false)}
-           />
-         </ErrorBoundary>
-       )}
-
-       {showRest && (
-         <RestModal
-            data={data}
-            onUpdate={onUpdateData}
-            onClose={() => setShowRest(false)}
-         />
-       )}
-
-       {selectedItemForDetail && (
-         <ErrorBoundary fallbackTitle="Item detail error" onReset={() => setSelectedItemForDetail(null)}>
-           <ItemDetailModal 
-              item={selectedItemForDetail}
-              onClose={() => setSelectedItemForDetail(null)}
-           />
-         </ErrorBoundary>
-       )}
+       {showPortraitGen && <PortraitGenerator currentPortrait={data.portraitUrl} onUpdate={onUpdatePortrait} onClose={() => setShowPortraitGen(false)} characterDescription={`${data.race} ${data.class}`} />}
+       {showAskDM && <AskDMModal onClose={() => setShowAskDM(false)} />}
+       {showSettings && <SettingsModal data={data} onSave={onUpdateData} onClose={() => setShowSettings(false)} />}
+       {showShop && <ShopModal data={data} onUpdate={onUpdateData} onClose={() => setShowShop(false)} />}
+       {showLevelUp && <LevelUpModal data={data} onUpdate={onUpdateData} onClose={() => setShowLevelUp(false)} />}
+       {showRest && <RestModal data={data} onUpdate={onUpdateData} onClose={() => setShowRest(false)} />}
+       {selectedItemForDetail && <ItemDetailModal item={selectedItemForDetail} onClose={() => setSelectedItemForDetail(null)} />}
     </div>
   );
 };

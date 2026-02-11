@@ -114,10 +114,19 @@ export interface UserProfile {
 
 export type StackType = 'vitals' | 'combat' | 'skills' | 'features' | 'inventory' | 'journal' | 'spells';
 
+export type RollMode = 'normal' | 'advantage' | 'disadvantage';
+
+export interface DiceGroup {
+  sides: number;
+  rolls: number[];
+  dropped?: number; // For adv/dis
+}
+
 export interface RollResult {
   label: string;
   total: number;
-  die: string;
-  rolls: number[];
+  expression: string;
+  diceGroups: DiceGroup[];
   modifier: number;
+  mode: RollMode;
 }

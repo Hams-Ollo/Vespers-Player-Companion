@@ -2,7 +2,7 @@
 
 > Development tracking for The Player's Companion — organized by epics, features, user stories, and tasks.
 >
-> **Last updated:** 2026-02-11
+> **Last updated:** 2026-02-12
 
 ---
 
@@ -50,7 +50,7 @@
 |--------|------|------|-------|-------|
 | ✅ | Feature | Card-stack dashboard UI | @Hams-Ollo | Swipeable cards for each stat category |
 | ✅ | Feature | Detail overlay views (7) | @Hams-Ollo | Vitals, Combat, Skills, Features, Spells, Inventory, Journal |
-| ✅ | Feature | Dice roller | @Hams-Ollo | Complex expressions, crit/fail detection |
+| ✅ | Feature | Dice roller | @Hams-Ollo | Advanced parser: Adv/Dis, complex expressions (2d6+4), crit/fail |
 | ✅ | Feature | Rest system (short + long) | @Hams-Ollo | Hit dice recovery |
 | ✅ | Feature | In-game equipment shop | @Hams-Ollo | Buy/sell from inventory |
 | ✅ | Feature | Settings modal (stat editor) | @Hams-Ollo | Manual stat overrides |
@@ -115,7 +115,7 @@
 | ⬜ | Task | Unit tests (Vitest) | — | Core utils, constants helpers |
 | ⬜ | Task | E2E tests (Playwright) | — | Character creation flow |
 | ⬜ | User Story | As a developer, I want CI/CD pipeline | — | GitHub Actions build + lint |
-| ⬜ | Feature | PWA support | — | Service worker, offline mode |
+| ⬜ | Feature | PWA support | — | Service worker, manifest |
 | ⬜ | Feature | Dark/light theme toggle | — | Currently dark-only |
 
 ---
