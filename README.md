@@ -148,15 +148,8 @@ Client-side multi-layer protection to prevent API abuse:
 - [🏗️ Architecture](docs/ARCHITECTURE.md) — System design, data flow, component map
 - [🔌 API Reference](docs/API.md) — Gemini AI integration, helper functions, data schemas
 - [🤝 Contributing](docs/CONTRIBUTING.md) — Setup, code style, PR guidelines
-
-## 🗺️ Roadmap
-
-- [ ] 📖 Spellbook management (prepare/swap spells)
-- [ ] 💾 Firestore cloud sync for characters
-- [ ] 📤 Export/import character JSON
-- [ ] 🛡️ Error boundaries for graceful failure
-- [ ] 🎨 Tailwind proper build pipeline (replace CDN)
-- [ ] 🔐 Backend proxy for API keys
+- [� Roadmap & TODO](docs/TODO.md) — Planned features, enhancements, community requests
+- [� Project Tracker](docs/PROJECT_TRACKER.md) — Epics, features, user stories, tasks with status tracking
 
 ## 📄 License
 
