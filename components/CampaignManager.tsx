@@ -4,25 +4,14 @@ import { Users, Plus, Hash, Copy, Crown, ChevronRight } from 'lucide-react';
 
 interface CampaignManagerProps {
   user: UserProfile;
+  campaigns: Campaign[];
+  onUpdateCampaigns: (newCamps: Campaign[]) => void;
 }
 
-const CampaignManager: React.FC<CampaignManagerProps> = ({ user }) => {
-  // SIMULATION: In a real app, these would fetch from Firestore using user.uid
-  // For now, we store them in localStorage so the user can see the UI interactions immediately
-  const STORAGE_KEY = `dnd-campaigns-${user.uid}`;
-  const [campaigns, setCampaigns] = useState<Campaign[]>(() => {
-    const saved = localStorage.getItem(STORAGE_KEY);
-    return saved ? JSON.parse(saved) : [];
-  });
-  
+const CampaignManager: React.FC<CampaignManagerProps> = ({ user, campaigns, onUpdateCampaigns }) => {
   const [showCreate, setShowCreate] = useState(false);
   const [newCampaignName, setNewCampaignName] = useState('');
   const [joinCode, setJoinCode] = useState('');
-
-  const updateCampaigns = (newCamps: Campaign[]) => {
-    setCampaigns(newCamps);
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(newCamps));
-  };
 
   const handleCreate = () => {
     if (!newCampaignName) return;
@@ -37,23 +26,20 @@ const CampaignManager: React.FC<CampaignManagerProps> = ({ user }) => {
         createdAt: Date.now()
     };
 
-    updateCampaigns([...campaigns, newCampaign]);
+    onUpdateCampaigns([...campaigns, newCampaign]);
     setNewCampaignName('');
     setShowCreate(false);
   };
 
   const handleJoin = () => {
      if (!joinCode) return;
-     // SIMULATION: Since we don't have a real backend, we can only join "local" campaigns for demo
-     // In a real app, this would query Firestore for the code
-     alert(`In this demo, you can only create local campaigns. In a production build, code "${joinCode}" would connect you to your friends!`);
+     // SIMULATION
+     alert(`Feature coming soon: code "${joinCode}" will connect you to shared Firestore campaigns!`);
      setJoinCode('');
   };
 
   return (
     <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
-        
-        {/* Actions */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {/* Create Card */}
             <div className="bg-zinc-900 border border-zinc-800 rounded-2xl p-6 hover:border-amber-500/50 transition-colors group">
@@ -78,18 +64,8 @@ const CampaignManager: React.FC<CampaignManagerProps> = ({ user }) => {
                            className="w-full bg-zinc-950 border border-zinc-700 rounded-lg p-3 text-sm text-white focus:outline-none focus:border-amber-500"
                         />
                         <div className="flex gap-2">
-                            <button 
-                                onClick={handleCreate}
-                                className="flex-1 bg-amber-600 hover:bg-amber-500 text-white text-sm font-bold py-2 rounded-lg transition-colors"
-                            >
-                                Create
-                            </button>
-                            <button 
-                                onClick={() => setShowCreate(false)}
-                                className="px-3 bg-zinc-800 hover:bg-zinc-700 text-zinc-400 text-sm font-bold rounded-lg"
-                            >
-                                Cancel
-                            </button>
+                            <button onClick={handleCreate} className="flex-1 bg-amber-600 hover:bg-amber-500 text-white text-sm font-bold py-2 rounded-lg transition-colors">Create</button>
+                            <button onClick={() => setShowCreate(false)} className="px-3 bg-zinc-800 hover:bg-zinc-700 text-zinc-400 text-sm font-bold rounded-lg">Cancel</button>
                         </div>
                     </div>
                 )}
@@ -99,8 +75,7 @@ const CampaignManager: React.FC<CampaignManagerProps> = ({ user }) => {
             <div className="bg-zinc-900 border border-zinc-800 rounded-2xl p-6">
                 <div className="flex flex-col items-center justify-center h-full space-y-4">
                      <div className="flex items-center gap-2 text-zinc-200 font-bold">
-                        <Users size={20} className="text-blue-500" />
-                        Join a Party
+                        <Users size={20} className="text-blue-500" /> Join a Party
                      </div>
                      <div className="flex w-full gap-2">
                          <div className="relative flex-grow">
@@ -114,26 +89,17 @@ const CampaignManager: React.FC<CampaignManagerProps> = ({ user }) => {
                                 maxLength={6}
                              />
                          </div>
-                         <button 
-                            onClick={handleJoin}
-                            className="bg-blue-600 hover:bg-blue-500 text-white font-bold px-4 rounded-lg transition-colors"
-                         >
-                            Join
-                         </button>
+                         <button onClick={handleJoin} className="bg-blue-600 hover:bg-blue-500 text-white font-bold px-4 rounded-lg transition-colors">Join</button>
                      </div>
                      <p className="text-[10px] text-zinc-600">Ask your DM for the 6-character code</p>
                 </div>
             </div>
         </div>
 
-        {/* List */}
         <div className="space-y-4">
             <h3 className="text-xs font-bold text-zinc-500 uppercase tracking-widest pl-1">Your Campaigns</h3>
-            
             {campaigns.length === 0 ? (
-                <div className="text-center py-10 border border-dashed border-zinc-800 rounded-2xl bg-zinc-900/30">
-                    <p className="text-zinc-600 italic">You are not part of any campaigns yet.</p>
-                </div>
+                <div className="text-center py-10 border border-dashed border-zinc-800 rounded-2xl bg-zinc-900/30"><p className="text-zinc-600 italic">No campaigns found.</p></div>
             ) : (
                 <div className="grid grid-cols-1 gap-3">
                     {campaigns.map(camp => (
@@ -145,7 +111,6 @@ const CampaignManager: React.FC<CampaignManagerProps> = ({ user }) => {
                                 </h4>
                                 <p className="text-xs text-zinc-500 mt-1">{camp.members.length} Members &middot; Created {new Date(camp.createdAt).toLocaleDateString()}</p>
                             </div>
-                            
                             <div className="flex items-center gap-4">
                                 <div className="flex flex-col items-end">
                                     <span className="text-[10px] text-zinc-500 uppercase font-bold">Join Code</span>

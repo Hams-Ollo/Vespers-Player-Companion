@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { CharacterData } from '../types';
+import { CharacterData, Campaign } from '../types';
 import { Plus, Play, Trash2, Scroll, Heart, Shield, Crown, Users, LogOut, User } from 'lucide-react';
 import CharacterCreationWizard from './CharacterCreationWizard';
 import CampaignManager from './CampaignManager';
@@ -7,12 +7,21 @@ import { useAuth } from '../contexts/AuthContext';
 
 interface CharacterSelectionProps {
   characters: CharacterData[];
+  campaigns: Campaign[];
+  onUpdateCampaigns: (camps: Campaign[]) => void;
   onSelect: (id: string) => void;
   onCreate: (data: CharacterData) => void;
   onDelete: (id: string) => void;
 }
 
-const CharacterSelection: React.FC<CharacterSelectionProps> = ({ characters, onSelect, onCreate, onDelete }) => {
+const CharacterSelection: React.FC<CharacterSelectionProps> = ({ 
+  characters, 
+  campaigns, 
+  onUpdateCampaigns, 
+  onSelect, 
+  onCreate, 
+  onDelete 
+}) => {
   const [showWizard, setShowWizard] = useState(false);
   const [activeTab, setActiveTab] = useState<'heroes' | 'campaigns'>('heroes');
   const { user, logout } = useAuth();
@@ -48,7 +57,7 @@ const CharacterSelection: React.FC<CharacterSelectionProps> = ({ characters, onS
            <div className="p-3 bg-zinc-900/50 rounded-full border border-zinc-800 backdrop-blur-sm mb-2 shadow-2xl ring-1 ring-white/5">
               <Crown className="text-amber-500 w-8 h-8" strokeWidth={1.5} />
            </div>
-           <h1 className="text-4xl md:text-6xl font-display font-bold text-transparent bg-clip-text bg-gradient-to-b from-white to-zinc-400 tracking-tight drop-shadow-sm">
+           <h1 className="text-4xl md:text-6xl font-display font-bold text-transparent bg-clip-text bg-gradient-to-b from-white to-zinc-400 tracking-tight drop-shadow-sm text-center">
              Adventurer's Hall
            </h1>
            
@@ -165,12 +174,19 @@ const CharacterSelection: React.FC<CharacterSelectionProps> = ({ characters, onS
             ))}
             </div>
         ) : (
-            user && <CampaignManager user={user} />
+            user && (
+              <CampaignManager 
+                user={user} 
+                campaigns={campaigns} 
+                onUpdateCampaigns={onUpdateCampaigns} 
+              />
+            )
         )}
       </div>
 
       {showWizard && (
         <CharacterCreationWizard
+          campaigns={campaigns}
           onCreate={handleCreate}
           onClose={() => setShowWizard(false)}
         />

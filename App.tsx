@@ -4,11 +4,12 @@ import CharacterSelection from './components/CharacterSelection';
 import LoginScreen from './components/LoginScreen';
 import { AuthProvider, useAuth } from './contexts/AuthContext';
 import { VESPER_DATA } from './constants';
-import { CharacterData } from './types';
+import { CharacterData, Campaign } from './types';
 
 const AppContent: React.FC = () => {
   const { user, loading: authLoading } = useAuth();
   const [characters, setCharacters] = useState<CharacterData[]>([]);
+  const [campaigns, setCampaigns] = useState<Campaign[]>([]);
   const [activeCharacterId, setActiveCharacterId] = useState<string | null>(null);
   const [dataLoading, setDataLoading] = useState(true);
 
@@ -17,40 +18,38 @@ const AppContent: React.FC = () => {
     if (authLoading) return;
     
     if (user) {
-        // User is logged in: Load their specific data
-        // In a real app, this would be: await firestore.collection('users').doc(user.uid).get()
-        const storageKey = `dnd-characters-${user.uid}`;
-        const saved = localStorage.getItem(storageKey);
+        const charKey = `dnd-characters-${user.uid}`;
+        const campKey = `dnd-campaigns-${user.uid}`;
         
-        if (saved) {
-            try {
-                setCharacters(JSON.parse(saved));
-            } catch (e) {
-                console.error("Failed to parse characters", e);
-                setCharacters([]);
-            }
+        const savedChars = localStorage.getItem(charKey);
+        const savedCamps = localStorage.getItem(campKey);
+        
+        if (savedChars) {
+            try { setCharacters(JSON.parse(savedChars)); } catch (e) { setCharacters([]); }
         } else {
-            // New user (or just cleared cache) -> Give them Vesper template if empty
-            // Only if it's the guest account for demo purposes
-            if (user.isAnonymous) {
-                 setCharacters([VESPER_DATA]);
-            } else {
-                 setCharacters([]);
-            }
+            if (user.isAnonymous) setCharacters([VESPER_DATA]);
+            else setCharacters([]);
+        }
+
+        if (savedCamps) {
+            try { setCampaigns(JSON.parse(savedCamps)); } catch (e) { setCampaigns([]); }
+        } else {
+            setCampaigns([]);
         }
     } else {
         setCharacters([]);
+        setCampaigns([]);
     }
     setDataLoading(false);
   }, [user, authLoading]);
 
-  // Save to local storage whenever characters change
+  // Save to local storage whenever state changes
   useEffect(() => {
     if (!authLoading && !dataLoading && user) {
-      const storageKey = `dnd-characters-${user.uid}`;
-      localStorage.setItem(storageKey, JSON.stringify(characters));
+      localStorage.setItem(`dnd-characters-${user.uid}`, JSON.stringify(characters));
+      localStorage.setItem(`dnd-campaigns-${user.uid}`, JSON.stringify(campaigns));
     }
-  }, [characters, authLoading, dataLoading, user]);
+  }, [characters, campaigns, authLoading, dataLoading, user]);
 
   const handleCreate = (newChar: CharacterData) => {
     setCharacters(prev => [...prev, newChar]);
@@ -66,26 +65,14 @@ const AppContent: React.FC = () => {
 
   const handleUpdateActiveCharacter = (newData: Partial<CharacterData>) => {
     if (!activeCharacterId) return;
-
-    setCharacters(prev => prev.map(c => {
-      if (c.id === activeCharacterId) {
-        return { ...c, ...newData };
-      }
-      return c;
-    }));
-  };
-
-  const handleUpdatePortrait = (url: string) => {
-    handleUpdateActiveCharacter({ portraitUrl: url });
+    setCharacters(prev => prev.map(c => c.id === activeCharacterId ? { ...c, ...newData } : c));
   };
 
   if (authLoading || (user && dataLoading)) {
       return <div className="min-h-screen bg-black flex items-center justify-center text-zinc-500">Loading...</div>;
   }
 
-  if (!user) {
-      return <LoginScreen />;
-  }
+  if (!user) return <LoginScreen />;
 
   const activeCharacter = characters.find(c => c.id === activeCharacterId);
 
@@ -93,7 +80,7 @@ const AppContent: React.FC = () => {
     return (
       <Dashboard 
         data={activeCharacter} 
-        onUpdatePortrait={handleUpdatePortrait} 
+        onUpdatePortrait={(url) => handleUpdateActiveCharacter({ portraitUrl: url })} 
         onUpdateData={handleUpdateActiveCharacter}
         onExit={() => setActiveCharacterId(null)}
       />
@@ -103,6 +90,8 @@ const AppContent: React.FC = () => {
   return (
     <CharacterSelection 
       characters={characters}
+      campaigns={campaigns}
+      onUpdateCampaigns={setCampaigns}
       onSelect={setActiveCharacterId}
       onCreate={handleCreate}
       onDelete={handleDelete}
