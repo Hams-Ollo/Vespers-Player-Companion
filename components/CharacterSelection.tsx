@@ -5,6 +5,7 @@ import { Plus, Play, Trash2, Scroll, Heart, Shield, Crown, Users, LogOut, User, 
 import CharacterCreationWizard from './CharacterCreationWizard';
 import QuickRollModal from './QuickRollModal';
 import CampaignManager from './CampaignManager';
+import ErrorBoundary from './ErrorBoundary';
 import { useAuth } from '../contexts/AuthContext';
 
 interface CharacterSelectionProps {
@@ -138,20 +139,18 @@ const CharacterSelection: React.FC<CharacterSelectionProps> = ({
 
             {/* Existing Characters */}
             {(characters || []).map((char) => {
-                // Safety: If char is fundamentally malformed, show a "broken card"
                 const isBroken = !char || !char.id || !char.name;
-
                 return (
+                  <ErrorBoundary key={char?.id || Math.random()} fallbackTitle="Hero failed to manifest">
                     <div 
-                    key={char?.id || Math.random()} 
                     className="group relative h-[420px] w-full bg-zinc-950 rounded-3xl overflow-hidden ring-1 ring-white/10 hover:ring-amber-500/50 transition-all duration-500 hover:shadow-2xl hover:shadow-black/50 hover:-translate-y-2 cursor-pointer"
                     onClick={() => char?.id && onSelect(char.id)}
                     >
                     {isBroken ? (
                         <div className="absolute inset-0 flex flex-col items-center justify-center p-8 text-center space-y-4">
                             <AlertTriangle className="text-red-500" size={48} />
-                            <h3 className="text-white font-bold">Incomplete Spirit</h3>
-                            <p className="text-zinc-500 text-xs">This hero failed to manifest correctly.</p>
+                            <h3 className="text-white font-bold">Corrupted Hero</h3>
+                            <p className="text-zinc-500 text-xs">This data is incomplete and cannot be rendered.</p>
                             <button 
                                 onClick={(e) => { e.stopPropagation(); char?.id && onDelete(char.id); }}
                                 className="px-4 py-2 bg-red-900/30 text-red-400 rounded-lg border border-red-500/30 text-xs font-bold"
@@ -234,6 +233,7 @@ const CharacterSelection: React.FC<CharacterSelectionProps> = ({
                         </>
                     )}
                     </div>
+                  </ErrorBoundary>
                 );
             })}
             </div>
@@ -242,7 +242,7 @@ const CharacterSelection: React.FC<CharacterSelectionProps> = ({
               <CampaignManager 
                 user={user} 
                 campaigns={campaigns} 
-                onUpdateCampaigns={onUpdateCampaigns} 
+                onUpdateCampaigns={onUpdateCampaigns as any} 
               />
             )
         )}

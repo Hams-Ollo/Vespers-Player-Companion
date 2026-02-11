@@ -1,6 +1,7 @@
+
 import React, { useState, useMemo } from 'react';
-import { X, ChevronRight, ChevronLeft, Dices, User, BookOpen, Sparkles, Loader2, Plus, Minus, ShieldCheck, Zap, Star } from 'lucide-react';
-import { CharacterData, StatKey, Campaign } from '../types';
+import { X, ChevronRight, ChevronLeft, Dices, User, BookOpen, Sparkles, Loader2, Plus, Minus, ShieldCheck, Zap, Star, Info } from 'lucide-react';
+import { CharacterData, StatKey, Campaign, Skill, Stat } from '../types';
 import TranscriptionButton from './TranscriptionButton';
 import {
   generateId,
@@ -25,7 +26,7 @@ import {
   getRaceTraits,
 } from '../constants';
 import { GoogleGenAI } from "@google/genai";
-import { checkRateLimit, recalculateCharacterStats } from '../utils';
+import { checkRateLimit, recalculateCharacterStats, calculateModifier } from '../utils';
 
 // ==========================================
 // Types
@@ -227,9 +228,31 @@ const StepAbilityScores: React.FC<{
   state: WizardState;
   onChange: (updates: Partial<WizardState>) => void;
 }> = ({ state, onChange }) => {
-  const handleStatChange = (key: StatKey, value: number) => {
-    const updated = { ...state.baseStats, [key]: value };
-    onChange({ baseStats: updated });
+  const pointsSpent = useMemo(() => {
+    if (state.statMethod !== 'pointbuy') return 0;
+    return STAT_KEYS.reduce((sum, key) => sum + (POINT_BUY_COSTS[state.baseStats[key]] || 0), 0);
+  }, [state.baseStats, state.statMethod]);
+
+  const pointsRemaining = POINT_BUY_TOTAL - pointsSpent;
+
+  const handlePointBuyChange = (key: StatKey, increment: boolean) => {
+    const currentScore = state.baseStats[key];
+    const nextScore = increment ? currentScore + 1 : currentScore - 1;
+    
+    if (nextScore < POINT_BUY_MIN || nextScore > POINT_BUY_MAX) return;
+
+    const currentCost = POINT_BUY_COSTS[currentScore];
+    const nextCost = POINT_BUY_COSTS[nextScore];
+    const costDiff = nextCost - currentCost;
+
+    if (increment && pointsRemaining < costDiff) return;
+
+    onChange({ baseStats: { ...state.baseStats, [key]: nextScore } });
+  };
+
+  const handleManualStatChange = (key: StatKey, value: string) => {
+    const score = Math.min(20, Math.max(1, parseInt(value) || 0));
+    onChange({ baseStats: { ...state.baseStats, [key]: score } });
   };
 
   const handleStandardAssignment = (key: StatKey, value: number | null) => {
@@ -241,63 +264,132 @@ const StepAbilityScores: React.FC<{
     <div className="p-4 sm:p-6 md:p-8 space-y-6">
       <div className="text-center">
         <h2 className="text-xl sm:text-2xl md:text-3xl font-display font-bold text-white">Ability Scores</h2>
-        <div className="flex justify-center gap-2 mt-2">
+        <p className="text-zinc-500 text-sm mt-1">Determine your raw potential</p>
+        
+        <div className="flex justify-center gap-2 mt-4">
           {(['standard', 'pointbuy', 'manual'] as StatMethod[]).map(m => (
             <button
               key={m}
               onClick={() => onChange({ statMethod: m })}
-              className={`px-3 py-1 text-xs font-bold rounded-full border ${state.statMethod === m ? 'bg-amber-600 border-amber-500 text-white' : 'bg-zinc-800 border-zinc-700 text-zinc-500'}`}
+              className={`px-3 py-1.5 text-[10px] font-bold rounded-full border uppercase tracking-widest transition-all ${
+                state.statMethod === m 
+                ? 'bg-amber-600 border-amber-500 text-white shadow-lg shadow-amber-900/20' 
+                : 'bg-zinc-800 border-zinc-700 text-zinc-500 hover:text-zinc-300'
+              }`}
             >
-              {m.charAt(0).toUpperCase() + m.slice(1)}
+              {m}
             </button>
           ))}
         </div>
       </div>
 
-      <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
-        {STAT_KEYS.map(key => (
-          <div key={key} className="bg-zinc-800 p-4 rounded-xl border border-zinc-700">
-            <label htmlFor={`stat-${key}`} className="text-[10px] font-bold text-zinc-500 uppercase block text-center mb-1">{key}</label>
-            {state.statMethod === 'standard' ? (
-              <select
-                id={`stat-${key}`}
-                value={state.standardAssignment[key] ?? ''}
-                onChange={e => handleStandardAssignment(key, e.target.value ? parseInt(e.target.value) : null)}
-                className="w-full bg-zinc-950 border border-zinc-700 rounded-lg p-2 text-sm text-white focus:outline-none"
-              >
-                <option value="">--</option>
-                {STANDARD_ARRAY.map(val => (
-                  <option key={val} value={val} disabled={Object.values(state.standardAssignment).includes(val) && state.standardAssignment[key] !== val}>
-                    {val}
-                  </option>
-                ))}
-              </select>
-            ) : (
-              <div className="flex items-center justify-between gap-2">
-                <button 
-                  aria-label={`Decrease ${key}`}
-                  onClick={() => handleStatChange(key, Math.max(POINT_BUY_MIN, state.baseStats[key] - 1))}
-                  className="p-1 text-zinc-500 hover:text-white"
-                >
-                  <Minus size={16} />
-                </button>
-                <span className="text-xl font-bold text-white">{state.baseStats[key]}</span>
-                <button 
-                  aria-label={`Increase ${key}`}
-                  onClick={() => handleStatChange(key, Math.min(POINT_BUY_MAX, state.baseStats[key] + 1))}
-                  className="p-1 text-zinc-500 hover:text-white"
-                >
-                  <Plus size={16} />
-                </button>
+      {state.statMethod === 'pointbuy' && (
+        <div className="bg-zinc-950 border border-zinc-800 rounded-2xl p-4 flex items-center justify-between">
+           <div className="flex items-center gap-3">
+              <div className={`p-2 rounded-lg ${pointsRemaining >= 0 ? 'bg-amber-500/10 text-amber-500' : 'bg-red-500/10 text-red-500'}`}>
+                <Info size={18} />
               </div>
-            )}
-            <div className="text-center mt-1">
-              <span className="text-[10px] text-zinc-500">
-                Bonus: {getRacialBonusDisplay(state.race)}
-              </span>
+              <div>
+                <span className="text-xs font-bold text-zinc-500 uppercase tracking-widest block">Points Remaining</span>
+                <span className={`text-xl font-mono font-bold ${pointsRemaining < 0 ? 'text-red-500' : 'text-amber-500'}`}>
+                  {pointsRemaining} / {POINT_BUY_TOTAL}
+                </span>
+              </div>
+           </div>
+           <div className="text-right">
+              <span className="text-[10px] text-zinc-600 font-bold uppercase block">Max Base: 15</span>
+              <span className="text-[10px] text-zinc-600 font-bold uppercase block">Min Base: 8</span>
+           </div>
+        </div>
+      )}
+
+      <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
+        {STAT_KEYS.map(key => {
+          const racialBonus = getRacialBonus(state.race, key);
+          const baseScore = state.statMethod === 'standard' 
+            ? (state.standardAssignment[key] ?? 8) 
+            : state.baseStats[key];
+          const totalScore = baseScore + racialBonus;
+          const mod = calculateModifier(totalScore);
+
+          return (
+            <div key={key} className="bg-zinc-800 p-4 rounded-2xl border border-zinc-700 shadow-xl relative group hover:border-zinc-500 transition-all">
+              <label className="text-[10px] font-bold text-zinc-500 uppercase block text-center mb-2 tracking-widest">{key}</label>
+              
+              <div className="flex flex-col items-center justify-center space-y-2">
+                {state.statMethod === 'standard' ? (
+                  <select
+                    aria-label={`Select score for ${key}`}
+                    value={state.standardAssignment[key] ?? ''}
+                    onChange={e => handleStandardAssignment(key, e.target.value ? parseInt(e.target.value) : null)}
+                    className="w-full bg-zinc-950 border border-zinc-700 rounded-xl p-2 text-sm font-bold text-white focus:outline-none focus:border-amber-500 text-center"
+                  >
+                    <option value="">--</option>
+                    {STANDARD_ARRAY.map(val => {
+                      const isUsedByOther = Object.entries(state.standardAssignment).some(([k, v]) => v === val && k !== key);
+                      return (
+                        <option key={val} value={val} disabled={isUsedByOther}>
+                          {val} {isUsedByOther ? '(Used)' : ''}
+                        </option>
+                      );
+                    })}
+                  </select>
+                ) : state.statMethod === 'pointbuy' ? (
+                  <div className="flex items-center justify-between w-full">
+                    <button 
+                      onClick={() => handlePointBuyChange(key, false)}
+                      className="p-1.5 rounded-lg bg-zinc-900 text-zinc-500 hover:text-white hover:bg-zinc-700 transition-colors"
+                      disabled={baseScore <= POINT_BUY_MIN}
+                    >
+                      <Minus size={14} />
+                    </button>
+                    <div className="text-center">
+                        <span className="text-2xl font-display font-bold text-white">{baseScore}</span>
+                        <div className="text-[9px] text-zinc-500 font-bold uppercase">Cost: {POINT_BUY_COSTS[baseScore]}</div>
+                    </div>
+                    <button 
+                      onClick={() => handlePointBuyChange(key, true)}
+                      className="p-1.5 rounded-lg bg-zinc-900 text-zinc-500 hover:text-white hover:bg-zinc-700 transition-colors"
+                      disabled={baseScore >= POINT_BUY_MAX || pointsRemaining < (POINT_BUY_COSTS[baseScore + 1] - POINT_BUY_COSTS[baseScore])}
+                    >
+                      <Plus size={14} />
+                    </button>
+                  </div>
+                ) : (
+                   <input 
+                      type="number"
+                      value={baseScore}
+                      onChange={(e) => handleManualStatChange(key, e.target.value)}
+                      className="w-full bg-zinc-950 border border-zinc-700 rounded-xl p-2 text-xl font-display font-bold text-white focus:outline-none focus:border-amber-500 text-center"
+                   />
+                )}
+
+                <div className="flex items-center gap-2 pt-1">
+                   <div className="text-xs bg-zinc-950 px-2 py-0.5 rounded text-zinc-400 font-bold">
+                      MOD {mod >= 0 ? '+' : ''}{mod}
+                   </div>
+                   {racialBonus !== 0 && (
+                     <div className="text-[10px] text-amber-500 font-bold">
+                        +{racialBonus} Race
+                     </div>
+                   )}
+                </div>
+              </div>
+              
+              <div className="mt-3 pt-2 border-t border-zinc-700/50 flex justify-between items-center">
+                <span className="text-[9px] font-bold text-zinc-500 uppercase">Total</span>
+                <span className="text-sm font-display font-bold text-amber-400">{totalScore}</span>
+              </div>
             </div>
-          </div>
-        ))}
+          );
+        })}
+      </div>
+      
+      <div className="bg-zinc-900/50 border border-zinc-800 rounded-xl p-4 flex gap-3 items-start">
+        <Star size={16} className="text-amber-500 shrink-0 mt-0.5" />
+        <p className="text-xs text-zinc-500 leading-relaxed italic">
+          Total Score = Base Score + Racial Bonus. Your Proficiency Bonus (+2) will be added to your skills and saves in the next step.
+        </p>
       </div>
     </div>
   );
@@ -309,7 +401,6 @@ const StepSkills: React.FC<{
 }> = ({ state, onChange }) => {
   const classData = getClassData(state.charClass);
   const skillLimit = classData?.skillsToPick || 2;
-  const toolLimit = state.charClass === 'Rogue' ? 1 : 0;
 
   const toggleSkill = (skill: string) => {
     const current = [...state.selectedSkills];
@@ -317,14 +408,6 @@ const StepSkills: React.FC<{
     if (idx >= 0) current.splice(idx, 1);
     else if (current.length < skillLimit) current.push(skill);
     onChange({ selectedSkills: current });
-  };
-
-  const toggleTool = (tool: string) => {
-    const current = [...state.selectedTools];
-    const idx = current.indexOf(tool);
-    if (idx >= 0) current.splice(idx, 1);
-    else if (current.length < toolLimit + 1) current.push(tool);
-    onChange({ selectedTools: current });
   };
 
   return (
@@ -549,19 +632,19 @@ const StepReview: React.FC<{
       <div className="bg-zinc-800 rounded-2xl border border-zinc-700 overflow-hidden divide-y divide-zinc-700/50">
         <div className="p-4 grid grid-cols-2 gap-4">
           <div>
-            <span className="text-[10px] font-bold text-zinc-500 uppercase block">Name</span>
+            <span className="text-[10px] font-bold text-zinc-500 uppercase block tracking-widest">Name</span>
             <span className="text-white font-bold">{state.name}</span>
           </div>
           <div>
-            <span className="text-[10px] font-bold text-zinc-500 uppercase block">Race & Class</span>
+            <span className="text-[10px] font-bold text-zinc-500 uppercase block tracking-widest">Lineage & Calling</span>
             <span className="text-white font-bold">{state.race} {state.charClass}</span>
           </div>
         </div>
         <div className="p-4">
-          <span className="text-[10px] font-bold text-zinc-500 uppercase block mb-1">Skills</span>
+          <span className="text-[10px] font-bold text-zinc-500 uppercase block mb-1 tracking-widest">Proficiencies</span>
           <div className="flex flex-wrap gap-1">
             {state.selectedSkills.map(s => (
-              <span key={s} className="bg-blue-900/30 text-blue-300 text-[10px] px-2 py-0.5 rounded border border-blue-500/30">{s}</span>
+              <span key={s} className="bg-blue-900/30 text-blue-300 text-[10px] px-2 py-0.5 rounded border border-blue-500/30 font-bold uppercase">{s}</span>
             ))}
           </div>
         </div>
@@ -569,14 +652,17 @@ const StepReview: React.FC<{
 
       {forging && (
         <div className="py-8 text-center space-y-4">
-          <Loader2 size={48} className="animate-spin text-amber-500 mx-auto" />
-          <p className="text-amber-500 font-display animate-pulse">Forging your destiny in the digital aether...</p>
+          <div className="relative inline-block">
+            <div className="absolute inset-0 bg-amber-500/20 blur-xl rounded-full animate-pulse" />
+            <Loader2 size={48} className="animate-spin text-amber-500 mx-auto relative" />
+          </div>
+          <p className="text-amber-500 font-display animate-pulse uppercase tracking-[0.2em] text-sm">Forging Destiny...</p>
         </div>
       )}
 
       {forgeError && (
         <div className="p-4 bg-red-900/20 border border-red-500/50 rounded-xl text-red-200 text-sm">
-          <span className="font-bold">Error during forging:</span> {forgeError}
+          <span className="font-bold">The ritual failed:</span> {forgeError}
         </div>
       )}
     </div>
@@ -598,7 +684,13 @@ const CharacterCreationWizard: React.FC<WizardProps> = ({ campaigns, onCreate, o
   const canAdvance = useMemo(() => {
     switch (step) {
       case 0: return !!(state.name && state.race && state.charClass && state.background && state.alignment);
-      case 1: return true;
+      case 1: 
+        if (state.statMethod === 'standard') return Object.values(state.standardAssignment).every(v => v !== null);
+        if (state.statMethod === 'pointbuy') {
+            const spent = STAT_KEYS.reduce((sum, key) => sum + (POINT_BUY_COSTS[state.baseStats[key]] || 0), 0);
+            return spent === POINT_BUY_TOTAL;
+        }
+        return true;
       case 2: return state.selectedSkills.length >= (classData?.skillsToPick || 2);
       case 3: return true;
       case 4: return true;
@@ -659,18 +751,23 @@ const CharacterCreationWizard: React.FC<WizardProps> = ({ campaigns, onCreate, o
     }
 
     const hitDie = classData?.hitDie ?? 8;
-    const stats = {} as any;
+    const stats: Record<StatKey, Stat> = {} as any;
     STAT_KEYS.forEach(stat => {
       let base = state.statMethod === 'standard' ? (state.standardAssignment[stat] ?? 8) : state.baseStats[stat];
       let score = base + getRacialBonus(state.race, stat);
       let mod = Math.floor((score - 10) / 2);
-      stats[stat] = { score, modifier: mod, save: mod, proficientSave: classData?.savingThrows.includes(stat) };
+      stats[stat] = { 
+        score, 
+        modifier: mod, 
+        save: mod, 
+        proficientSave: classData?.savingThrows.includes(stat) ?? false 
+      };
     });
 
     const character: CharacterData = {
       id: generateId(),
       campaign: state.campaign || 'Solo Adventure',
-      name: state.name,
+      name: state.name || 'Unnamed Adventurer',
       race: state.race,
       class: state.charClass,
       background: state.background,
@@ -683,7 +780,7 @@ const CharacterCreationWizard: React.FC<WizardProps> = ({ campaigns, onCreate, o
       ac: 10 + stats.DEX.modifier,
       initiative: stats.DEX.modifier,
       speed: getRaceSpeed(state.race),
-      passivePerception: 10 + (stats.WIS?.modifier || 0),
+      passivePerception: 10 + stats.WIS.modifier,
       skills: DND_SKILLS.map(s => ({ 
         name: s.name, 
         ability: s.ability, 
@@ -724,18 +821,22 @@ const CharacterCreationWizard: React.FC<WizardProps> = ({ campaigns, onCreate, o
 
         <div className="p-4 sm:p-5 border-t border-zinc-800 bg-zinc-950/50 flex gap-3 shrink-0">
           {step > 0 && !forging && (
-            <button onClick={() => setStep(s => s - 1)} className="px-4 py-3 bg-zinc-800 hover:bg-zinc-700 text-white font-bold rounded-xl flex items-center gap-1">
+            <button onClick={() => setStep(s => s - 1)} className="px-4 py-3 bg-zinc-800 hover:bg-zinc-700 text-white font-bold rounded-xl flex items-center gap-1 transition-all">
               <ChevronLeft size={18} /> Back
             </button>
           )}
           <div className="flex-grow" />
           {step < 5 && (
-            <button onClick={() => setStep(s => s + 1)} disabled={!canAdvance} className="px-6 py-3 bg-amber-600 hover:bg-amber-500 text-white font-bold rounded-xl flex items-center gap-1 disabled:opacity-50">
+            <button 
+                onClick={() => setStep(s => s + 1)} 
+                disabled={!canAdvance} 
+                className="px-6 py-3 bg-amber-600 hover:bg-amber-500 text-white font-bold rounded-xl flex items-center gap-1 disabled:opacity-30 transition-all shadow-lg shadow-amber-900/20"
+            >
               Next <ChevronRight size={18} />
             </button>
           )}
           {step === 5 && !forging && (
-            <button onClick={handleForge} className="px-6 py-3 bg-gradient-to-r from-amber-600 to-orange-600 text-white font-bold rounded-xl flex items-center gap-2">
+            <button onClick={handleForge} className="px-6 py-3 bg-gradient-to-r from-amber-600 to-orange-600 text-white font-bold rounded-xl flex items-center gap-2 transition-all shadow-xl shadow-orange-900/40 active:scale-95">
               <Sparkles size={18} /> Forge Character
             </button>
           )}

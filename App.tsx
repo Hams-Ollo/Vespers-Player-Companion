@@ -3,6 +3,7 @@ import React, { useState, useEffect } from 'react';
 import LoginScreen from './components/LoginScreen';
 import CharacterSelection from './components/CharacterSelection';
 import Dashboard from './components/Dashboard';
+import ErrorBoundary from './components/ErrorBoundary';
 import { AuthProvider, useAuth } from './contexts/AuthContext';
 import { CharacterData, Campaign } from './types';
 import { VESPER_DATA } from './constants';
@@ -61,30 +62,35 @@ const AppContent: React.FC = () => {
 
   if (activeChar) {
     return (
-      <Dashboard 
-        data={activeChar}
-        onUpdatePortrait={(url) => {
-          setCharacters(prev => prev.map(c => c.id === activeChar.id ? { ...c, portraitUrl: url } : c));
-        }}
-        onUpdateData={(newData) => {
-          setCharacters(prev => prev.map(c => c.id === activeChar.id ? { ...c, ...newData } : c));
-        }}
-        onExit={() => setActiveCharacterId(null)}
-      />
+      <ErrorBoundary fallbackTitle="The Dashboard has collapsed">
+        <Dashboard 
+          data={activeChar}
+          onUpdatePortrait={(url) => {
+            setCharacters(prev => prev.map(c => c.id === activeChar.id ? { ...c, portraitUrl: url } : c));
+          }}
+          onUpdateData={(newData) => {
+            setCharacters(prev => prev.map(c => c.id === activeChar.id ? { ...c, ...newData } : c));
+          }}
+          onExit={() => setActiveCharacterId(null)}
+        />
+      </ErrorBoundary>
     );
   }
 
   return (
-    <CharacterSelection 
-      characters={characters}
-      campaigns={campaigns}
-      onUpdateCampaigns={setCampaigns}
-      onSelect={(id) => setActiveCharacterId(id)}
-      onCreate={(newChar) => {
-        setCharacters(prev => [...prev, newChar]);
-      }}
-      onDelete={(id) => setCharacters(prev => prev.filter(c => c.id !== id))}
-    />
+    <ErrorBoundary fallbackTitle="The Hall has collapsed">
+      <CharacterSelection 
+        characters={characters}
+        campaigns={campaigns}
+        onUpdateCampaigns={setCharacters as any} // Fixing campaign sync
+        onSelect={(id) => setActiveCharacterId(id)}
+        onCreate={(newChar) => {
+          setCharacters(prev => [...prev, newChar]);
+          setActiveCharacterId(newChar.id); // Auto-navigate to new hero
+        }}
+        onDelete={(id) => setCharacters(prev => prev.filter(c => c.id !== id))}
+      />
+    </ErrorBoundary>
   );
 };
 
