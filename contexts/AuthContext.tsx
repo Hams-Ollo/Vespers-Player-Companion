@@ -1,9 +1,16 @@
-
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { UserProfile } from '../types';
-// Fix: Use namespaced imports for Firebase v8 compatibility to resolve "no exported member" errors
-import firebase from 'firebase/app';
-import 'firebase/auth';
+import { initializeApp, getApps, FirebaseApp } from 'firebase/app';
+import { 
+  getAuth, 
+  signInWithPopup, 
+  GoogleAuthProvider, 
+  onAuthStateChanged, 
+  signOut,
+  signInAnonymously,
+  Auth,
+  User
+} from 'firebase/auth';
 
 // Firebase configuration using provided environment variables
 const firebaseConfig = {
@@ -15,18 +22,22 @@ const firebaseConfig = {
   appId: process.env.VITE_FIREBASE_APP_ID
 };
 
-// Initialize Firebase safely using the namespaced API
-let auth: any;
-try {
-  // Fix: Use namespaced initialization to resolve missing functional exports
-  const app = firebase.apps.length === 0 ? firebase.initializeApp(firebaseConfig) : firebase.app();
-  auth = app.auth();
-} catch (e) {
-  console.error("Firebase initialization failed. Check your environment variables.", e);
-}
+// Initialize Firebase using the Modular API
+let app: FirebaseApp;
+let auth: Auth | null = null;
+const googleProvider = new GoogleAuthProvider();
 
-// Fix: Use namespaced provider to resolve "no exported member 'GoogleAuthProvider'"
-const googleProvider = new firebase.auth.GoogleAuthProvider();
+try {
+  // Check if API key exists to avoid crashing on start
+  if (firebaseConfig.apiKey && firebaseConfig.apiKey !== 'undefined') {
+    app = getApps().length === 0 ? initializeApp(firebaseConfig) : getApps()[0];
+    auth = getAuth(app);
+  } else {
+    console.warn("Firebase API Key is missing. Check your environment variables.");
+  }
+} catch (e) {
+  console.error("Firebase initialization failed:", e);
+}
 
 interface AuthContextType {
   user: UserProfile | null;
@@ -48,8 +59,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       return;
     }
 
-    // Fix: Use namespaced onAuthStateChanged to resolve "no exported member"
-    const unsubscribe = auth.onAuthStateChanged((firebaseUser: any) => {
+    // Modern modular listener for auth state changes
+    const unsubscribe = onAuthStateChanged(auth, (firebaseUser: User | null) => {
       if (firebaseUser) {
         const profile: UserProfile = {
           uid: firebaseUser.uid,
@@ -70,10 +81,12 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   }, []);
 
   const signInWithGoogle = async () => {
-    if (!auth) return;
+    if (!auth) {
+      alert("Auth system not initialized. Check console for configuration errors.");
+      return;
+    }
     try {
-      // Fix: Use namespaced signInWithPopup
-      await auth.signInWithPopup(googleProvider);
+      await signInWithPopup(auth, googleProvider);
     } catch (error: any) {
       console.error("Google Sign-In Error:", error);
       alert(`Sign-in failed: ${error.message}`);
@@ -82,17 +95,17 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const signInAsGuest = async () => {
     if (!auth) {
-      // Fallback if auth is completely missing
-      const mockUser = { uid: 'guest-local', displayName: 'Guest (Local)', email: null, photoURL: null };
+      // Manual fallback if Firebase is not connected
+      const mockUser = { uid: 'guest-offline', displayName: 'Offline Guest', email: null, photoURL: null };
       setUser(mockUser);
       setLoading(false);
       return;
     }
     try {
-      // Fix: Use namespaced signInAnonymously
-      await auth.signInAnonymously();
-    } catch (error) {
+      await signInAnonymously(auth);
+    } catch (error: any) {
       console.error("Guest Sign-In Error:", error);
+      // Local fallback for guest mode if network/config is down
       const mockUser = { 
         uid: 'guest-' + Math.random().toString(36).substr(2, 5), 
         displayName: 'Guest Adventurer', 
@@ -110,8 +123,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       return;
     }
     try {
-      // Fix: Use namespaced signOut
-      await auth.signOut();
+      await signOut(auth);
     } catch (error) {
       console.error("Logout Error:", error);
     }
