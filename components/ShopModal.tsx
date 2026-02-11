@@ -1,7 +1,7 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { CharacterData, Item } from '../types';
 import { SHOP_INVENTORY } from '../constants';
-import { X, ShoppingBag, Coins, ShieldCheck, Sword, Package, Star, ArrowRightLeft, Trash2 } from 'lucide-react';
+import { X, ShoppingBag, Coins, ShieldCheck, Sword, Package, Star, ArrowRightLeft, Trash2, Search } from 'lucide-react';
 
 interface ShopModalProps {
   data: CharacterData;
@@ -12,6 +12,7 @@ interface ShopModalProps {
 const ShopModal: React.FC<ShopModalProps> = ({ data, onUpdate, onClose }) => {
   const [mode, setMode] = useState<'buy' | 'sell'>('buy');
   const [filter, setFilter] = useState<string>('All');
+  const [search, setSearch] = useState('');
 
   const buyItem = (item: Item) => {
     if (data.inventory.gold < item.cost!) {
@@ -75,12 +76,26 @@ const ShopModal: React.FC<ShopModalProps> = ({ data, onUpdate, onClose }) => {
          case 'Weapon': return <Sword size={16} className="text-red-400" />;
          case 'Armor': return <ShieldCheck size={16} className="text-blue-400" />;
          case 'Magic Item': return <Star size={16} className="text-purple-400" />;
+         case 'Consumable': return <Package size={16} className="text-green-400" />;
          default: return <Package size={16} className="text-amber-400" />;
      }
   };
 
+  const formatCost = (cost: number): string => {
+    if (cost >= 1) return `${cost} gp`;
+    if (cost >= 0.1) return `${Math.round(cost * 10)} sp`;
+    return `${Math.round(cost * 100)} cp`;
+  };
+
   // Filter items for display
-  const shopItems = filter === 'All' ? SHOP_INVENTORY : SHOP_INVENTORY.filter(i => i.type === filter);
+  const shopItems = useMemo(() => {
+    let items = filter === 'All' ? SHOP_INVENTORY : SHOP_INVENTORY.filter(i => i.type === filter);
+    if (search.trim()) {
+      const q = search.toLowerCase();
+      items = items.filter(i => i.name.toLowerCase().includes(q) || (i.notes || '').toLowerCase().includes(q));
+    }
+    return items;
+  }, [filter, search]);
   const playerItems = data.inventory.items.filter(i => !i.equipped); // Can only sell unequipped
 
   return (
@@ -115,29 +130,48 @@ const ShopModal: React.FC<ShopModalProps> = ({ data, onUpdate, onClose }) => {
         </div>
 
         {mode === 'buy' && (
-            <div className="flex gap-2 p-4 border-b border-zinc-800 bg-zinc-900 overflow-x-auto no-scrollbar">
-                {['All', 'Weapon', 'Armor', 'Gear', 'Consumable'].map(f => (
-                    <button
-                        key={f}
-                        onClick={() => setFilter(f)}
-                        className={`px-3 py-1 rounded-lg text-xs font-bold transition-colors whitespace-nowrap ${filter === f ? 'bg-amber-600/20 text-amber-400 border border-amber-600/50' : 'bg-zinc-800 text-zinc-400 hover:bg-zinc-700'}`}
-                    >
-                        {f}
-                    </button>
-                ))}
+            <div className="border-b border-zinc-800 bg-zinc-900">
+                <div className="flex gap-2 p-4 pb-2 overflow-x-auto no-scrollbar">
+                    {['All', 'Weapon', 'Armor', 'Gear', 'Consumable'].map(f => (
+                        <button
+                            key={f}
+                            onClick={() => setFilter(f)}
+                            className={`px-3 py-1 rounded-lg text-xs font-bold transition-colors whitespace-nowrap ${filter === f ? 'bg-amber-600/20 text-amber-400 border border-amber-600/50' : 'bg-zinc-800 text-zinc-400 hover:bg-zinc-700'}`}
+                        >
+                            {f}
+                        </button>
+                    ))}
+                </div>
+                <div className="px-4 pb-3 flex items-center gap-2">
+                    <div className="relative flex-1">
+                        <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-500" />
+                        <input
+                            type="text"
+                            value={search}
+                            onChange={e => setSearch(e.target.value)}
+                            placeholder="Search items..."
+                            className="w-full bg-zinc-800 border border-zinc-700 rounded-lg py-2 pl-9 pr-3 text-sm text-white placeholder-zinc-500 focus:outline-none focus:ring-1 focus:ring-amber-500/50"
+                        />
+                    </div>
+                    <span className="text-[10px] text-zinc-500 font-mono whitespace-nowrap">{shopItems.length} items</span>
+                </div>
             </div>
         )}
 
         <div className="p-4 overflow-y-auto grid grid-cols-1 sm:grid-cols-2 gap-3">
             {mode === 'buy' ? (
-                shopItems.map((item, idx) => (
+                shopItems.length === 0 ? (
+                    <div className="col-span-full text-center py-10 text-zinc-500 italic">
+                        No items found{search ? ` for "${search}"` : ''}. Try a different search or category.
+                    </div>
+                ) : shopItems.map((item, idx) => (
                     <div key={idx} className="bg-zinc-800 border border-zinc-700 p-3 rounded-xl flex flex-col justify-between hover:border-amber-500/50 transition-colors">
                         <div>
                             <div className="flex justify-between items-start">
                                  <h4 className="font-bold text-zinc-200 flex items-center gap-2 text-sm">
                                     {getIcon(item.type)} {item.name}
                                  </h4>
-                                 <span className="text-amber-400 font-mono text-xs font-bold whitespace-nowrap">{item.cost} gp</span>
+                                 <span className="text-amber-400 font-mono text-xs font-bold whitespace-nowrap">{formatCost(item.cost || 0)}</span>
                             </div>
                             <p className="text-xs text-zinc-500 mt-1 line-clamp-2">{item.notes || item.type}</p>
                         </div>
@@ -161,7 +195,7 @@ const ShopModal: React.FC<ShopModalProps> = ({ data, onUpdate, onClose }) => {
                                         {getIcon(item.type)} {item.name} <span className="text-xs text-zinc-500">x{item.quantity}</span>
                                      </h4>
                                      <span className="text-green-400 font-mono text-xs font-bold whitespace-nowrap">
-                                         {Math.floor((item.cost || 0) / 2)} gp
+                                         {formatCost(Math.floor((item.cost || 0) / 2))}
                                      </span>
                                 </div>
                                 <p className="text-xs text-zinc-500 mt-1 line-clamp-2">{item.notes || item.type}</p>

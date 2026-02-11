@@ -159,12 +159,264 @@ export const POINT_BUY_MIN = 8;
 export const POINT_BUY_MAX = 15;
 
 export const SHOP_INVENTORY: Item[] = [
-  { name: "Dagger", cost: 2, weight: 1, type: "Weapon", quantity: 1, notes: "1d4 piercing, Finesse, Light" },
+  // ======================================
+  // SIMPLE MELEE WEAPONS (PHB Ch.5)
+  // ======================================
+  { name: "Club", cost: 0.1, weight: 2, type: "Weapon", quantity: 1, notes: "1d4 bludgeoning, Light" },
+  { name: "Dagger", cost: 2, weight: 1, type: "Weapon", quantity: 1, notes: "1d4 piercing, Finesse, Light, Thrown (20/60)" },
+  { name: "Greatclub", cost: 0.2, weight: 10, type: "Weapon", quantity: 1, notes: "1d8 bludgeoning, Two-handed" },
+  { name: "Handaxe", cost: 5, weight: 2, type: "Weapon", quantity: 1, notes: "1d6 slashing, Light, Thrown (20/60)" },
+  { name: "Javelin", cost: 0.5, weight: 2, type: "Weapon", quantity: 1, notes: "1d6 piercing, Thrown (30/120)" },
+  { name: "Light Hammer", cost: 2, weight: 2, type: "Weapon", quantity: 1, notes: "1d4 bludgeoning, Light, Thrown (20/60)" },
+  { name: "Mace", cost: 5, weight: 4, type: "Weapon", quantity: 1, notes: "1d6 bludgeoning" },
+  { name: "Quarterstaff", cost: 0.2, weight: 4, type: "Weapon", quantity: 1, notes: "1d6 bludgeoning, Versatile (1d8)" },
+  { name: "Sickle", cost: 1, weight: 2, type: "Weapon", quantity: 1, notes: "1d4 slashing, Light" },
+  { name: "Spear", cost: 1, weight: 3, type: "Weapon", quantity: 1, notes: "1d6 piercing, Thrown (20/60), Versatile (1d8)" },
+
+  // ======================================
+  // SIMPLE RANGED WEAPONS (PHB Ch.5)
+  // ======================================
+  { name: "Crossbow, Light", cost: 25, weight: 5, type: "Weapon", quantity: 1, notes: "1d8 piercing, Ammunition, Loading, Range 80/320, Two-handed" },
+  { name: "Dart", cost: 0.05, weight: 0.25, type: "Weapon", quantity: 1, notes: "1d4 piercing, Finesse, Thrown (20/60)" },
+  { name: "Shortbow", cost: 25, weight: 2, type: "Weapon", quantity: 1, notes: "1d6 piercing, Ammunition, Range 80/320, Two-handed" },
+  { name: "Sling", cost: 0.1, weight: 0, type: "Weapon", quantity: 1, notes: "1d4 bludgeoning, Ammunition, Range 30/120" },
+
+  // ======================================
+  // MARTIAL MELEE WEAPONS (PHB Ch.5)
+  // ======================================
+  { name: "Battleaxe", cost: 10, weight: 4, type: "Weapon", quantity: 1, notes: "1d8 slashing, Versatile (1d10)" },
+  { name: "Flail", cost: 10, weight: 2, type: "Weapon", quantity: 1, notes: "1d8 bludgeoning" },
+  { name: "Glaive", cost: 20, weight: 6, type: "Weapon", quantity: 1, notes: "1d10 slashing, Heavy, Reach, Two-handed" },
+  { name: "Greataxe", cost: 30, weight: 7, type: "Weapon", quantity: 1, notes: "1d12 slashing, Heavy, Two-handed" },
+  { name: "Greatsword", cost: 50, weight: 6, type: "Weapon", quantity: 1, notes: "2d6 slashing, Heavy, Two-handed" },
+  { name: "Halberd", cost: 20, weight: 6, type: "Weapon", quantity: 1, notes: "1d10 slashing, Heavy, Reach, Two-handed" },
+  { name: "Lance", cost: 10, weight: 6, type: "Weapon", quantity: 1, notes: "1d12 piercing, Reach, Special" },
   { name: "Longsword", cost: 15, weight: 3, type: "Weapon", quantity: 1, notes: "1d8 slashing, Versatile (1d10)" },
-  { name: "Shortbow", cost: 25, weight: 2, type: "Weapon", quantity: 1, notes: "1d6 piercing, Range 80/320" },
+  { name: "Maul", cost: 10, weight: 10, type: "Weapon", quantity: 1, notes: "2d6 bludgeoning, Heavy, Two-handed" },
+  { name: "Morningstar", cost: 15, weight: 4, type: "Weapon", quantity: 1, notes: "1d8 piercing" },
+  { name: "Pike", cost: 5, weight: 18, type: "Weapon", quantity: 1, notes: "1d10 piercing, Heavy, Reach, Two-handed" },
+  { name: "Rapier", cost: 25, weight: 2, type: "Weapon", quantity: 1, notes: "1d8 piercing, Finesse" },
+  { name: "Scimitar", cost: 25, weight: 3, type: "Weapon", quantity: 1, notes: "1d6 slashing, Finesse, Light" },
+  { name: "Shortsword", cost: 10, weight: 2, type: "Weapon", quantity: 1, notes: "1d6 piercing, Finesse, Light" },
+  { name: "Trident", cost: 5, weight: 4, type: "Weapon", quantity: 1, notes: "1d6 piercing, Thrown (20/60), Versatile (1d8)" },
+  { name: "War Pick", cost: 5, weight: 2, type: "Weapon", quantity: 1, notes: "1d8 piercing" },
+  { name: "Warhammer", cost: 15, weight: 2, type: "Weapon", quantity: 1, notes: "1d8 bludgeoning, Versatile (1d10)" },
+  { name: "Whip", cost: 2, weight: 3, type: "Weapon", quantity: 1, notes: "1d4 slashing, Finesse, Reach" },
+
+  // ======================================
+  // MARTIAL RANGED WEAPONS (PHB Ch.5)
+  // ======================================
+  { name: "Blowgun", cost: 10, weight: 1, type: "Weapon", quantity: 1, notes: "1 piercing, Ammunition, Loading, Range 25/100" },
+  { name: "Crossbow, Hand", cost: 75, weight: 3, type: "Weapon", quantity: 1, notes: "1d6 piercing, Ammunition, Light, Loading, Range 30/120" },
+  { name: "Crossbow, Heavy", cost: 50, weight: 18, type: "Weapon", quantity: 1, notes: "1d10 piercing, Ammunition, Heavy, Loading, Range 100/400, Two-handed" },
+  { name: "Longbow", cost: 50, weight: 2, type: "Weapon", quantity: 1, notes: "1d8 piercing, Ammunition, Heavy, Range 150/600, Two-handed" },
+  { name: "Net", cost: 1, weight: 3, type: "Weapon", quantity: 1, notes: "Special, Thrown (5/15)" },
+
+  // ======================================
+  // AMMUNITION (PHB Ch.5)
+  // ======================================
+  { name: "Arrows (20)", cost: 1, weight: 1, type: "Gear", quantity: 1, notes: "Ammunition for bows" },
+  { name: "Blowgun Needles (50)", cost: 1, weight: 1, type: "Gear", quantity: 1, notes: "Ammunition for blowguns" },
+  { name: "Crossbow Bolts (20)", cost: 1, weight: 1.5, type: "Gear", quantity: 1, notes: "Ammunition for crossbows" },
+  { name: "Sling Bullets (20)", cost: 0.04, weight: 1.5, type: "Gear", quantity: 1, notes: "Ammunition for slings" },
+
+  // ======================================
+  // LIGHT ARMOR (PHB Ch.5)
+  // ======================================
+  { name: "Padded Armor", cost: 5, weight: 8, type: "Armor", quantity: 1, notes: "AC 11 + Dex, Disadvantage on Stealth" },
   { name: "Leather Armor", cost: 10, weight: 10, type: "Armor", quantity: 1, notes: "AC 11 + Dex" },
   { name: "Studded Leather", cost: 45, weight: 13, type: "Armor", quantity: 1, notes: "AC 12 + Dex" },
+
+  // ======================================
+  // MEDIUM ARMOR (PHB Ch.5)
+  // ======================================
+  { name: "Hide Armor", cost: 10, weight: 12, type: "Armor", quantity: 1, notes: "AC 12 + Dex (max 2)" },
+  { name: "Chain Shirt", cost: 50, weight: 20, type: "Armor", quantity: 1, notes: "AC 13 + Dex (max 2)" },
+  { name: "Scale Mail", cost: 50, weight: 45, type: "Armor", quantity: 1, notes: "AC 14 + Dex (max 2), Disadvantage on Stealth" },
+  { name: "Breastplate", cost: 400, weight: 20, type: "Armor", quantity: 1, notes: "AC 14 + Dex (max 2)" },
+  { name: "Half Plate", cost: 750, weight: 40, type: "Armor", quantity: 1, notes: "AC 15 + Dex (max 2), Disadvantage on Stealth" },
+
+  // ======================================
+  // HEAVY ARMOR (PHB Ch.5)
+  // ======================================
+  { name: "Ring Mail", cost: 30, weight: 40, type: "Armor", quantity: 1, notes: "AC 14, Disadvantage on Stealth" },
+  { name: "Chain Mail", cost: 75, weight: 55, type: "Armor", quantity: 1, notes: "AC 16, Str 13 required, Disadvantage on Stealth" },
+  { name: "Splint Armor", cost: 200, weight: 60, type: "Armor", quantity: 1, notes: "AC 17, Str 15 required, Disadvantage on Stealth" },
+  { name: "Plate Armor", cost: 1500, weight: 65, type: "Armor", quantity: 1, notes: "AC 18, Str 15 required, Disadvantage on Stealth" },
+
+  // ======================================
+  // SHIELDS (PHB Ch.5)
+  // ======================================
+  { name: "Shield", cost: 10, weight: 6, type: "Armor", quantity: 1, notes: "+2 AC" },
+
+  // ======================================
+  // ADVENTURING GEAR (PHB Ch.5)
+  // ======================================
+  { name: "Abacus", cost: 2, weight: 2, type: "Gear", quantity: 1, notes: "Counting tool" },
+  { name: "Acid (vial)", cost: 25, weight: 1, type: "Gear", quantity: 1, notes: "2d6 acid damage, Ranged attack (20 ft)" },
+  { name: "Alchemist's Fire (flask)", cost: 50, weight: 1, type: "Gear", quantity: 1, notes: "1d4 fire/turn, Ranged attack (20 ft)" },
+  { name: "Antitoxin (vial)", cost: 50, weight: 0, type: "Gear", quantity: 1, notes: "Advantage on saves vs poison for 1 hour" },
+  { name: "Backpack", cost: 2, weight: 5, type: "Gear", quantity: 1, notes: "Holds 30 lbs / 1 cu. ft." },
+  { name: "Ball Bearings (bag of 1000)", cost: 1, weight: 2, type: "Gear", quantity: 1, notes: "10 ft area, DEX DC 10 or fall prone" },
+  { name: "Barrel", cost: 2, weight: 70, type: "Gear", quantity: 1, notes: "Holds 40 gal liquid / 4 cu. ft. dry" },
+  { name: "Basket", cost: 0.4, weight: 2, type: "Gear", quantity: 1, notes: "Holds 2 cu. ft. / 40 lbs" },
+  { name: "Bedroll", cost: 1, weight: 7, type: "Gear", quantity: 1, notes: "Sleeping gear" },
+  { name: "Bell", cost: 1, weight: 0, type: "Gear", quantity: 1, notes: "Small bell" },
+  { name: "Blanket", cost: 0.5, weight: 3, type: "Gear", quantity: 1, notes: "Keeps warm" },
+  { name: "Block and Tackle", cost: 1, weight: 5, type: "Gear", quantity: 1, notes: "Pulley system, lift 4x normal weight" },
+  { name: "Book", cost: 25, weight: 5, type: "Gear", quantity: 1, notes: "Blank journal, 100 pages" },
+  { name: "Bottle, Glass", cost: 2, weight: 2, type: "Gear", quantity: 1, notes: "Holds 1.5 pints" },
+  { name: "Bucket", cost: 0.05, weight: 2, type: "Gear", quantity: 1, notes: "Holds 3 gal liquid / 0.5 cu. ft." },
+  { name: "Burglar's Pack", cost: 16, weight: 44.5, type: "Gear", quantity: 1, notes: "Backpack, ball bearings, string, bell, 5 candles, crowbar, hammer, pitons, lantern, oil, rations, waterskin, rope" },
+  { name: "Caltrops (bag of 20)", cost: 1, weight: 2, type: "Gear", quantity: 1, notes: "5 ft area, DEX DC 15 or 1 piercing + stop" },
+  { name: "Candle", cost: 0.01, weight: 0, type: "Gear", quantity: 1, notes: "5 ft bright + 5 ft dim, 1 hour" },
+  { name: "Case, Crossbow Bolt", cost: 1, weight: 1, type: "Gear", quantity: 1, notes: "Holds 20 bolts" },
+  { name: "Case, Map or Scroll", cost: 1, weight: 1, type: "Gear", quantity: 1, notes: "Holds 10 sheets of paper or 5 scrolls" },
+  { name: "Chain (10 feet)", cost: 5, weight: 10, type: "Gear", quantity: 1, notes: "AC 19, 10 HP, break DC 20" },
+  { name: "Chalk (1 piece)", cost: 0.01, weight: 0, type: "Gear", quantity: 1, notes: "For marking" },
+  { name: "Chest", cost: 5, weight: 25, type: "Gear", quantity: 1, notes: "Holds 12 cu. ft. / 300 lbs" },
+  { name: "Climber's Kit", cost: 25, weight: 12, type: "Gear", quantity: 1, notes: "Pitons, boot tips, gloves, harness. Advantage on climbing checks" },
+  { name: "Common Clothes", cost: 0.5, weight: 3, type: "Gear", quantity: 1, notes: "Standard clothing" },
+  { name: "Component Pouch", cost: 25, weight: 2, type: "Gear", quantity: 1, notes: "Spellcasting focus (material components)" },
+  { name: "Costume Clothes", cost: 5, weight: 4, type: "Gear", quantity: 1, notes: "Disguise or performance clothing" },
+  { name: "Crowbar", cost: 2, weight: 5, type: "Gear", quantity: 1, notes: "Advantage on STR checks to pry" },
+  { name: "Diplomat's Pack", cost: 39, weight: 36, type: "Gear", quantity: 1, notes: "Chest, 2 map cases, fine clothes, ink, pen, lamp, oil, paper, perfume, sealing wax, soap" },
+  { name: "Dragonchess Set", cost: 1, weight: 0.5, type: "Gear", quantity: 1, notes: "Gaming set" },
+  { name: "Dungeoneer's Pack", cost: 12, weight: 61.5, type: "Gear", quantity: 1, notes: "Backpack, crowbar, hammer, pitons, torches, tinderbox, rations, waterskin, rope" },
+  { name: "Entertainer's Pack", cost: 40, weight: 38, type: "Gear", quantity: 1, notes: "Backpack, bedroll, 2 costumes, candles, rations, waterskin, disguise kit" },
+  { name: "Explorer's Pack", cost: 10, weight: 59, type: "Gear", quantity: 1, notes: "Backpack, bedroll, mess kit, tinderbox, torches, rations, waterskin, rope" },
+  { name: "Fine Clothes", cost: 15, weight: 6, type: "Gear", quantity: 1, notes: "High-quality clothing" },
+  { name: "Fishing Tackle", cost: 1, weight: 4, type: "Gear", quantity: 1, notes: "Rod, line, hooks, bobbers, bait" },
+  { name: "Flask or Tankard", cost: 0.02, weight: 1, type: "Gear", quantity: 1, notes: "Holds 1 pint" },
+  { name: "Grappling Hook", cost: 2, weight: 4, type: "Gear", quantity: 1, notes: "Attach to rope for climbing" },
+  { name: "Hammer", cost: 1, weight: 3, type: "Gear", quantity: 1, notes: "Standard hammer" },
+  { name: "Hammer, Sledge", cost: 2, weight: 10, type: "Gear", quantity: 1, notes: "Heavy hammer" },
+  { name: "Healer's Kit", cost: 5, weight: 3, type: "Gear", quantity: 1, notes: "10 uses, stabilize at 0 HP without Medicine check" },
+  { name: "Holy Symbol (Amulet)", cost: 5, weight: 1, type: "Gear", quantity: 1, notes: "Spellcasting focus (divine)" },
+  { name: "Holy Symbol (Emblem)", cost: 5, weight: 0, type: "Gear", quantity: 1, notes: "Spellcasting focus (divine), attach to shield" },
+  { name: "Holy Symbol (Reliquary)", cost: 5, weight: 2, type: "Gear", quantity: 1, notes: "Spellcasting focus (divine)" },
+  { name: "Holy Water (flask)", cost: 25, weight: 1, type: "Gear", quantity: 1, notes: "2d6 radiant to fiends/undead, Ranged (20 ft)" },
+  { name: "Hourglass", cost: 25, weight: 1, type: "Gear", quantity: 1, notes: "Measure 1 minute intervals" },
+  { name: "Hunting Trap", cost: 5, weight: 25, type: "Gear", quantity: 1, notes: "1d4 piercing, DC 13 STR to escape" },
+  { name: "Ink (1 oz. bottle)", cost: 10, weight: 0, type: "Gear", quantity: 1, notes: "Writing ink" },
+  { name: "Ink Pen", cost: 0.02, weight: 0, type: "Gear", quantity: 1, notes: "Writing pen" },
+  { name: "Jug or Pitcher", cost: 0.02, weight: 4, type: "Gear", quantity: 1, notes: "Holds 1 gallon" },
+  { name: "Ladder (10-foot)", cost: 0.1, weight: 25, type: "Gear", quantity: 1, notes: "10-foot wooden ladder" },
+  { name: "Lamp", cost: 0.5, weight: 1, type: "Gear", quantity: 1, notes: "15 ft bright + 30 ft dim, 6 hours on 1 flask oil" },
+  { name: "Lantern, Bullseye", cost: 10, weight: 2, type: "Gear", quantity: 1, notes: "60 ft cone bright + 60 ft dim, 6 hours" },
+  { name: "Lantern, Hooded", cost: 5, weight: 2, type: "Gear", quantity: 1, notes: "30 ft bright + 30 ft dim, 6 hours, can dim to 5 ft" },
+  { name: "Lock", cost: 10, weight: 1, type: "Gear", quantity: 1, notes: "DC 15 to pick (Dexterity check with thieves' tools)" },
+  { name: "Magnifying Glass", cost: 100, weight: 0, type: "Gear", quantity: 1, notes: "Start fire in sunlight, +5 Appraise checks" },
+  { name: "Manacles", cost: 2, weight: 6, type: "Gear", quantity: 1, notes: "DC 20 DEX to escape, DC 20 STR to break" },
+  { name: "Mess Kit", cost: 0.2, weight: 1, type: "Gear", quantity: 1, notes: "Tin box with cup, cutlery, pan" },
+  { name: "Mirror, Steel", cost: 5, weight: 0.5, type: "Gear", quantity: 1, notes: "Handheld steel mirror" },
+  { name: "Oil (flask)", cost: 0.1, weight: 1, type: "Gear", quantity: 1, notes: "5 damage fire if lit, 15 ft bright + 15 ft dim, 6 hours in lamp" },
+  { name: "Paper (one sheet)", cost: 0.2, weight: 0, type: "Gear", quantity: 1, notes: "Writing paper" },
+  { name: "Parchment (one sheet)", cost: 0.1, weight: 0, type: "Gear", quantity: 1, notes: "Writing surface" },
+  { name: "Perfume (vial)", cost: 5, weight: 0, type: "Gear", quantity: 1, notes: "Fragrance" },
+  { name: "Pick, Miner's", cost: 2, weight: 10, type: "Gear", quantity: 1, notes: "Mining tool" },
+  { name: "Piton", cost: 0.05, weight: 0.25, type: "Gear", quantity: 1, notes: "Iron spike for climbing" },
+  { name: "Pole (10-foot)", cost: 0.05, weight: 7, type: "Gear", quantity: 1, notes: "10-foot wooden pole" },
+  { name: "Pot, Iron", cost: 2, weight: 10, type: "Gear", quantity: 1, notes: "Holds 1 gallon" },
+  { name: "Pouch", cost: 0.5, weight: 1, type: "Gear", quantity: 1, notes: "Holds 6 lbs / 0.2 cu. ft." },
+  { name: "Priest's Pack", cost: 19, weight: 24, type: "Gear", quantity: 1, notes: "Backpack, blanket, candles, tinderbox, alms box, incense, censer, vestments, rations, waterskin" },
+  { name: "Quiver", cost: 1, weight: 1, type: "Gear", quantity: 1, notes: "Holds 20 arrows" },
+  { name: "Ram, Portable", cost: 4, weight: 35, type: "Gear", quantity: 1, notes: "+4 to STR checks to break down doors" },
+  { name: "Rations (1 day)", cost: 0.5, weight: 2, type: "Gear", quantity: 1, notes: "Dried food for 1 day" },
+  { name: "Robes", cost: 1, weight: 4, type: "Gear", quantity: 1, notes: "Standard robes" },
+  { name: "Rope, Hempen (50 feet)", cost: 1, weight: 10, type: "Gear", quantity: 1, notes: "2 HP, burst DC 17" },
+  { name: "Rope, Silk (50 feet)", cost: 10, weight: 5, type: "Gear", quantity: 1, notes: "2 HP, burst DC 17. Easier to climb" },
+  { name: "Sack", cost: 0.01, weight: 0.5, type: "Gear", quantity: 1, notes: "Holds 30 lbs / 1 cu. ft." },
+  { name: "Scale, Merchant's", cost: 5, weight: 3, type: "Gear", quantity: 1, notes: "Measures up to 2 lbs precisely" },
+  { name: "Scholar's Pack", cost: 40, weight: 10, type: "Gear", quantity: 1, notes: "Backpack, book of lore, ink, pen, parchment, small knife, little bag of sand" },
+  { name: "Sealing Wax", cost: 0.5, weight: 0, type: "Gear", quantity: 1, notes: "For sealing letters" },
+  { name: "Shovel", cost: 2, weight: 5, type: "Gear", quantity: 1, notes: "Digging tool" },
+  { name: "Signal Whistle", cost: 0.05, weight: 0, type: "Gear", quantity: 1, notes: "Audible up to 600 ft" },
+  { name: "Signet Ring", cost: 5, weight: 0, type: "Gear", quantity: 1, notes: "Personal seal" },
+  { name: "Soap", cost: 0.02, weight: 0, type: "Gear", quantity: 1, notes: "Cleaning" },
+  { name: "Spellbook", cost: 50, weight: 3, type: "Gear", quantity: 1, notes: "100-page book for wizard spells" },
+  { name: "Spike, Iron (10)", cost: 1, weight: 5, type: "Gear", quantity: 1, notes: "Iron spikes for securing doors or climbing" },
+  { name: "Spyglass", cost: 1000, weight: 1, type: "Gear", quantity: 1, notes: "Objects appear 2x closer" },
+  { name: "Tent, Two-Person", cost: 2, weight: 20, type: "Gear", quantity: 1, notes: "Shelter for 2 people" },
+  { name: "Thieves' Tools", cost: 25, weight: 1, type: "Gear", quantity: 1, notes: "Pick locks & disarm traps (DEX check)" },
+  { name: "Tinderbox", cost: 0.5, weight: 1, type: "Gear", quantity: 1, notes: "Start fire in 1 action (1 min without dry tinder)" },
+  { name: "Torch", cost: 0.01, weight: 1, type: "Gear", quantity: 1, notes: "20 ft bright + 20 ft dim, 1 hour, 1 fire damage" },
+  { name: "Traveler's Clothes", cost: 2, weight: 4, type: "Gear", quantity: 1, notes: "Durable traveling clothing" },
+  { name: "Vial", cost: 1, weight: 0, type: "Gear", quantity: 1, notes: "Holds 4 oz liquid" },
+  { name: "Waterskin", cost: 0.2, weight: 5, type: "Gear", quantity: 1, notes: "Holds 4 pints water" },
+  { name: "Whetstone", cost: 0.01, weight: 1, type: "Gear", quantity: 1, notes: "Sharpen blades" },
+
+  // ======================================
+  // ARCANE FOCUSES (PHB Ch.5)
+  // ======================================
+  { name: "Arcane Focus — Crystal", cost: 10, weight: 1, type: "Gear", quantity: 1, notes: "Spellcasting focus (arcane)" },
+  { name: "Arcane Focus — Orb", cost: 20, weight: 3, type: "Gear", quantity: 1, notes: "Spellcasting focus (arcane)" },
+  { name: "Arcane Focus — Rod", cost: 10, weight: 2, type: "Gear", quantity: 1, notes: "Spellcasting focus (arcane)" },
+  { name: "Arcane Focus — Staff", cost: 5, weight: 4, type: "Gear", quantity: 1, notes: "Spellcasting focus (arcane)" },
+  { name: "Arcane Focus — Wand", cost: 10, weight: 1, type: "Gear", quantity: 1, notes: "Spellcasting focus (arcane)" },
+
+  // ======================================
+  // DRUIDIC FOCUSES (PHB Ch.5)
+  // ======================================
+  { name: "Druidic Focus — Sprig of Mistletoe", cost: 1, weight: 0, type: "Gear", quantity: 1, notes: "Spellcasting focus (druidic)" },
+  { name: "Druidic Focus — Totem", cost: 1, weight: 0, type: "Gear", quantity: 1, notes: "Spellcasting focus (druidic)" },
+  { name: "Druidic Focus — Wooden Staff", cost: 5, weight: 4, type: "Gear", quantity: 1, notes: "Spellcasting focus (druidic)" },
+  { name: "Druidic Focus — Yew Wand", cost: 10, weight: 1, type: "Gear", quantity: 1, notes: "Spellcasting focus (druidic)" },
+
+  // ======================================
+  // MUSICAL INSTRUMENTS (PHB Ch.5)
+  // ======================================
+  { name: "Bagpipes", cost: 30, weight: 6, type: "Gear", quantity: 1, notes: "Musical instrument" },
+  { name: "Drum", cost: 6, weight: 3, type: "Gear", quantity: 1, notes: "Musical instrument" },
+  { name: "Dulcimer", cost: 25, weight: 10, type: "Gear", quantity: 1, notes: "Musical instrument" },
+  { name: "Flute", cost: 2, weight: 1, type: "Gear", quantity: 1, notes: "Musical instrument" },
+  { name: "Lute", cost: 35, weight: 2, type: "Gear", quantity: 1, notes: "Musical instrument" },
+  { name: "Lyre", cost: 30, weight: 2, type: "Gear", quantity: 1, notes: "Musical instrument" },
+  { name: "Horn", cost: 3, weight: 2, type: "Gear", quantity: 1, notes: "Musical instrument" },
+  { name: "Pan Flute", cost: 12, weight: 2, type: "Gear", quantity: 1, notes: "Musical instrument" },
+  { name: "Shawm", cost: 2, weight: 1, type: "Gear", quantity: 1, notes: "Musical instrument" },
+  { name: "Viol", cost: 30, weight: 1, type: "Gear", quantity: 1, notes: "Musical instrument" },
+
+  // ======================================
+  // TOOLS & KITS (PHB Ch.5)
+  // ======================================
+  { name: "Alchemist's Supplies", cost: 50, weight: 8, type: "Gear", quantity: 1, notes: "Artisan's tools" },
+  { name: "Brewer's Supplies", cost: 20, weight: 9, type: "Gear", quantity: 1, notes: "Artisan's tools" },
+  { name: "Calligrapher's Supplies", cost: 10, weight: 5, type: "Gear", quantity: 1, notes: "Artisan's tools" },
+  { name: "Carpenter's Tools", cost: 8, weight: 6, type: "Gear", quantity: 1, notes: "Artisan's tools" },
+  { name: "Cartographer's Tools", cost: 15, weight: 6, type: "Gear", quantity: 1, notes: "Artisan's tools" },
+  { name: "Cobbler's Tools", cost: 5, weight: 5, type: "Gear", quantity: 1, notes: "Artisan's tools" },
+  { name: "Cook's Utensils", cost: 1, weight: 8, type: "Gear", quantity: 1, notes: "Artisan's tools" },
+  { name: "Disguise Kit", cost: 25, weight: 3, type: "Gear", quantity: 1, notes: "Proficiency lets you create disguises" },
+  { name: "Forgery Kit", cost: 15, weight: 5, type: "Gear", quantity: 1, notes: "Proficiency lets you forge documents" },
+  { name: "Glassblower's Tools", cost: 30, weight: 5, type: "Gear", quantity: 1, notes: "Artisan's tools" },
+  { name: "Herbalism Kit", cost: 5, weight: 3, type: "Gear", quantity: 1, notes: "Create antitoxin and potions of healing" },
+  { name: "Jeweler's Tools", cost: 25, weight: 2, type: "Gear", quantity: 1, notes: "Artisan's tools" },
+  { name: "Leatherworker's Tools", cost: 5, weight: 5, type: "Gear", quantity: 1, notes: "Artisan's tools" },
+  { name: "Mason's Tools", cost: 10, weight: 8, type: "Gear", quantity: 1, notes: "Artisan's tools" },
+  { name: "Navigator's Tools", cost: 25, weight: 2, type: "Gear", quantity: 1, notes: "Determine position at sea" },
+  { name: "Painter's Supplies", cost: 10, weight: 5, type: "Gear", quantity: 1, notes: "Artisan's tools" },
+  { name: "Playing Card Set", cost: 0.5, weight: 0, type: "Gear", quantity: 1, notes: "Gaming set" },
+  { name: "Poisoner's Kit", cost: 50, weight: 2, type: "Gear", quantity: 1, notes: "Create and apply poisons" },
+  { name: "Potter's Tools", cost: 10, weight: 3, type: "Gear", quantity: 1, notes: "Artisan's tools" },
+  { name: "Smith's Tools", cost: 20, weight: 8, type: "Gear", quantity: 1, notes: "Artisan's tools" },
+  { name: "Three-Dragon Ante Set", cost: 1, weight: 0, type: "Gear", quantity: 1, notes: "Gaming set" },
+  { name: "Tinker's Tools", cost: 50, weight: 10, type: "Gear", quantity: 1, notes: "Artisan's tools" },
+  { name: "Weaver's Tools", cost: 1, weight: 5, type: "Gear", quantity: 1, notes: "Artisan's tools" },
+  { name: "Woodcarver's Tools", cost: 1, weight: 5, type: "Gear", quantity: 1, notes: "Artisan's tools" },
+
+  // ======================================
+  // CONSUMABLES & POTIONS
+  // ======================================
   { name: "Potion of Healing", cost: 50, weight: 0.5, type: "Consumable", quantity: 1, notes: "Heals 2d4+2 HP" },
+  { name: "Potion of Greater Healing", cost: 150, weight: 0.5, type: "Consumable", quantity: 1, notes: "Heals 4d4+4 HP" },
+  { name: "Potion of Climbing", cost: 75, weight: 0.5, type: "Consumable", quantity: 1, notes: "Climbing speed equal to walking speed for 1 hour" },
+  { name: "Oil of Slipperiness", cost: 100, weight: 0.5, type: "Consumable", quantity: 1, notes: "Freedom of Movement for 8 hours" },
+  { name: "Philter of Love", cost: 90, weight: 0.5, type: "Consumable", quantity: 1, notes: "Charmed for 1 hour after drinking" },
+  { name: "Potion of Animal Friendship", cost: 100, weight: 0.5, type: "Consumable", quantity: 1, notes: "Animal Friendship (save DC 13) for 1 hour" },
+  { name: "Potion of Fire Breath", cost: 150, weight: 0.5, type: "Consumable", quantity: 1, notes: "Exhale fire 30 ft, 4d6 fire (DEX DC 13), 3 uses, 1 hour" },
+  { name: "Potion of Resistance", cost: 300, weight: 0.5, type: "Consumable", quantity: 1, notes: "Resistance to one damage type for 1 hour" },
+  { name: "Potion of Water Breathing", cost: 100, weight: 0.5, type: "Consumable", quantity: 1, notes: "Breathe underwater for 1 hour" },
 ];
 
 // ==========================================
