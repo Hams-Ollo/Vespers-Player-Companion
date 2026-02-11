@@ -64,6 +64,9 @@ export interface JournalEntry {
 
 export interface CharacterData {
   id: string;
+  ownerUid?: string;
+  createdAt?: number;
+  updatedAt?: number;
   name: string;
   nickname?: string;
   race: string;

@@ -1,0 +1,31 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // ── Characters collection ────────────────────────────────────
+    match /characters/{charId} {
+      // Users can only read their own characters
+      allow read: if request.auth != null
+                  && resource.data.ownerUid == request.auth.uid;
+
+      // Users can create characters assigned to themselves (max 20)
+      allow create: if request.auth != null
+                    && request.resource.data.ownerUid == request.auth.uid;
+
+      // Users can update only their own characters (ownerUid cannot be changed)
+      allow update: if request.auth != null
+                    && resource.data.ownerUid == request.auth.uid
+                    && request.resource.data.ownerUid == request.auth.uid;
+
+      // Users can delete only their own characters
+      allow delete: if request.auth != null
+                    && resource.data.ownerUid == request.auth.uid;
+    }
+
+    // Deny everything else by default
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}

@@ -64,8 +64,9 @@ flowchart TD
 
 | Component | File | Responsibility |
 |-----------|------|---------------|
-| `App` | `App.tsx` | Auth gate, character array state, routing between selection/dashboard |
+| `App` | `App.tsx` | Auth gate, routing between selection/dashboard |
 | `AuthProvider` | `contexts/AuthContext.tsx` | Firebase auth state, sign-in/out methods, React context |
+| `CharacterProvider` | `contexts/CharacterContext.tsx` | Character CRUD, Firestore/localStorage dual-mode, migration |
 
 ### 📜 Selection Layer
 
@@ -124,6 +125,9 @@ flowchart TD
 ```typescript
 interface CharacterData {
   id: string;
+  ownerUid?: string;                     // Firebase Auth UID (set for cloud users)
+  createdAt?: number;                    // epoch ms
+  updatedAt?: number;                    // epoch ms (auto-set on every save)
   name: string;
   race: string;
   class: string;
@@ -153,13 +157,25 @@ See `types.ts` for all interfaces (`Stat`, `Skill`, `Attack`, `Feature`, `Spell`
 
 ### 💽 Persistence
 
-| Data | Storage | Key |
-|------|---------|-----|
-| Characters | `localStorage` | `vesper_chars` |
-| Campaigns | `localStorage` | `vesper_campaigns` |
-| Auth session | Firebase + `localStorage` | `vesper_user` |
+| Data | Storage (Google users) | Storage (Guests) | Key/Collection |
+|------|----------------------|-------------------|----------------|
+| Characters | Cloud Firestore | `localStorage` | `characters` collection / `vesper_chars` |
+| Campaigns | `localStorage` | `localStorage` | `vesper_campaigns` |
+| Auth session | Firebase Auth | Firebase Auth / local | Managed by Firebase SDK |
 
-> ⚠️ All character data is client-side only. Clearing browser storage deletes everything. Firestore sync is on the roadmap.
+**Firestore Schema:**
+- Collection: `characters` (top-level)
+- Document ID: `character.id` (client-generated UUID)
+- Partition field: `ownerUid` (Firebase Auth UID)
+- Composite index: `ownerUid` ASC + `updatedAt` DESC
+- Security rules: Users can only read/write documents where `ownerUid == auth.uid`
+
+**Dual-mode logic** is managed by `CharacterContext`:
+- On auth change: subscribes to Firestore (`onSnapshot`) for Google users, loads localStorage for guests
+- Writes are debounced (500ms) to avoid excessive Firestore operations during combat
+- Failed Firestore connections fall back to localStorage
+
+> ℹ️ Campaign data is still localStorage-only. Firestore migration for campaigns is planned for the Party System epic.
 
 ---
 
@@ -203,7 +219,7 @@ Environment variables from `.env` are injected as build-time constants. Firebase
 
 ### Styling
 
-Tailwind CSS is loaded via CDN in `index.html`. The app uses Tailwind utility classes throughout with a dark zinc-based theme.
+Tailwind CSS is loaded via the `@tailwindcss/vite` plugin with tree-shaken CSS. The app uses Tailwind utility classes throughout with a dark zinc-based theme.
 
 ---
 

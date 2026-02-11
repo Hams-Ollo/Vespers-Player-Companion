@@ -284,3 +284,110 @@ interface Campaign {
 
 - **`GEMINI_API_KEY`** → Injected by Vite's `define` in `vite.config.ts` as `process.env.API_KEY`
 - **`VITE_*`** → Automatically exposed by Vite as `import.meta.env.VITE_*` and via the `getEnv()` helper in `AuthContext.tsx`
+
+---
+
+## 🔥 Firestore Service (`lib/firestore.ts`)
+
+The Firestore service module handles all Cloud Firestore operations for character persistence.
+
+### `subscribeUserCharacters(uid, onData, onError?)`
+
+Subscribes to a user's characters in real-time via `onSnapshot`.
+
+```typescript
+import { subscribeUserCharacters } from '../lib/firestore';
+
+const unsubscribe = subscribeUserCharacters(
+  user.uid,
+  (chars) => setCharacters(chars),
+  (err) => console.error(err),
+);
+// Call unsubscribe() to stop listening
+```
+
+| Parameter | Type | Description |
+|-----------|------|-------------|
+| `uid` | `string` | Firebase Auth UID |
+| `onData` | `(chars: CharacterData[]) => void` | Callback with updated characters array |
+| `onError` | `(err: Error) => void` | Optional error handler |
+| **Returns** | `Unsubscribe` | Function to stop the listener |
+
+**Query:** `where('ownerUid', '==', uid)` + `orderBy('updatedAt', 'desc')`
+
+---
+
+### `saveCharacter(char)`
+
+Saves or updates a character document. **Debounced** (500ms) to prevent excessive writes during rapid gameplay changes.
+
+```typescript
+import { saveCharacter } from '../lib/firestore';
+
+await saveCharacter({ ...character, updatedAt: Date.now() });
+```
+
+| Parameter | Type | Description |
+|-----------|------|-------------|
+| `char` | `CharacterData` | Full character data (must include `id` and `ownerUid`) |
+| **Returns** | `Promise<void>` | Resolves when write completes |
+
+**Behavior:** Uses `setDoc` with `{ merge: true }`. Warns in console if document size exceeds 800KB (Firestore limit is 1MB).
+
+---
+
+### `deleteCharacter(charId)`
+
+Deletes a character document and cancels any pending debounced write.
+
+```typescript
+import { deleteCharacter } from '../lib/firestore';
+
+await deleteCharacter('char-uuid-123');
+```
+
+---
+
+### `migrateLocalCharacters(uid, chars)`
+
+Batch-writes an array of local characters to Firestore, setting `ownerUid` on each.
+
+```typescript
+import { migrateLocalCharacters } from '../lib/firestore';
+
+await migrateLocalCharacters(user.uid, localCharacters);
+```
+
+Used by the migration prompt when a Google user first signs in and has existing localStorage characters.
+
+---
+
+## 📦 Character Context (`contexts/CharacterContext.tsx`)
+
+The `CharacterProvider` manages all character state and provides a unified API regardless of storage backend.
+
+### `useCharacters()` Hook
+
+```typescript
+import { useCharacters } from '../contexts/CharacterContext';
+
+const {
+  characters,           // CharacterData[]
+  activeCharacter,      // CharacterData | null
+  activeCharacterId,    // string | null
+  setActiveCharacterId, // (id: string | null) => void
+  createCharacter,      // (char: CharacterData) => void
+  updateCharacter,      // (partial: Partial<CharacterData>) => void
+  updatePortrait,       // (url: string) => void
+  deleteCharacter,      // (id: string) => void
+  isCloudUser,          // boolean — true if using Firestore
+  isLoading,            // boolean — true while initial data loads
+  pendingMigration,     // CharacterData[] | null — local chars awaiting import
+  acceptMigration,      // () => Promise<void>
+  dismissMigration,     // () => void
+} = useCharacters();
+```
+
+**Dual-mode behavior:**
+- **Google users** (`isCloudUser === true`): All CRUD operations write to Firestore. State updates come from `onSnapshot` listener.
+- **Guest users** (`isCloudUser === false`): All CRUD operations write to localStorage. State managed locally.

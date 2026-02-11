@@ -183,11 +183,11 @@ These are tracked in the README and are great first contributions:
 | Item | Difficulty | Description |
 |------|-----------|-------------|
 | 📖 Spellbook management | 🟡 Medium | Prepare/swap spells on long rest for prepared casters |
-| 💾 Firestore sync | 🔴 Hard | Cloud persistence for characters via Firebase Firestore |
-| 📤 Export/import JSON | 🟢 Easy | Download/upload character data as JSON files |
-| 🛡️ Error boundaries | 🟢 Easy | Add React error boundaries around AI calls and detail views |
-| 🎨 Tailwind build pipeline | 🟡 Medium | Replace CDN with proper PostCSS/Tailwind build |
+| � Export/import JSON | 🟢 Easy | Download/upload character data as JSON files |
+| 🗺️ Campaign Firestore sync | 🔴 Hard | Migrate campaigns to Firestore (characters already done) |
+| 🛡️ Conditions tracker | 🟡 Medium | Track active conditions with mechanical effects |
 | 🔐 Backend API proxy | 🔴 Hard | Move Gemini API key to a server-side proxy |
+| 🎯 Subclass selection | 🟡 Medium | UI for choosing subclass at appropriate level |
 
 ---
 

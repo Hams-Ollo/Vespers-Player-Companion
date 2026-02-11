@@ -23,13 +23,13 @@
 ### 🔴 Critical
 
 - [ ] **Backend API proxy** — Move Gemini API key to a server-side proxy so it’s not embedded in the client bundle
-- [ ] **Firestore cloud sync** — Persist characters & campaigns to Firebase Firestore so data survives across devices/browsers. Use `uid` as partition key. Keep localStorage as offline cache.
+- [x] **Firestore cloud sync** — Persist characters to Firebase Firestore so data survives across devices/browsers. Uses `ownerUid` as partition key. localStorage remains as guest/offline fallback. _(v0.3.0 — 2026-02-11)_
 
 ### 🟠 High
 
-- [ ] **Firestore data schema design** — Collections: `users`, `characters`, `campaigns`. Security rules: players edit own, read party members'; DMs read all in campaign
-- [ ] **Real-time Firestore listeners (`onSnapshot`)** — Characters & campaigns sync live across devices
-- [ ] **Data migration helper** — One-time import of existing localStorage data to Firestore on first login
+- [x] **Firestore data schema design** — Collection: `characters` (top-level, keyed by character ID). Fields: `ownerUid`, `createdAt`, `updatedAt`. Security rules enforce per-user isolation. _(v0.3.0 — 2026-02-11)_
+- [x] **Real-time Firestore listeners (`onSnapshot`)** — Characters sync live across devices via `CharacterContext` _(v0.3.0 — 2026-02-11)_
+- [x] **Data migration helper** — First login detects localStorage characters, offers one-click "Import All" migration to Firestore _(v0.3.0 — 2026-02-11)_
 - [ ] **Spellbook management** — Prepare/swap spells on long rest for prepared casters (Cleric, Druid, Wizard, Paladin)
 
 ### 🟡 Medium
@@ -143,6 +143,8 @@
 > Move items here as they're finished. Include the version/date.
 
 - [x] **Cloud Run deployment infrastructure** — Dockerfile (multi-stage), nginx.conf, .dockerignore, env var handling, deployment guide _(v0.2.3 — 2026-02-11)_
+- [x] **CI/CD pipeline** — Cloud Build trigger on `main` branch, inline YAML with build-arg substitution, auto-deploy to Cloud Run _(v0.2.3 — 2026-02-11)_
+- [x] **Firestore character persistence** — `lib/firestore.ts` service + `CharacterContext` provider, dual-mode (Firestore for Google users, localStorage for guests), debounced writes, migration banner, security rules + composite index _(v0.3.0 — 2026-02-11)_
 - [x] **Firebase auth fixes** — Anonymous auth fallback to local guest session, Firebase authorized domains config _(v0.2.3 — 2026-02-11)_
 - [x] **Wizard Spellbook Support** — Added Wizards to known-spell tables and improved AI forge parsing to prevent missing Grimoire data _(v0.2.2 — 2026-02-12)_
 - [x] **Card Name Revert** — Reverted "Pouch" back to "Inventory" and "Legacy" to "Journal" for better intuitive navigation _(v0.2.2 — 2026-02-12)_

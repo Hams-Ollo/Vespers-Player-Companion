@@ -1,12 +1,13 @@
 
 import React, { useState } from 'react';
 import { CharacterData, Campaign } from '../types';
-import { Plus, Play, Trash2, Scroll, Heart, Shield, Crown, Users, LogOut, User, Lock, Dices, AlertTriangle } from 'lucide-react';
+import { Plus, Play, Trash2, Scroll, Heart, Shield, Crown, Users, LogOut, User, Lock, Dices, AlertTriangle, Cloud, CloudOff, Upload } from 'lucide-react';
 import CharacterCreationWizard from './CharacterCreationWizard';
 import QuickRollModal from './QuickRollModal';
 import CampaignManager from './CampaignManager';
 import ErrorBoundary from './ErrorBoundary';
 import { useAuth } from '../contexts/AuthContext';
+import { useCharacters } from '../contexts/CharacterContext';
 
 interface CharacterSelectionProps {
   characters: CharacterData[];
@@ -28,7 +29,9 @@ const CharacterSelection: React.FC<CharacterSelectionProps> = ({
   const [showWizard, setShowWizard] = useState(false);
   const [showQuickRoll, setShowQuickRoll] = useState(false);
   const [activeTab, setActiveTab] = useState<'heroes' | 'campaigns'>('heroes');
+  const [migrating, setMigrating] = useState(false);
   const { user, logout } = useAuth();
+  const { isCloudUser, pendingMigration, acceptMigration, dismissMigration } = useCharacters();
 
   const handleCreate = (newChar: CharacterData) => {
     onCreate(newChar);
@@ -67,9 +70,20 @@ const CharacterSelection: React.FC<CharacterSelectionProps> = ({
            <h1 className="text-4xl md:text-6xl font-display font-bold text-transparent bg-clip-text bg-gradient-to-b from-white to-zinc-400 tracking-tight drop-shadow-sm text-center">
              Adventurer's Hall
            </h1>
-           <p className="text-zinc-500 text-sm font-medium">
-             {(characters || []).length} / 20 Heroes Forged
-           </p>
+           <div className="flex items-center gap-3">
+             <p className="text-zinc-500 text-sm font-medium">
+               {(characters || []).length} / 20 Heroes Forged
+             </p>
+             {isCloudUser ? (
+               <span className="flex items-center gap-1.5 text-emerald-400 text-xs font-bold bg-emerald-500/10 px-2.5 py-1 rounded-full border border-emerald-500/20">
+                 <Cloud size={12} /> Cloud Sync
+               </span>
+             ) : (
+               <span className="flex items-center gap-1.5 text-zinc-500 text-xs font-bold bg-zinc-800/50 px-2.5 py-1 rounded-full border border-zinc-700/50">
+                 <CloudOff size={12} /> Local Only
+               </span>
+             )}
+           </div>
            
            {/* Navigation Tabs */}
            <div className="flex p-1 bg-zinc-900/80 rounded-xl border border-zinc-800 backdrop-blur-md mt-6">
@@ -87,6 +101,38 @@ const CharacterSelection: React.FC<CharacterSelectionProps> = ({
                 </button>
            </div>
         </header>
+
+        {/* Migration Banner */}
+        {pendingMigration && pendingMigration.length > 0 && (
+          <div className="mb-8 p-4 bg-amber-500/10 border border-amber-500/30 rounded-2xl flex flex-col sm:flex-row items-center gap-4 animate-in fade-in slide-in-from-top-4 duration-500">
+            <Upload className="text-amber-400 shrink-0" size={24} />
+            <div className="flex-1 text-center sm:text-left">
+              <p className="text-white font-bold text-sm">Local Characters Found</p>
+              <p className="text-zinc-400 text-xs mt-0.5">
+                {pendingMigration.length} character{pendingMigration.length > 1 ? 's' : ''} saved on this device.
+                Import {pendingMigration.length > 1 ? 'them' : 'it'} to your cloud account?
+              </p>
+            </div>
+            <div className="flex gap-2">
+              <button
+                onClick={async () => {
+                  setMigrating(true);
+                  try { await acceptMigration(); } catch {} finally { setMigrating(false); }
+                }}
+                disabled={migrating}
+                className="px-4 py-2 bg-amber-500 text-black font-bold text-xs rounded-lg hover:bg-amber-400 transition-colors disabled:opacity-50"
+              >
+                {migrating ? 'Importing...' : 'Import All'}
+              </button>
+              <button
+                onClick={dismissMigration}
+                className="px-4 py-2 bg-zinc-800 text-zinc-400 font-bold text-xs rounded-lg hover:bg-zinc-700 hover:text-white transition-colors"
+              >
+                Skip
+              </button>
+            </div>
+          </div>
+        )}
 
         {activeTab === 'heroes' ? (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 lg:gap-8 animate-in fade-in slide-in-from-bottom-4 duration-500">

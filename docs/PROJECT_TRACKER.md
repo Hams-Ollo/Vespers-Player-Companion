@@ -35,9 +35,9 @@
 | ✅ | Feature | Spell slot progression tables | @Hams-Ollo | Full/half/pact caster |
 | ✅ | Feature | Starter equipment shop | @Hams-Ollo | Roll gold, buy gear post-creation |
 | ✅ | Feature | Character selection & deletion | @Hams-Ollo | |
-| ✅ | Task | localStorage persistence | @Hams-Ollo | `vesper_chars` key |
+| ✅ | Task | localStorage persistence | @Hams-Ollo | `vesper_chars` key (guest fallback) |
 | ⬜ | User Story | As a player, I want to export/import my character as JSON | — | Download `.json`, import from file |
-| ⬜ | User Story | As a player, I want my characters synced to the cloud | — | See Epic 6: Cloud Persistence |
+| ✅ | User Story | As a player, I want my characters synced to the cloud | @Hams-Ollo | See Epic 6 — completed |
 | ⬜ | Feature | Multiclass support | — | Split hit dice, merge spell slots |
 | ⬜ | Feature | Subclass selection UI | — | Choose at appropriate level |
 | ⬜ | Feature | Create character at any level (1–20) | — | See Epic 9: Higher-Level Character Creation |
@@ -95,8 +95,8 @@
 | ✅ | Feature | Anonymous guest mode | @Hams-Ollo | Fallback to local session |
 | ✅ | Feature | Campaign manager | @Hams-Ollo | Create/join with shareable codes |
 | ⬜ | User Story | As a DM, I want to see all players in my campaign | — | See Epic 7: Party System |
-| ⬜ | Feature | Firestore character sync | — | See Epic 6: Cloud Persistence |
-| ⬜ | Feature | Real-time campaign updates | — | See Epic 6: Cloud Persistence |
+| ✅ | Feature | Firestore character sync | @Hams-Ollo | See Epic 6 — completed |
+| ⬜ | Feature | Real-time campaign updates | — | Campaigns still localStorage, planned for Party System |
 
 ---
 
@@ -113,8 +113,9 @@
 | ✅ | Task | Remove legacy import map from index.html | @Hams-Ollo | Leftover from pre-Vite CDN setup |
 | ✅ | Task | Cloud Run deployment guide | @Hams-Ollo | `docs/CLOUD_RUN_DEPLOY.md` |
 | ✅ | Task | Firebase authorized domains config | @Hams-Ollo | Cloud Run `.run.app` domain added |
+| ✅ | Task | CI/CD pipeline (Cloud Build) | @Hams-Ollo | Trigger on `main`, inline YAML, auto-deploy to Cloud Run |
 | ⬜ | Task | Backend API proxy for Gemini key | — | Server-side key management, unblocks Epic 3 security |
-| ⬜ | User Story | As a developer, I want CI/CD pipeline | — | GitHub Actions: build, lint, deploy to Cloud Run |
+| ✅ | User Story | As a developer, I want CI/CD pipeline | @Hams-Ollo | Cloud Build trigger → Cloud Run auto-deploy |
 
 ---
 
@@ -145,15 +146,15 @@
 
 | Status | Type | Item | Owner | Notes |
 |--------|------|------|-------|-------|
-| ⬜ | Task | Enable Firestore in Firebase project | — | Firebase Console → Build → Firestore |
-| ⬜ | Task | Design Firestore data schema | — | Collections: `users`, `characters`, `campaigns`; use `uid` as partition key |
-| ⬜ | Task | Firestore security rules | — | Players edit own characters, read party members'; DMs read all in campaign |
-| ⬜ | Feature | Migrate character persistence to Firestore | — | Replace `localStorage.getItem('vesper_chars')` with Firestore CRUD |
-| ⬜ | Feature | Migrate campaign persistence to Firestore | — | Replace `localStorage.getItem('vesper_campaigns')` with Firestore CRUD |
-| ⬜ | Task | localStorage offline cache layer | — | Keep localStorage as fallback/cache, sync when online |
-| ⬜ | Feature | Real-time Firestore listeners (`onSnapshot`) | — | Characters & campaigns sync live across devices |
-| ⬜ | Task | Data migration helper | — | One-time import of existing localStorage data to Firestore on first login |
-| ⬜ | Task | Per-user data partitioning | — | Tie characters to authenticated `uid`, not browser |
+| ✅ | Task | Enable Firestore in Firebase project | @Hams-Ollo | Firebase Console → Build → Firestore, us-west1 |
+| ✅ | Task | Design Firestore data schema | @Hams-Ollo | Collection: `characters` (top-level), `ownerUid` field, `createdAt`/`updatedAt` timestamps |
+| ✅ | Task | Firestore security rules | @Hams-Ollo | `firestore.rules` — users read/write own chars only, ownerUid immutable |
+| ✅ | Feature | Migrate character persistence to Firestore | @Hams-Ollo | `lib/firestore.ts` + `contexts/CharacterContext.tsx`, debounced writes (500ms) |
+| ⬜ | Feature | Migrate campaign persistence to Firestore | — | Campaigns still in localStorage, planned for Party System epic |
+| ✅ | Task | localStorage offline/guest fallback | @Hams-Ollo | Guest users use localStorage; cloud users fall back on Firestore error |
+| ✅ | Feature | Real-time Firestore listeners (`onSnapshot`) | @Hams-Ollo | CharacterContext subscribes on auth, auto-updates across tabs/devices |
+| ✅ | Task | Data migration helper | @Hams-Ollo | Migration banner on first sign-in: "Import All" batch-writes local chars to Firestore |
+| ✅ | Task | Per-user data partitioning | @Hams-Ollo | `ownerUid` field + composite index (`ownerUid` ASC + `updatedAt` DESC) |
 
 ---
 
@@ -244,18 +245,18 @@
 
 | Epic | Done | In Progress | Not Started | Total |
 |------|------|-------------|-------------|-------|
-| 1. Core Character Management | 12 | 0 | 5 | 17 |
+| 1. Core Character Management | 13 | 0 | 4 | 17 |
 | 2. Dashboard & Gameplay | 7 | 0 | 6 | 13 |
 | 3. AI Integration | 8 | 0 | 2 | 10 |
-| 4. Auth & Multiplayer | 3 | 0 | 3 | 6 |
-| 5. Deployment & Infrastructure | 7 | 0 | 2 | 9 |
+| 4. Auth & Multiplayer | 4 | 0 | 2 | 6 |
+| 5. Deployment & Infrastructure | 9 | 0 | 1 | 10 |
 | 5b. Developer Experience | 7 | 0 | 4 | 11 |
-| 6. Cloud Persistence (Phase 1) | 0 | 0 | 9 | 9 |
+| 6. Cloud Persistence (Phase 1) | 8 | 0 | 1 | 9 |
 | 7. Party System (Phase 2) | 0 | 0 | 6 | 6 |
 | 8. DM Tool Suite (Phase 3) | 0 | 0 | 14 | 14 |
 | 9. Higher-Level Char Creation (Phase 4) | 0 | 0 | 10 | 10 |
 | 10. Polish & Extras | 0 | 0 | 5 | 5 |
-| **Total** | **44** | **0** | **66** | **110** |
+| **Total** | **56** | **0** | **55** | **111** |
 
 ---
 

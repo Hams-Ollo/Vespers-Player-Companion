@@ -23,6 +23,7 @@ The Player's Companion is a mobile-first web app for managing D&D 5th Edition ch
 | 🛏️ **Rest System** | Short & long rest with hit dice recovery |
 | 🗺️ **Campaign Manager** | Create or join campaigns with shareable codes |
 | 🔐 **Authentication** | Firebase Google sign-in + anonymous guest mode |
+| ☁️ **Cloud Sync** | Firestore character persistence for signed-in users — real-time sync across devices |
 | 🎨 **AI Portraits** | Gemini 2.5 Flash image model for character portraits |
 
 ## 🛠️ Tech Stack
@@ -35,7 +36,9 @@ The Player's Companion is a mobile-first web app for managing D&D 5th Edition ch
 | **Icons** | Lucide React |
 | **AI** | Google Gemini (`@google/genai`) — `gemini-3-flash-preview` (text), `gemini-2.5-flash-image` (portraits) |
 | **Auth** | Firebase Authentication (Google + Anonymous providers) |
-| **Storage** | localStorage (client-side) |
+| **Database** | Cloud Firestore (character sync for authenticated users) |
+| **Storage** | localStorage (guest/offline fallback) |
+| **Deployment** | Docker (multi-stage) → Google Cloud Run |
 
 ## 🚀 Getting Started
 
@@ -93,18 +96,25 @@ npm run preview
 ## 📁 Project Structure
 
 ```
-├── App.tsx                     # 🏠 Root — auth gate, character state, routing
+├── App.tsx                     # 🏠 Root — auth gate, routing (uses CharacterContext)
 ├── constants.tsx               # 📊 D&D data: races, classes, spells, features, slot tables
 ├── types.ts                    # 📝 TypeScript interfaces (CharacterData, Campaign, etc.)
 ├── utils.ts                    # 🔧 Rate limiting, stat recalculation, helpers
 ├── vite.config.ts              # ⚙️ Vite config with env var injection
 ├── index.html                  # 🌐 HTML entry point
+├── Dockerfile                  # 🐳 Multi-stage build (node → nginx)
+├── nginx.conf                  # 🌐 Production SPA server config
+├── firebase.json               # 🔥 Firebase project config (Firestore rules + indexes)
+├── firestore.rules             # 🔒 Firestore security rules
+├── firestore.indexes.json      # 📇 Firestore composite indexes
 │
 ├── lib/
-│   └── gemini.ts               # 🤖 Centralized Gemini AI client
+│   ├── gemini.ts               # 🤖 Centralized Gemini AI client
+│   └── firestore.ts            # 🔥 Firestore CRUD, real-time subscriptions, migration
 │
 ├── contexts/
-│   └── AuthContext.tsx          # 🔐 Firebase auth provider + hooks
+│   ├── AuthContext.tsx          # 🔐 Firebase auth provider + hooks
+│   └── CharacterContext.tsx     # 📦 Character state provider (Firestore/localStorage dual-mode)
 │
 ├── components/
 │   ├── LoginScreen.tsx          # 🚪 Google sign-in / guest mode
@@ -123,6 +133,8 @@ npm run preview
 │   ├── SettingsModal.tsx        # ⚙️ Character stat editor
 │   ├── PortraitGenerator.tsx    # 🎨 AI portrait generation
 │   ├── TranscriptionButton.tsx  # 🎙️ Voice-to-text input
+│   ├── QuickRollModal.tsx       # 🎲 AI-generated quick character
+│   ├── ErrorBoundary.tsx        # 🛡️ React error boundary
 │   │
 │   └── details/
 │       ├── VitalsDetail.tsx     # ❤️ HP, AC, speed, conditions
@@ -135,6 +147,17 @@ npm run preview
 │
 └── reference-docs/              # 📚 D&D PDFs (gitignored)
 ```
+
+## ☁️ Cloud Persistence
+
+Signed-in users (Google Auth) get **automatic Firestore sync**:
+
+- Characters are stored in the `characters` collection, partitioned by `ownerUid`
+- Real-time `onSnapshot` listeners keep multiple browser tabs/devices in sync
+- Writes are **debounced** (500ms) to avoid excessive Firestore operations during combat
+- Guest users continue using localStorage with no cloud calls
+- First-time sign-in detects local characters and offers a one-click **migration** to the cloud
+- Firestore security rules enforce per-user isolation — users can only read/write their own characters
 
 ## 🔒 Rate Limiting
 
