@@ -1,8 +1,9 @@
 
 import React, { useState } from 'react';
 import { CharacterData, Campaign } from '../types';
-import { Plus, Play, Trash2, Scroll, Heart, Shield, Crown, Users, LogOut, User, Lock } from 'lucide-react';
+import { Plus, Play, Trash2, Scroll, Heart, Shield, Crown, Users, LogOut, User, Lock, Dices } from 'lucide-react';
 import CharacterCreationWizard from './CharacterCreationWizard';
+import QuickRollModal from './QuickRollModal';
 import CampaignManager from './CampaignManager';
 import { useAuth } from '../contexts/AuthContext';
 
@@ -24,12 +25,14 @@ const CharacterSelection: React.FC<CharacterSelectionProps> = ({
   onDelete 
 }) => {
   const [showWizard, setShowWizard] = useState(false);
+  const [showQuickRoll, setShowQuickRoll] = useState(false);
   const [activeTab, setActiveTab] = useState<'heroes' | 'campaigns'>('heroes');
   const { user, logout } = useAuth();
 
   const handleCreate = (newChar: CharacterData) => {
     onCreate(newChar);
     setShowWizard(false);
+    setShowQuickRoll(false);
   };
 
   const isAtLimit = characters.length >= 20;
@@ -86,30 +89,54 @@ const CharacterSelection: React.FC<CharacterSelectionProps> = ({
 
         {activeTab === 'heroes' ? (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 lg:gap-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
-            {/* Create New Card */}
-            <button 
-                onClick={() => !isAtLimit && setShowWizard(true)}
-                disabled={isAtLimit}
-                className={`group relative h-[420px] w-full bg-zinc-900/40 border-2 border-dashed rounded-3xl flex flex-col items-center justify-center transition-all duration-300 ${
-                  isAtLimit 
-                  ? 'border-zinc-800 cursor-not-allowed opacity-60' 
-                  : 'border-zinc-800 hover:border-amber-500/50 hover:bg-zinc-900/60 hover:shadow-2xl hover:shadow-amber-900/10 hover:-translate-y-1'
-                }`}
-            >
-                <div className={`w-20 h-20 rounded-full flex items-center justify-center mb-6 transition-all duration-300 border shadow-xl ${
-                  isAtLimit 
-                  ? 'bg-zinc-800 text-zinc-600 border-zinc-700' 
-                  : 'bg-zinc-800/80 group-hover:scale-110 group-hover:bg-amber-500 group-hover:text-black border-zinc-700 group-hover:border-amber-400'
-                }`}>
-                  {isAtLimit ? <Lock size={32} /> : <Plus size={32} strokeWidth={3} />}
-                </div>
-                <span className={`font-display font-bold text-xl transition-colors tracking-wide ${isAtLimit ? 'text-zinc-600' : 'text-zinc-400 group-hover:text-white'}`}>
-                  {isAtLimit ? 'Hall is Full' : 'Forge New Hero'}
-                </span>
-                <span className="text-zinc-600 text-sm mt-2 font-medium">
-                  {isAtLimit ? 'Delete a hero to forge more' : 'Start a new journey'}
-                </span>
-            </button>
+            {/* Action Group for creation */}
+            <div className="flex flex-col gap-4">
+                {/* Manual Creation Card */}
+                <button 
+                    onClick={() => !isAtLimit && setShowWizard(true)}
+                    disabled={isAtLimit}
+                    className={`group relative h-[200px] w-full bg-zinc-900/40 border-2 border-dashed rounded-3xl flex flex-col items-center justify-center transition-all duration-300 ${
+                    isAtLimit 
+                    ? 'border-zinc-800 cursor-not-allowed opacity-60' 
+                    : 'border-zinc-800 hover:border-amber-500/50 hover:bg-zinc-900/60 hover:shadow-2xl hover:-translate-y-1'
+                    }`}
+                >
+                    <div className={`w-12 h-12 rounded-full flex items-center justify-center mb-3 transition-all duration-300 border ${
+                    isAtLimit 
+                    ? 'bg-zinc-800 text-zinc-600 border-zinc-700' 
+                    : 'bg-zinc-800/80 group-hover:bg-amber-500 group-hover:text-black border-zinc-700'
+                    }`}>
+                    {isAtLimit ? <Lock size={20} /> : <Plus size={24} strokeWidth={3} />}
+                    </div>
+                    <span className={`font-display font-bold text-lg tracking-wide ${isAtLimit ? 'text-zinc-600' : 'text-zinc-400 group-hover:text-white'}`}>
+                    Forge New Hero
+                    </span>
+                    <span className="text-zinc-600 text-xs mt-1">Manual wizard</span>
+                </button>
+
+                {/* Quick Roll Card */}
+                <button 
+                    onClick={() => !isAtLimit && setShowQuickRoll(true)}
+                    disabled={isAtLimit}
+                    className={`group relative h-[200px] w-full bg-zinc-900/40 border-2 border-dashed rounded-3xl flex flex-col items-center justify-center transition-all duration-300 ${
+                    isAtLimit 
+                    ? 'border-zinc-800 cursor-not-allowed opacity-60' 
+                    : 'border-zinc-800 hover:border-indigo-500/50 hover:bg-zinc-900/60 hover:shadow-2xl hover:-translate-y-1'
+                    }`}
+                >
+                    <div className={`w-12 h-12 rounded-full flex items-center justify-center mb-3 transition-all duration-300 border ${
+                    isAtLimit 
+                    ? 'bg-zinc-800 text-zinc-600 border-zinc-700' 
+                    : 'bg-zinc-800/80 group-hover:bg-indigo-600 group-hover:text-white border-zinc-700'
+                    }`}>
+                    {isAtLimit ? <Lock size={20} /> : <Dices size={24} strokeWidth={2.5} />}
+                    </div>
+                    <span className={`font-display font-bold text-lg tracking-wide ${isAtLimit ? 'text-zinc-600' : 'text-zinc-400 group-hover:text-white'}`}>
+                    Quick AI Roll
+                    </span>
+                    <span className="text-zinc-600 text-xs mt-1 text-center px-4">AI generated guest character</span>
+                </button>
+            </div>
 
             {/* Existing Characters */}
             {characters.map((char) => (
@@ -208,6 +235,13 @@ const CharacterSelection: React.FC<CharacterSelectionProps> = ({
           campaigns={campaigns}
           onCreate={handleCreate}
           onClose={() => setShowWizard(false)}
+        />
+      )}
+
+      {showQuickRoll && (
+        <QuickRollModal
+          onCreate={handleCreate}
+          onClose={() => setShowQuickRoll(false)}
         />
       )}
     </div>
