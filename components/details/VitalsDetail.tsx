@@ -1,14 +1,15 @@
 import React from 'react';
-import { Heart, Shield, Zap, Eye, Wind, Minus, Plus, ArrowUpCircle } from 'lucide-react';
+import { Heart, Shield, Zap, Eye, Wind, Minus, Plus, ArrowUpCircle, Moon } from 'lucide-react';
 import { CharacterData } from '../../types';
 
 interface VitalsDetailProps {
   data: CharacterData;
   onUpdate: (newData: Partial<CharacterData>) => void;
   onLevelUp?: () => void;
+  onRest?: () => void;
 }
 
-const VitalsDetail: React.FC<VitalsDetailProps> = ({ data, onUpdate, onLevelUp }) => {
+const VitalsDetail: React.FC<VitalsDetailProps> = ({ data, onUpdate, onLevelUp, onRest }) => {
   const hpPercent = (data.hp.current / data.hp.max) * 100;
 
   const handleHealthChange = (amount: number) => {
@@ -44,14 +45,24 @@ const VitalsDetail: React.FC<VitalsDetailProps> = ({ data, onUpdate, onLevelUp }
                  <span className="text-zinc-300 text-sm font-medium">{data.class}</span>
              </div>
          </div>
-         {onLevelUp && (
-             <button 
-                onClick={onLevelUp}
-                className="px-3 py-1.5 bg-green-900/20 text-green-400 border border-green-600/30 rounded-lg text-xs font-bold hover:bg-green-900/40 transition-colors flex items-center gap-1.5"
-             >
-                 <ArrowUpCircle size={14} /> Level Up
-             </button>
-         )}
+         <div className="flex gap-2">
+            {onRest && (
+                <button 
+                    onClick={onRest}
+                    className="px-3 py-1.5 bg-indigo-900/20 text-indigo-400 border border-indigo-600/30 rounded-lg text-xs font-bold hover:bg-indigo-900/40 transition-colors flex items-center gap-1.5"
+                >
+                    <Moon size={14} /> Rest
+                </button>
+            )}
+            {onLevelUp && (
+                <button 
+                    onClick={onLevelUp}
+                    className="px-3 py-1.5 bg-green-900/20 text-green-400 border border-green-600/30 rounded-lg text-xs font-bold hover:bg-green-900/40 transition-colors flex items-center gap-1.5"
+                >
+                    <ArrowUpCircle size={14} /> Level Up
+                </button>
+            )}
+         </div>
       </div>
 
       {/* HP Card */}
@@ -91,7 +102,7 @@ const VitalsDetail: React.FC<VitalsDetailProps> = ({ data, onUpdate, onLevelUp }
           <Shield className="text-zinc-400 mb-1" size={24} />
           <span className="text-4xl font-display font-bold text-white mb-1">{data.ac}</span>
           <span className="text-xs uppercase tracking-widest text-zinc-500">Armor Class</span>
-          <span className="text-xs text-zinc-600 mt-1">Leather + Dex</span>
+          <span className="text-xs text-zinc-600 mt-1">Calculated from Gear</span>
         </div>
         
         <div className="bg-zinc-800 rounded-xl p-4 border border-zinc-700 flex flex-col items-center justify-center">

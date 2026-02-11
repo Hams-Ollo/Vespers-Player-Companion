@@ -802,6 +802,7 @@ const CharacterCreationWizard: React.FC<WizardProps> = ({ onCreate, onClose }) =
       portraitUrl,
       stats,
       hp: { current: hitDie + conMod, max: hitDie + conMod },
+      hitDice: { current: 1, max: 1, die: `1d${hitDie}` },
       ac: 10 + stats.DEX.modifier,
       initiative: stats.DEX.modifier,
       speed,
@@ -811,6 +812,8 @@ const CharacterCreationWizard: React.FC<WizardProps> = ({ onCreate, onClose }) =
         { name: "Unarmed Strike", bonus: stats.STR.modifier + profBonus, damage: "1", type: "Bludgeoning" }
       ],
       features: [],
+      spells: [],
+      spellSlots: [],
       inventory: {
         gold: 0,
         items: [],

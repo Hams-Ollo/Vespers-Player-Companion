@@ -81,8 +81,9 @@ export const SHOP_INVENTORY: Item[] = [
   { name: "Longsword", cost: 15, weight: 3, type: "Weapon", quantity: 1, notes: "1d8 slashing, Versatile (1d10)" },
   { name: "Shortbow", cost: 25, weight: 2, type: "Weapon", quantity: 1, notes: "1d6 piercing, Two-handed" },
   { name: "Greatsword", cost: 50, weight: 6, type: "Weapon", quantity: 1, notes: "2d6 slashing, Heavy, Two-handed" },
-  { name: "Leather Armor", cost: 10, weight: 10, type: "Armor", quantity: 1, notes: "11 + Dex Modifier" },
-  { name: "Chain Mail", cost: 75, weight: 55, type: "Armor", quantity: 1, notes: "AC 16, Str 13, Stealth Disadvantage" },
+  { name: "Leather Armor", cost: 10, weight: 10, type: "Armor", quantity: 1, notes: "AC 11, Light Armor" },
+  { name: "Chain Shirt", cost: 50, weight: 20, type: "Armor", quantity: 1, notes: "AC 13, Medium Armor" },
+  { name: "Plate Armor", cost: 1500, weight: 65, type: "Armor", quantity: 1, notes: "AC 18, Heavy Armor, Str 15" },
   { name: "Shield", cost: 10, weight: 6, type: "Armor", quantity: 1, notes: "+2 AC" },
   { name: "Potion of Healing", cost: 50, weight: 0.5, type: "Consumable", quantity: 1, notes: "Heals 2d4+2 HP" },
   { name: "Rations (1 day)", cost: 0.5, weight: 2, type: "Consumable", quantity: 1 },
@@ -170,6 +171,7 @@ export const VESPER_DATA: CharacterData = {
     CHA: { score: 15, modifier: +2, save: +2, proficientSave: false },
   },
   hp: { current: 10, max: 10 },
+  hitDice: { current: 1, max: 1, die: "1d8" },
   ac: 15,
   initiative: 4,
   speed: 30,
@@ -231,13 +233,15 @@ export const VESPER_DATA: CharacterData = {
       fullText: "You have disadvantage on attack rolls..."
     },
   ],
+  spells: [],
+  spellSlots: [],
   inventory: {
     gold: 15,
     items: [
-      { name: "Leather Armor", quantity: 1, notes: "AC 11 + Dex", cost: 10, type: "Armor" },
+      { name: "Leather Armor", quantity: 1, notes: "AC 11, Light Armor", cost: 10, type: "Armor", equipped: true },
       { name: "Thieves' Tools", quantity: 1, cost: 25, type: "Gear" },
-      { name: "Dagger", quantity: 2, cost: 2, type: "Weapon" },
-      { name: "Shortbow", quantity: 1, cost: 25, type: "Weapon" },
+      { name: "Dagger", quantity: 2, cost: 2, type: "Weapon", equipped: true, notes: "1d4 piercing, Finesse" },
+      { name: "Shortbow", quantity: 1, cost: 25, type: "Weapon", equipped: false, notes: "1d6 piercing, Two-handed" },
       { name: "Arrows", quantity: 20, cost: 1, type: "Consumable" },
       { name: "Burglar's Pack", quantity: 1, cost: 16, type: "Gear" },
     ],
@@ -295,15 +299,18 @@ export const createNewCharacter = (name: string, race: string, charClass: string
     portraitUrl: "https://picsum.photos/400/400?grayscale",
     stats: baseStats,
     hp: { current: hitDie, max: hitDie },
-    ac: 10,
-    initiative: 0,
+    hitDice: { current: 1, max: 1, die: `1d${hitDie}` },
+    ac: 10 + baseStats.DEX.modifier,
+    initiative: baseStats.DEX.modifier,
     speed: speed,
-    passivePerception: 10,
+    passivePerception: 10 + baseStats.WIS.modifier,
     skills: defaultSkills,
     attacks: [
-      { name: "Unarmed Strike", bonus: 2, damage: "1", type: "Bludgeoning" }
+      { name: "Unarmed Strike", bonus: baseStats.STR.modifier + 2, damage: `1${baseStats.STR.modifier >= 0 ? '+' : ''}${baseStats.STR.modifier}`, type: "Bludgeoning" }
     ],
     features: [],
+    spells: [],
+    spellSlots: [],
     inventory: {
       gold: 15, // Standard starting gold for background/class avg
       items: [],

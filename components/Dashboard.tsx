@@ -15,6 +15,7 @@ import SettingsModal from './SettingsModal';
 import ShopModal from './ShopModal';
 import LevelUpModal from './LevelUpModal';
 import ItemDetailModal from './ItemDetailModal';
+import RestModal from './RestModal';
 import { Heart, Sword, Brain, Sparkles, Backpack, Edit2, MessageSquare, Settings, LogOut, Book, ShoppingBag } from 'lucide-react';
 
 interface DashboardProps {
@@ -32,6 +33,7 @@ const Dashboard: React.FC<DashboardProps> = ({ data, onUpdatePortrait, onUpdateD
   const [showSettings, setShowSettings] = useState(false);
   const [showShop, setShowShop] = useState(false);
   const [showLevelUp, setShowLevelUp] = useState(false);
+  const [showRest, setShowRest] = useState(false);
   const [selectedItemForDetail, setSelectedItemForDetail] = useState<Item | Feature | null>(null);
 
   const handleRoll = (label: string, modifier: number, die: string) => {
@@ -284,7 +286,12 @@ const Dashboard: React.FC<DashboardProps> = ({ data, onUpdatePortrait, onUpdateD
           title="Vitals & Stats"
           color="red"
         >
-          <VitalsDetail data={data} onUpdate={onUpdateData} onLevelUp={() => setShowLevelUp(true)} />
+          <VitalsDetail 
+            data={data} 
+            onUpdate={onUpdateData} 
+            onLevelUp={() => setShowLevelUp(true)} 
+            onRest={() => setShowRest(true)} 
+          />
        </DetailOverlay>
 
        <DetailOverlay 
@@ -328,6 +335,7 @@ const Dashboard: React.FC<DashboardProps> = ({ data, onUpdatePortrait, onUpdateD
             data={data} 
             onShop={() => setShowShop(true)} 
             onInspect={setSelectedItemForDetail}
+            onUpdate={onUpdateData}
           />
        </DetailOverlay>
 
@@ -377,6 +385,14 @@ const Dashboard: React.FC<DashboardProps> = ({ data, onUpdatePortrait, onUpdateD
             data={data}
             onUpdate={onUpdateData}
             onClose={() => setShowLevelUp(false)}
+         />
+       )}
+
+       {showRest && (
+         <RestModal
+            data={data}
+            onUpdate={onUpdateData}
+            onClose={() => setShowRest(false)}
          />
        )}
 

@@ -36,7 +36,22 @@ export interface Item {
   notes?: string;
   cost?: number; // In gp
   weight?: number; // In lbs
-  type?: 'Weapon' | 'Armor' | 'Gear' | 'Consumable';
+  type?: 'Weapon' | 'Armor' | 'Gear' | 'Consumable' | 'Magic Item';
+  equipped?: boolean;
+  slot?: 'Main Hand' | 'Off Hand' | 'Body' | 'Accessory';
+  armorClass?: number; // If armor
+}
+
+export interface Spell {
+  name: string;
+  level: number;
+  school?: string;
+  castingTime?: string;
+  range?: string;
+  components?: string;
+  duration?: string;
+  description: string;
+  prepared?: boolean;
 }
 
 export interface JournalEntry {
@@ -60,6 +75,7 @@ export interface CharacterData {
   portraitUrl: string;
   stats: Record<StatKey, AbilityScore>;
   hp: { current: number; max: number };
+  hitDice: { current: number; max: number; die: string }; // Added
   ac: number;
   initiative: number;
   speed: number;
@@ -67,6 +83,8 @@ export interface CharacterData {
   skills: Skill[];
   attacks: Attack[];
   features: Feature[];
+  spells: Spell[]; 
+  spellSlots: { current: number; max: number; level: number }[]; // Added
   inventory: {
     gold: number;
     items: Item[];
