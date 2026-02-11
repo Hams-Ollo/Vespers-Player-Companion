@@ -201,7 +201,7 @@ const Dashboard: React.FC<DashboardProps> = ({ data, onUpdatePortrait, onUpdateD
                         </div>
                          <div className="flex justify-between items-center">
                             <span className="text-xs text-zinc-500">Wis Check</span>
-                            <span className="text-lg font-bold text-zinc-400">+{data.stats.WIS.modifier}</span>
+                            <span className="text-lg font-bold text-blue-400">+{data.stats.WIS.modifier}</span>
                         </div>
                         <div className="mt-2 text-xs text-blue-200/80">
                              <div className="flex justify-between"><span>Stealth</span> <span>+{data.skills.find(s=>s.name === 'Stealth')?.modifier || 0}</span></div>
@@ -239,7 +239,7 @@ const Dashboard: React.FC<DashboardProps> = ({ data, onUpdatePortrait, onUpdateD
                      <div className="flex flex-col justify-center h-full gap-1">
                         <div className="flex items-center gap-2">
                              <div className="w-2 h-2 rounded-full bg-amber-400"></div>
-                             <span className="text-sm font-bold text-amber-100">{data.inventory.gold} gp</span>
+                             <span className="text-sm font-bold text-amber-100">{data.inventory.gold.toFixed(2)} gp</span>
                         </div>
                          <div className="flex items-center gap-2">
                              <div className="w-2 h-2 rounded-full bg-zinc-600"></div>

@@ -19,7 +19,8 @@ const ShopModal: React.FC<ShopModalProps> = ({ data, onUpdate, onClose }) => {
         return;
     }
 
-    const newGold = data.inventory.gold - item.cost!;
+    // Explicitly round to 2 decimal places to handle JS float artifacts
+    const newGold = Number((data.inventory.gold - item.cost!).toFixed(2));
     
     // Check if item exists to stack it
     const existingItemIndex = data.inventory.items.findIndex(i => i.name === item.name && !i.equipped);
@@ -47,7 +48,8 @@ const ShopModal: React.FC<ShopModalProps> = ({ data, onUpdate, onClose }) => {
       const sellPrice = Math.floor((item.cost || 0) / 2);
       
       if (confirm(`Sell ${item.name} for ${sellPrice} gp?`)) {
-          const newGold = data.inventory.gold + sellPrice;
+          // Explicitly round to 2 decimal places to handle JS float artifacts
+          const newGold = Number((data.inventory.gold + sellPrice).toFixed(2));
           
           let newItems = [...data.inventory.items];
           const index = newItems.indexOf(item);
@@ -91,7 +93,7 @@ const ShopModal: React.FC<ShopModalProps> = ({ data, onUpdate, onClose }) => {
           </h3>
           <div className="flex items-center gap-2 bg-amber-900/20 px-3 py-1 rounded-full border border-amber-500/30">
              <Coins size={14} className="text-amber-400" />
-             <span className="font-mono font-bold text-amber-100">{data.inventory.gold} gp</span>
+             <span className="font-mono font-bold text-amber-100">{data.inventory.gold.toFixed(2)} gp</span>
           </div>
           <button onClick={onClose} className="text-zinc-500 hover:text-white"><X size={24} /></button>
         </div>

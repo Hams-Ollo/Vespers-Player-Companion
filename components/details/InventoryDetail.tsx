@@ -61,7 +61,7 @@ const InventoryDetail: React.FC<InventoryDetailProps> = ({ data, onShop, onInspe
           </div>
         </div>
         <div className="text-right">
-          <span className="block text-2xl font-mono font-bold text-amber-400">{data.inventory.gold} <span className="text-sm text-amber-600">gp</span></span>
+          <span className="block text-2xl font-mono font-bold text-amber-400">{data.inventory.gold.toFixed(2)} <span className="text-sm text-amber-600">gp</span></span>
         </div>
       </div>
 
