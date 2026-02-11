@@ -1,4 +1,4 @@
-// Fix: ClassOption is defined locally in this file, so it should not be imported from './types'
+
 import { CharacterData, StatKey, Item } from './types';
 
 export const generateId = () => Math.random().toString(36).substring(2, 11);
@@ -14,7 +14,37 @@ export interface ClassOption {
   hitDie: number;
   primaryAbility: string;
   savingThrows: [StatKey, StatKey];
+  skillsToPick: number;
+  isCaster: boolean;
 }
+
+export const DND_SKILLS: { name: string; ability: StatKey }[] = [
+  { name: 'Acrobatics', ability: 'DEX' },
+  { name: 'Animal Handling', ability: 'WIS' },
+  { name: 'Arcana', ability: 'INT' },
+  { name: 'Athletics', ability: 'STR' },
+  { name: 'Deception', ability: 'CHA' },
+  { name: 'History', ability: 'INT' },
+  { name: 'Insight', ability: 'WIS' },
+  { name: 'Intimidation', ability: 'CHA' },
+  { name: 'Investigation', ability: 'INT' },
+  { name: 'Medicine', ability: 'WIS' },
+  { name: 'Nature', ability: 'INT' },
+  { name: 'Perception', ability: 'WIS' },
+  { name: 'Performance', ability: 'CHA' },
+  { name: 'Persuasion', ability: 'CHA' },
+  { name: 'Religion', ability: 'INT' },
+  { name: 'Sleight of Hand', ability: 'DEX' },
+  { name: 'Stealth', ability: 'DEX' },
+  { name: 'Survival', ability: 'WIS' },
+];
+
+export const DND_TOOLS = [
+  "Thieves' Tools", "Alchemist's Supplies", "Brewer's Supplies", "Calligrapher's Supplies", 
+  "Carpenter's Tools", "Cartographer's Tools", "Cook's Utensils", "Glassblower's Tools",
+  "Jeweler's Tools", "Leatherworker's Tools", "Mason's Tools", "Painter's Supplies",
+  "Potter's Tools", "Smith's Tools", "Tinker's Tools", "Weaver's Tools", "Woodcarver's Tools"
+];
 
 export const DND_RACES: RaceOption[] = [
   { name: 'Dragonborn', speed: 30 },
@@ -29,18 +59,18 @@ export const DND_RACES: RaceOption[] = [
 ];
 
 export const DND_CLASSES: ClassOption[] = [
-  { name: 'Barbarian', hitDie: 12, primaryAbility: 'STR', savingThrows: ['STR', 'CON'] },
-  { name: 'Bard', hitDie: 8, primaryAbility: 'CHA', savingThrows: ['DEX', 'CHA'] },
-  { name: 'Cleric', hitDie: 8, primaryAbility: 'WIS', savingThrows: ['WIS', 'CHA'] },
-  { name: 'Druid', hitDie: 8, primaryAbility: 'WIS', savingThrows: ['INT', 'WIS'] },
-  { name: 'Fighter', hitDie: 10, primaryAbility: 'STR', savingThrows: ['STR', 'CON'] },
-  { name: 'Monk', hitDie: 8, primaryAbility: 'DEX', savingThrows: ['STR', 'DEX'] },
-  { name: 'Paladin', hitDie: 10, primaryAbility: 'STR', savingThrows: ['WIS', 'CHA'] },
-  { name: 'Ranger', hitDie: 10, primaryAbility: 'DEX', savingThrows: ['STR', 'DEX'] },
-  { name: 'Rogue', hitDie: 8, primaryAbility: 'DEX', savingThrows: ['DEX', 'INT'] },
-  { name: 'Sorcerer', hitDie: 6, primaryAbility: 'CHA', savingThrows: ['CON', 'CHA'] },
-  { name: 'Warlock', hitDie: 8, primaryAbility: 'CHA', savingThrows: ['WIS', 'CHA'] },
-  { name: 'Wizard', hitDie: 6, primaryAbility: 'INT', savingThrows: ['INT', 'WIS'] },
+  { name: 'Barbarian', hitDie: 12, primaryAbility: 'STR', savingThrows: ['STR', 'CON'], skillsToPick: 2, isCaster: false },
+  { name: 'Bard', hitDie: 8, primaryAbility: 'CHA', savingThrows: ['DEX', 'CHA'], skillsToPick: 3, isCaster: true },
+  { name: 'Cleric', hitDie: 8, primaryAbility: 'WIS', savingThrows: ['WIS', 'CHA'], skillsToPick: 2, isCaster: true },
+  { name: 'Druid', hitDie: 8, primaryAbility: 'WIS', savingThrows: ['INT', 'WIS'], skillsToPick: 2, isCaster: true },
+  { name: 'Fighter', hitDie: 10, primaryAbility: 'STR', savingThrows: ['STR', 'CON'], skillsToPick: 2, isCaster: false },
+  { name: 'Monk', hitDie: 8, primaryAbility: 'DEX', savingThrows: ['STR', 'DEX'], skillsToPick: 2, isCaster: false },
+  { name: 'Paladin', hitDie: 10, primaryAbility: 'STR', savingThrows: ['WIS', 'CHA'], skillsToPick: 2, isCaster: true },
+  { name: 'Ranger', hitDie: 10, primaryAbility: 'DEX', savingThrows: ['STR', 'DEX'], skillsToPick: 3, isCaster: true },
+  { name: 'Rogue', hitDie: 8, primaryAbility: 'DEX', savingThrows: ['DEX', 'INT'], skillsToPick: 4, isCaster: false },
+  { name: 'Sorcerer', hitDie: 6, primaryAbility: 'CHA', savingThrows: ['CON', 'CHA'], skillsToPick: 2, isCaster: true },
+  { name: 'Warlock', hitDie: 8, primaryAbility: 'CHA', savingThrows: ['WIS', 'CHA'], skillsToPick: 2, isCaster: true },
+  { name: 'Wizard', hitDie: 6, primaryAbility: 'INT', savingThrows: ['INT', 'WIS'], skillsToPick: 2, isCaster: true },
 ];
 
 export const DND_BACKGROUNDS = ['Acolyte', 'Charlatan', 'Criminal', 'Entertainer', 'Folk Hero', 'Noble', 'Sage', 'Soldier', 'Urchin'];

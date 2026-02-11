@@ -1,6 +1,7 @@
+
 import React, { useState } from 'react';
 import { CharacterData, Campaign } from '../types';
-import { Plus, Play, Trash2, Scroll, Heart, Shield, Crown, Users, LogOut, User } from 'lucide-react';
+import { Plus, Play, Trash2, Scroll, Heart, Shield, Crown, Users, LogOut, User, Lock } from 'lucide-react';
 import CharacterCreationWizard from './CharacterCreationWizard';
 import CampaignManager from './CampaignManager';
 import { useAuth } from '../contexts/AuthContext';
@@ -31,6 +32,8 @@ const CharacterSelection: React.FC<CharacterSelectionProps> = ({
     setShowWizard(false);
   };
 
+  const isAtLimit = characters.length >= 20;
+
   return (
     <div className="min-h-screen bg-[#09090b] flex flex-col items-center relative overflow-hidden selection:bg-amber-500/30">
       {/* Background Decorations */}
@@ -60,6 +63,9 @@ const CharacterSelection: React.FC<CharacterSelectionProps> = ({
            <h1 className="text-4xl md:text-6xl font-display font-bold text-transparent bg-clip-text bg-gradient-to-b from-white to-zinc-400 tracking-tight drop-shadow-sm text-center">
              Adventurer's Hall
            </h1>
+           <p className="text-zinc-500 text-sm font-medium">
+             {characters.length} / 20 Heroes Forged
+           </p>
            
            {/* Navigation Tabs */}
            <div className="flex p-1 bg-zinc-900/80 rounded-xl border border-zinc-800 backdrop-blur-md mt-6">
@@ -82,14 +88,27 @@ const CharacterSelection: React.FC<CharacterSelectionProps> = ({
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 lg:gap-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
             {/* Create New Card */}
             <button 
-                onClick={() => setShowWizard(true)}
-                className="group relative h-[420px] w-full bg-zinc-900/40 border-2 border-dashed border-zinc-800 hover:border-amber-500/50 rounded-3xl flex flex-col items-center justify-center transition-all duration-300 hover:bg-zinc-900/60 hover:shadow-2xl hover:shadow-amber-900/10 hover:-translate-y-1"
+                onClick={() => !isAtLimit && setShowWizard(true)}
+                disabled={isAtLimit}
+                className={`group relative h-[420px] w-full bg-zinc-900/40 border-2 border-dashed rounded-3xl flex flex-col items-center justify-center transition-all duration-300 ${
+                  isAtLimit 
+                  ? 'border-zinc-800 cursor-not-allowed opacity-60' 
+                  : 'border-zinc-800 hover:border-amber-500/50 hover:bg-zinc-900/60 hover:shadow-2xl hover:shadow-amber-900/10 hover:-translate-y-1'
+                }`}
             >
-                <div className="w-20 h-20 rounded-full bg-zinc-800/80 flex items-center justify-center mb-6 group-hover:scale-110 group-hover:bg-amber-500 group-hover:text-black transition-all duration-300 border border-zinc-700 group-hover:border-amber-400 shadow-xl">
-                <Plus size={32} strokeWidth={3} />
+                <div className={`w-20 h-20 rounded-full flex items-center justify-center mb-6 transition-all duration-300 border shadow-xl ${
+                  isAtLimit 
+                  ? 'bg-zinc-800 text-zinc-600 border-zinc-700' 
+                  : 'bg-zinc-800/80 group-hover:scale-110 group-hover:bg-amber-500 group-hover:text-black border-zinc-700 group-hover:border-amber-400'
+                }`}>
+                  {isAtLimit ? <Lock size={32} /> : <Plus size={32} strokeWidth={3} />}
                 </div>
-                <span className="font-display font-bold text-xl text-zinc-400 group-hover:text-white transition-colors tracking-wide">Forge New Hero</span>
-                <span className="text-zinc-600 text-sm mt-2 font-medium">Start a new journey</span>
+                <span className={`font-display font-bold text-xl transition-colors tracking-wide ${isAtLimit ? 'text-zinc-600' : 'text-zinc-400 group-hover:text-white'}`}>
+                  {isAtLimit ? 'Hall is Full' : 'Forge New Hero'}
+                </span>
+                <span className="text-zinc-600 text-sm mt-2 font-medium">
+                  {isAtLimit ? 'Delete a hero to forge more' : 'Start a new journey'}
+                </span>
             </button>
 
             {/* Existing Characters */}
