@@ -1,54 +1,57 @@
-# D&D Card Deck Character Sheet
+# 🐉 Vesper's Card Sheet
 
-A modern, mobile-first Dungeons & Dragons 5e character sheet application. This project reimagines the traditional spreadsheet-style character sheet as a "Card Deck" dashboard, focusing on visual hierarchy, tactile interactions, and AI-powered enhancements.
+![Status](https://img.shields.io/badge/Status-Active_Development-success)
+![Tech](https://img.shields.io/badge/Stack-React_19_|_TypeScript_|_Tailwind-blue)
+![AI](https://img.shields.io/badge/Powered_by-Google_Gemini-purple)
 
-![Status](https://img.shields.io/badge/Status-Active-success)
-![Tech](https://img.shields.io/badge/Stack-React_|_TypeScript_|_Tailwind-blue)
-![AI](https://img.shields.io/badge/AI-Google_Gemini-purple)
+**Vesper's Card Sheet** is a modern, mobile-first Dungeons & Dragons 5e character sheet application. It reimagines the traditional spreadsheet-style character sheet as a tactile "Card Deck" dashboard, focusing on visual hierarchy, intuitive interactions, and powerful AI integration.
 
-## 🌟 Features
+## ✨ Features
 
 ### 🎴 The Card Stack UI
-Instead of scrolling through endless tables, data is organized into 5 intuitive color-coded stacks:
-*   **❤️ Vitals (Red):** HP, AC, Initiative, and Speed. Includes interactive Heal/Damage controls.
-*   **⚔️ Combat (Orange):** Weapons, Attacks, and Class combat features (e.g., Sneak Attack).
-*   **🧠 Skills (Blue):** Ability scores, Saving throws, and Skill checks with proficiency/expertise tracking.
-*   **✨ Traits (Purple):** Racial and Class features with expandable rule text.
-*   **🎒 Inventory (Amber):** Gold tracking, equipment list, and encumbrance.
+Data is organized into 5 intuitive, color-coded stacks that expand into detailed overlays:
+*   **❤️ Vitals (Red):** HP management, AC calculation, Initiative, and Hit Dice resting mechanics.
+*   **⚔️ Combat (Orange):** Integrated weapon attacks, damage rolls, and class features (e.g., Sneak Attack).
+*   **🧠 Skills (Blue):** Ability scores, saving throws, and skill checks with visual proficiency indicators.
+*   **✨ Traits (Purple):** Class features and racial traits with expandable rules text.
+*   **🎒 Inventory (Amber):** Gold tracking, equipment management, and an interactive shop.
+
+### 🤖 AI-Powered Dungeon Master (Google Gemini)
+*   **Portrait Artificer:** Generate high-fantasy character portraits based on your description or uploaded reference photos.
+*   **Level Up Wizard:** AI analyzes your class and level to suggest new spells, feats, and stat improvements.
+*   **Lore Master:** Click on any item or feature to get a detailed, Markdown-formatted rules description generated instantly.
+*   **Journal Scribe:** Summarize your session notes into a coherent narrative chronicle.
+*   **DM Chat:** A dedicated "Ask the DM" interface for rule queries and mechanic clarifications.
 
 ### 🎲 Interactive Systems
-*   **Dice Roller:** Click any stat, skill, or attack modifier to roll 3D dice logic instantly. Visual feedback for Critical Success (Nat 20) and Critical Fail (Nat 1).
-*   **Character Management:** Create new characters (with auto-rolled Standard Array stats), switch between active campaigns, and delete old sheets. Data is persisted via `localStorage`.
-
-### 🤖 AI Integration (Google Gemini)
-*   **Portrait Artificer:** Generate high-fantasy character portraits based on your race/class description using text-to-image or image-to-image generation.
-*   **Dungeon Master Chat:** An in-app chat interface to query rules, spell descriptions, or mechanics.
+*   **3D Dice Logic:** Click any stat, skill, or attack to roll. Visual feedback for Critical Successes (Nat 20) and Fails.
+*   **Character Forge:** A step-by-step wizard to create new characters using Standard Array, Point Buy, or Manual stat generation.
+*   **Persistence:** All data is saved automatically to your browser's Local Storage.
 
 ---
 
-## 🛠️ Tech Stack
+## 📚 Documentation
 
-*   **Framework:** React 19
-*   **Language:** TypeScript
-*   **Styling:** Tailwind CSS
-*   **Icons:** Lucide React
-*   **AI SDK:** `@google/genai` (Gemini API)
-*   **Build Tooling:** Compatible with Vite/ESM
+We have detailed documentation available in the `docs/` folder:
+
+*   **[🏗️ Architecture Guide](docs/ARCHITECTURE.md)**: Deep dive into the tech stack, component structure, and data flow.
+*   **[🎮 User Guide](docs/USAGE.md)**: Instructions on setting up your API key, creating characters, and using the dashboard.
+*   **[🤝 Contributing Guide](docs/CONTRIBUTING.md)**: How to set up the dev environment and guidelines for submitting pull requests.
 
 ---
 
-## 🚀 Getting Started
+## 🚀 Quick Start
 
 ### Prerequisites
 *   Node.js (v18+ recommended)
-*   A Google AI Studio API Key (for AI features)
+*   A Google AI Studio API Key (Get it [here](https://aistudio.google.com/))
 
 ### Installation
 
 1.  **Clone the repository**
     ```bash
-    git clone https://github.com/yourusername/dnd-card-sheet.git
-    cd dnd-card-sheet
+    git clone https://github.com/yourusername/vespers-card-sheet.git
+    cd vespers-card-sheet
     ```
 
 2.  **Install Dependencies**
@@ -57,78 +60,18 @@ Instead of scrolling through endless tables, data is organized into 5 intuitive 
     ```
 
 3.  **Environment Setup**
-    Create a `.env` file in the root directory to enable the AI features.
-    
+    Create a `.env` file in the root directory:
     ```env
-    # Get your key at https://aistudio.google.com/
-    API_KEY=your_google_ai_key_here
+    GEMINI_API_KEY=your_google_ai_key_here
     ```
-    
-    *Note: If using Vite, you may need to prefix this as `VITE_API_KEY` and update the references in the code from `process.env.API_KEY` to `import.meta.env.VITE_API_KEY`.*
 
 4.  **Run Local Server**
     ```bash
-    npm start
-    # or
     npm run dev
     ```
 
 ---
 
-## 📂 Project Structure
-
-```text
-/
-├── App.tsx                 # Main Session Manager (State & LocalStorage)
-├── types.ts                # TypeScript Interfaces (CharacterData, Skills, etc.)
-├── constants.tsx           # Default Data & Factories (Vesper template)
-├── components/
-│   ├── Dashboard.tsx       # Main Character Sheet View
-│   ├── CharacterSelection.tsx # Menu for selecting/creating characters
-│   ├── CardStack.tsx       # Reusable Card UI Component
-│   ├── DetailOverlay.tsx   # Modal wrapper for detailed views
-│   ├── DiceRollModal.tsx   # Visual Dice Result Pop-up
-│   ├── SettingsModal.tsx   # Edit Stats/Bio & API Status
-│   ├── PortraitGenerator.tsx # AI Image Generation Modal
-│   ├── AskDMModal.tsx      # AI Chat Interface
-│   └── details/            # Inner content for specific stacks
-│       ├── VitalsDetail.tsx
-│       ├── CombatDetail.tsx
-│       ├── SkillsDetail.tsx
-│       ├── FeaturesDetail.tsx
-│       └── InventoryDetail.tsx
-```
-
----
-
-## 🧩 Customization Guide
-
-### Adding New Skills
-Modify `types.ts` to update the `Skill` interface if needed, and update the `defaultSkills` array in `constants.tsx`.
-
-### Changing the Theme
-The app uses semantic color mapping in `CardStack.tsx` and `DetailOverlay.tsx`.
-```typescript
-const colorMap = {
-  red: "border-l-red-500 shadow-red-900/10",
-  // ... change these Tailwind classes to adjust the theme
-};
-```
-
-### Modifying AI Prompts
-*   **Portrait Prompts:** Located in `components/PortraitGenerator.tsx`. Currently set to generate "High fantasy digital art".
-*   **DM Persona:** Located in `components/AskDMModal.tsx` inside the `systemInstruction` config.
-
----
-
-## 🔒 Security Note
-
-The API Key is currently accessed via `process.env.API_KEY`.
-*   **Local Dev:** This is safe if using `.env` not committed to Git.
-*   **Production:** Do not embed your personal API Key in a public client-side build. For a production deployment, you should proxy these requests through a backend server or require the user to input their own API Key in the Settings modal.
-
----
-
 ## 📜 License
 
-[MIT](https://choosealicense.com/licenses/mit/)
+This project is open source and available under the [MIT License](LICENSE).

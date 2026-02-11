@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
-import { CharacterData, Feature, Spell } from '../types';
-import { X, ArrowUpCircle, Sparkles, Loader2, Check, BookOpen, Crown, Zap } from 'lucide-react';
+import { CharacterData, Feature, Spell, StatKey } from '../types';
+import { X, ArrowUpCircle, Sparkles, Loader2, Check, BookOpen, Crown, Zap, Activity } from 'lucide-react';
 import { GoogleGenAI } from "@google/genai";
-import { checkRateLimit } from '../utils';
+import { checkRateLimit, recalculateCharacterStats } from '../utils';
 
 interface LevelUpModalProps {
   data: CharacterData;
@@ -16,7 +16,7 @@ interface LevelUpPlan {
     choices: {
         id: string;
         label: string; // e.g., "Choose 2 Spells", "Feat or ASI"
-        type: 'spell' | 'feat' | 'language' | 'other';
+        type: 'spell' | 'feat' | 'language' | 'asi' | 'other';
         count: number;
         suggestions?: string[]; // AI suggested options
     }[];
@@ -29,6 +29,7 @@ const LevelUpModal: React.FC<LevelUpModalProps> = ({ data, onUpdate, onClose }) 
   const [loadingText, setLoadingText] = useState("");
   
   const nextLevel = data.level + 1;
+  const STAT_KEYS: StatKey[] = ['STR', 'DEX', 'CON', 'INT', 'WIS', 'CHA'];
 
   // 1. Analyze Step: Ask AI what happens
   const handleStartLevelUp = async () => {
@@ -62,8 +63,10 @@ const LevelUpModal: React.FC<LevelUpModalProps> = ({ data, onUpdate, onClose }) 
                  }
               ]
             }
-            If no choices are needed, choices should be empty array.
-            Include specific suggestions for spells/feats based on a standard build.
+            CRITICAL INSTRUCTIONS:
+            - If this level grants an Ability Score Improvement (ASI), return a choice with type 'asi', count 2 (representing 2 points to distribute), and label "Ability Score Improvement".
+            - If no choices are needed, choices should be empty array.
+            - Include specific suggestions for spells/feats based on a standard build.
         `;
 
         const response = await ai.models.generateContent({
@@ -100,45 +103,83 @@ const LevelUpModal: React.FC<LevelUpModalProps> = ({ data, onUpdate, onClose }) 
     setLoadingText("Inscribing new powers into your sheet...");
 
     try {
-        const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
+        // Calculate new stats first if ASI was chosen
+        let updatedStats = { ...data.stats };
         
-        // Construct prompt to get full text for everything
-        const featsToFetch = plan.newFeatures.map(f => f.name);
-        const choicesToFetch = Object.values(selections).flat();
-        
-        const prompt = `
-            Provide detailed D&D 5e rules text for the following features/spells/feats:
-            ${JSON.stringify([...featsToFetch, ...choicesToFetch])}
-            
-            Return JSON:
-            {
-                "features": [{ "name": "", "source": "Class/Race/Feat", "description": "Short", "fullText": "Long rules" }],
-                "spells": [{ "name": "", "level": 1, "school": "", "description": "", "castingTime": "", "range": "", "duration": "", "components": "" }]
+        plan.choices.forEach(choice => {
+            if (choice.type === 'asi') {
+                const choices = selections[choice.id] || [];
+                choices.forEach(stat => {
+                    if (updatedStats[stat as StatKey]) {
+                        const newScore = updatedStats[stat as StatKey].score + 1;
+                        const newMod = Math.floor((newScore - 10) / 2);
+                        // Update score and mod. Keep save proficiency same, just update value.
+                        const oldSave = updatedStats[stat as StatKey].save;
+                        const oldMod = updatedStats[stat as StatKey].modifier;
+                        const saveDiff = newMod - oldMod;
+                        
+                        updatedStats[stat as StatKey] = {
+                            ...updatedStats[stat as StatKey],
+                            score: newScore,
+                            modifier: newMod,
+                            save: oldSave + saveDiff
+                        };
+                    }
+                });
             }
-        `;
-
-        const response = await ai.models.generateContent({
-            model: 'gemini-3-flash-preview',
-            contents: prompt,
-            config: { responseMimeType: 'application/json' }
         });
 
-        const result = JSON.parse(response.text || '{}');
+        const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
+        
+        // Filter out ASI selections from the prompt request since we handle them locally
+        const nonAsiChoices = plan.choices.filter(c => c.type !== 'asi');
+        const featsToFetch = plan.newFeatures.map(f => f.name);
+        const choicesToFetch = nonAsiChoices.flatMap(c => selections[c.id] || []);
+        
+        let result = { features: [], spells: [] };
+
+        // Only ask AI if there are text-based things to fetch
+        if (featsToFetch.length > 0 || choicesToFetch.length > 0) {
+            const prompt = `
+                Provide detailed D&D 5e rules text for the following features/spells/feats:
+                ${JSON.stringify([...featsToFetch, ...choicesToFetch])}
+                
+                Return JSON:
+                {
+                    "features": [{ "name": "", "source": "Class/Race/Feat", "description": "Short", "fullText": "Long rules" }],
+                    "spells": [{ "name": "", "level": 1, "school": "", "description": "", "castingTime": "", "range": "", "duration": "", "components": "" }]
+                }
+            `;
+
+            const response = await ai.models.generateContent({
+                model: 'gemini-3-flash-preview',
+                contents: prompt,
+                config: { responseMimeType: 'application/json' }
+            });
+
+            result = JSON.parse(response.text || '{}');
+        }
         
         // Merge Data
         const updatedFeatures = [...data.features, ...(result.features || [])];
         const updatedSpells = [...(data.spells || []), ...(result.spells || [])];
         
-        onUpdate({
+        const tempChar: CharacterData = {
+            ...data,
             level: nextLevel,
+            stats: updatedStats,
             hp: {
                 current: data.hp.current + plan.hpAverage,
                 max: data.hp.max + plan.hpAverage
             },
             features: updatedFeatures,
             spells: updatedSpells
-        });
-        
+        };
+
+        // Recalculate derived stats (AC, Attacks, etc.) which might have changed due to Stats or Proficiency
+        const finalChar = recalculateCharacterStats(tempChar);
+
+        onUpdate(finalChar);
         setStep('finalizing');
 
     } catch (e) {
@@ -228,26 +269,49 @@ const LevelUpModal: React.FC<LevelUpModalProps> = ({ data, onUpdate, onClose }) 
                             {plan.choices.map((choice) => (
                                 <div key={choice.id} className="space-y-2">
                                     <label className="text-sm font-bold text-zinc-300 block">{choice.label}</label>
-                                    {Array.from({ length: choice.count }).map((_, i) => (
-                                        <div key={i} className="relative">
-                                            <input 
-                                                type="text"
-                                                list={`suggestions-${choice.id}`}
-                                                placeholder={`Select option ${i + 1}...`}
-                                                className="w-full bg-zinc-950 border border-zinc-700 rounded-lg p-3 text-white focus:border-amber-500 focus:outline-none"
-                                                onChange={(e) => handleSelectionChange(choice.id, e.target.value, i)}
-                                            />
-                                            {choice.suggestions && (
-                                                <datalist id={`suggestions-${choice.id}`}>
-                                                    {choice.suggestions.map(s => <option key={s} value={s} />)}
-                                                </datalist>
-                                            )}
-                                            <div className="absolute right-3 top-3 text-zinc-600 pointer-events-none">
-                                                {choice.type === 'spell' ? <BookOpen size={16} /> : <Zap size={16} />}
-                                            </div>
+                                    
+                                    {choice.type === 'asi' ? (
+                                        // ASI Specific UI
+                                        <div className="grid grid-cols-2 gap-3">
+                                            {Array.from({ length: choice.count }).map((_, i) => (
+                                                <select
+                                                    key={i}
+                                                    className="w-full bg-zinc-950 border border-zinc-700 rounded-lg p-3 text-white focus:border-amber-500 focus:outline-none appearance-none cursor-pointer"
+                                                    onChange={(e) => handleSelectionChange(choice.id, e.target.value, i)}
+                                                    defaultValue=""
+                                                >
+                                                    <option value="" disabled>Select Stat...</option>
+                                                    {STAT_KEYS.map(stat => (
+                                                        <option key={stat} value={stat}>{stat} (Current: {data.stats[stat].score})</option>
+                                                    ))}
+                                                </select>
+                                            ))}
+                                            <p className="col-span-2 text-[10px] text-zinc-500 italic">Select the same stat twice to increase it by +2.</p>
                                         </div>
-                                    ))}
-                                    {choice.suggestions && (
+                                    ) : (
+                                        // Standard Text UI for Spells/Feats
+                                        Array.from({ length: choice.count }).map((_, i) => (
+                                            <div key={i} className="relative">
+                                                <input 
+                                                    type="text"
+                                                    list={`suggestions-${choice.id}`}
+                                                    placeholder={`Select option ${i + 1}...`}
+                                                    className="w-full bg-zinc-950 border border-zinc-700 rounded-lg p-3 text-white focus:border-amber-500 focus:outline-none"
+                                                    onChange={(e) => handleSelectionChange(choice.id, e.target.value, i)}
+                                                />
+                                                {choice.suggestions && (
+                                                    <datalist id={`suggestions-${choice.id}`}>
+                                                        {choice.suggestions.map(s => <option key={s} value={s} />)}
+                                                    </datalist>
+                                                )}
+                                                <div className="absolute right-3 top-3 text-zinc-600 pointer-events-none">
+                                                    {choice.type === 'spell' ? <BookOpen size={16} /> : <Zap size={16} />}
+                                                </div>
+                                            </div>
+                                        ))
+                                    )}
+
+                                    {choice.suggestions && choice.type !== 'asi' && (
                                         <p className="text-[10px] text-zinc-500">Suggestions: {choice.suggestions.join(', ')}</p>
                                     )}
                                 </div>
