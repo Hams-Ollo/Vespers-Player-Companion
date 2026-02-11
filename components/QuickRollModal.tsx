@@ -1,6 +1,6 @@
 
 import React, { useState } from 'react';
-import { X, Dices, Sparkles, Loader2, Wand2, Star, ChevronDown, Activity } from 'lucide-react';
+import { X, Dices, Sparkles, Loader2, Wand2, Star, ChevronDown, Activity, AlertCircle } from 'lucide-react';
 import { CharacterData, StatKey, ProficiencyLevel } from '../types';
 import { GoogleGenAI, Type } from "@google/genai";
 import { checkRateLimit, recalculateCharacterStats } from '../utils';
@@ -9,7 +9,8 @@ import {
   getAllRaceOptions, 
   DND_CLASSES, 
   getClassData, 
-  getRaceSpeed 
+  getRaceSpeed,
+  DND_SKILLS
 } from '../constants';
 
 interface QuickRollModalProps {
@@ -28,6 +29,11 @@ const QuickRollModal: React.FC<QuickRollModalProps> = ({ onCreate, onClose }) =>
   const races = getAllRaceOptions();
   const classes = DND_CLASSES.map(c => c.name);
 
+  // Helper to strip markdown from AI response
+  const cleanJson = (text: string) => {
+    return text.replace(/```json/g, '').replace(/```/g, '').trim();
+  };
+
   const handleRoll = async () => {
     if (!race || !charClass) {
         setError("Please choose a lineage and calling.");
@@ -35,20 +41,20 @@ const QuickRollModal: React.FC<QuickRollModalProps> = ({ onCreate, onClose }) =>
     }
 
     if (!process.env.API_KEY) {
-        setError("AI Neural Link unavailable. Check environment.");
+        setError("AI Neural Link unavailable. Check your configuration.");
         return;
     }
 
     setIsForging(true);
     setError(null);
-    setRitualMessage("Consulting the ancient scrolls...");
+    setRitualMessage("Chanting the incantations...");
 
     try {
         checkRateLimit();
         const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
 
         // 1. Generate Character Data
-        setRitualMessage("Weaving the threads of destiny...");
+        setRitualMessage("Binding the threads of soul and shadow...");
         
         const characterSchema = {
             type: Type.OBJECT,
@@ -117,26 +123,28 @@ const QuickRollModal: React.FC<QuickRollModalProps> = ({ onCreate, onClose }) =>
 
         const dataResponse = await ai.models.generateContent({
             model: 'gemini-3-flash-preview',
-            contents: `Generate a detailed Level 1 D&D 5e character. 
-                      Race: ${race}. Class: ${charClass}. Vibe: ${vibe || 'Traditional'}.
-                      Ability scores must be valid Standard Array (15, 14, 13, 12, 10, 8) distributed correctly for the class, BEFORE racial bonuses.
-                      Apply these racial bonuses to the scores: ${race}.
-                      Pick relevant Level 1 features and starting spells for ${charClass}.`,
+            contents: `Forge a Level 1 D&D 5e character. 
+                      Race: ${race}. Class: ${charClass}. Vibe: ${vibe || 'Epic Fantasy'}.
+                      Instructions:
+                      - Ability scores MUST use Standard Array (15, 14, 13, 12, 10, 8). 
+                      - Distribute scores optimally for the ${charClass} class. 
+                      - DO NOT apply racial bonuses yet; return the BASE array values.
+                      - Pick relevant starting features and equipment.`,
             config: {
                 responseMimeType: 'application/json',
                 responseSchema: characterSchema,
-                temperature: 0.8
+                temperature: 0.85
             }
         });
 
-        const charResult = JSON.parse(dataResponse.text || '{}');
+        const charResult = JSON.parse(cleanJson(dataResponse.text || '{}'));
 
-        // 2. Generate Portrait
+        // 2. Generate Portrait (with internal safety)
         setRitualMessage("Manifesting the physical form...");
         
-        let portraitUrl = "https://picsum.photos/400/400?grayscale";
+        let portraitUrl = "https://images.unsplash.com/photo-1519074069444-1ba4fff66d16?q=80&w=800&auto=format&fit=crop";
         try {
-            const portraitPrompt = `A stunning, professional high-fantasy digital art portrait of a ${race} ${charClass}. ${charResult.appearance}. Cinematic lighting, intricate detail, 1:1 aspect ratio.`;
+            const portraitPrompt = `High-fantasy character portrait, ${race} ${charClass}, ${charResult.appearance}. Professional digital painting, cinematic lighting, 1:1 aspect ratio.`;
             const portraitResponse = await ai.models.generateContent({
                 model: 'gemini-2.5-flash-image',
                 contents: { parts: [{ text: portraitPrompt }] },
@@ -151,23 +159,23 @@ const QuickRollModal: React.FC<QuickRollModalProps> = ({ onCreate, onClose }) =>
                 }
             }
         } catch (imgErr) {
-            console.warn("Portrait failed, using fallback", imgErr);
+            console.warn("Portrait generation failed, using fallback.", imgErr);
         }
 
-        // 3. Assemble Final Object
+        // 3. Assemble Final Character Object
         setRitualMessage("Binding the spirit to the sheet...");
         
         const classData = getClassData(charClass);
         const hitDie = classData?.hitDie ?? 8;
-        const stats: any = {};
         
+        // Initial stat assembly (Base values)
+        const stats: any = {};
         (Object.keys(charResult.stats) as StatKey[]).forEach(k => {
             const score = charResult.stats[k];
-            const mod = Math.floor((score - 10) / 2);
             stats[k] = { 
                 score, 
-                modifier: mod, 
-                save: mod, 
+                modifier: 0, 
+                save: 0, 
                 proficientSave: classData?.savingThrows.includes(k) ?? false 
             };
         });
@@ -177,30 +185,29 @@ const QuickRollModal: React.FC<QuickRollModalProps> = ({ onCreate, onClose }) =>
             name: charResult.name,
             race: race,
             class: charClass,
+            background: charResult.background,
+            alignment: charResult.alignment,
             level: 1,
             campaign: 'Quick Start',
             portraitUrl,
             stats,
-            hp: { 
-                current: hitDie + stats.CON.modifier, 
-                max: hitDie + stats.CON.modifier 
-            },
+            hp: { current: 1, max: 1 }, // Will be fixed by recalculate
             hitDice: { current: 1, max: 1, die: `1d${hitDie}` },
-            ac: 10 + stats.DEX.modifier,
-            initiative: stats.DEX.modifier,
+            ac: 10,
+            initiative: 0,
             speed: getRaceSpeed(race),
-            passivePerception: 10 + stats.WIS.modifier,
+            passivePerception: 10,
             skills: charResult.skills.map((s: any) => ({
                 name: s.name,
-                ability: 'DEX', // Default fallback, recalculate will fix it
+                ability: 'DEX', // Recalculate will fix based on standard skill list
                 modifier: 0,
                 proficiency: s.proficiency as ProficiencyLevel
             })),
             attacks: [],
             features: charResult.features,
             spells: charResult.spells,
-            spellSlots: [], // Recalculate will populate this
-            inventory: { gold: 10, items: [], load: "Light" },
+            spellSlots: [], 
+            inventory: { gold: 15, items: [], load: "Light" },
             journal: [{ 
                 id: 'origin', 
                 timestamp: Date.now(), 
@@ -209,12 +216,18 @@ const QuickRollModal: React.FC<QuickRollModalProps> = ({ onCreate, onClose }) =>
             }]
         };
 
+        // Final math pass (handles racial bonuses, skill abilities, ac, etc)
         const readyChar = recalculateCharacterStats(finalCharacter);
-        onCreate(readyChar);
-        onClose();
+        
+        setRitualMessage("Success! Your hero awaits.");
+        setTimeout(() => {
+          onCreate(readyChar);
+          onClose();
+        }, 800);
 
     } catch (err: any) {
-        setError(err.message || "The ritual was interrupted. Try again.");
+        console.error("Quick Roll Failure:", err);
+        setError(err.message || "The ritual was interrupted by a magical anomaly. Please try again.");
         setIsForging(false);
     }
   };
@@ -234,15 +247,17 @@ const QuickRollModal: React.FC<QuickRollModalProps> = ({ onCreate, onClose }) =>
         )}
 
         {isForging ? (
-          <div className="p-12 text-center space-y-8 flex flex-col items-center justify-center min-h-[400px]">
+          <div className="p-12 text-center space-y-8 flex flex-col items-center justify-center min-h-[440px]">
             <div className="relative">
                 <div className="absolute inset-0 bg-indigo-500/20 blur-3xl rounded-full animate-pulse" />
                 <div className="w-24 h-24 rounded-full border-4 border-indigo-500/20 border-t-indigo-500 animate-spin relative" />
                 <Dices size={40} className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-indigo-400 animate-bounce" />
             </div>
-            <div className="space-y-3">
+            <div className="space-y-4 max-w-xs mx-auto">
                 <h2 className="text-2xl font-display font-bold text-white tracking-widest uppercase animate-pulse">Forging Destiny</h2>
-                <p className="text-zinc-500 font-medium italic">"{ritualMessage}"</p>
+                <div className="h-px bg-zinc-800 w-full" />
+                <p className="text-indigo-400 font-medium italic min-h-[1.5rem]">"{ritualMessage}"</p>
+                <p className="text-zinc-600 text-[10px] uppercase font-black tracking-tighter">This ritual may take up to 20 seconds</p>
             </div>
           </div>
         ) : (
@@ -254,15 +269,16 @@ const QuickRollModal: React.FC<QuickRollModalProps> = ({ onCreate, onClose }) =>
                  </div>
                  <h2 className="text-3xl font-display font-bold text-white">Quick Roll</h2>
               </div>
-              <p className="text-zinc-500 text-sm">Let the AI forge a complete guest character instantly.</p>
+              <p className="text-zinc-500 text-sm">Forge a complete, level 1 guest character with AI logic.</p>
             </div>
 
             <div className="p-8 space-y-6">
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <label className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest ml-1">Lineage</label>
+                  <label htmlFor="qr-race" className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest ml-1">Lineage</label>
                   <div className="relative">
                     <select 
+                      id="qr-race"
                       value={race}
                       onChange={e => setRace(e.target.value)}
                       className="w-full bg-zinc-800 border border-zinc-700 rounded-2xl py-3 px-4 text-white focus:outline-none focus:ring-2 focus:ring-indigo-500/50 appearance-none cursor-pointer"
@@ -275,9 +291,10 @@ const QuickRollModal: React.FC<QuickRollModalProps> = ({ onCreate, onClose }) =>
                 </div>
                 
                 <div className="space-y-2">
-                  <label className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest ml-1">Calling</label>
+                  <label htmlFor="qr-class" className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest ml-1">Calling</label>
                   <div className="relative">
                     <select 
+                      id="qr-class"
                       value={charClass}
                       onChange={e => setCharClass(e.target.value)}
                       className="w-full bg-zinc-800 border border-zinc-700 rounded-2xl py-3 px-4 text-white focus:outline-none focus:ring-2 focus:ring-indigo-500/50 appearance-none cursor-pointer"
@@ -292,11 +309,12 @@ const QuickRollModal: React.FC<QuickRollModalProps> = ({ onCreate, onClose }) =>
 
               <div className="space-y-2">
                 <div className="flex justify-between items-center ml-1">
-                    <label className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest">Character Vibe (Optional)</label>
+                    <label htmlFor="qr-vibe" className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest">Adventurer Vibe (Optional)</label>
                     <Star size={10} className="text-amber-500" />
                 </div>
                 <textarea 
-                  placeholder="e.g. A grumpy pirate, a mysterious noble, a bubbly hermit..."
+                  id="qr-vibe"
+                  placeholder="e.g. A grumpy hermit who speaks to birds, or a noble looking for their lost sibling..."
                   value={vibe}
                   onChange={e => setVibe(e.target.value)}
                   className="w-full h-24 bg-zinc-800 border border-zinc-700 rounded-2xl py-3 px-4 text-white focus:outline-none focus:ring-2 focus:ring-indigo-500/50 resize-none text-sm"
@@ -304,8 +322,9 @@ const QuickRollModal: React.FC<QuickRollModalProps> = ({ onCreate, onClose }) =>
               </div>
 
               {error && (
-                <div className="p-4 bg-red-900/20 border border-red-500/30 rounded-2xl text-red-400 text-xs font-bold animate-in shake duration-300">
-                  {error}
+                <div className="p-4 bg-red-900/20 border border-red-500/30 rounded-2xl text-red-400 text-xs font-bold flex items-start gap-3 animate-in shake duration-300">
+                  <AlertCircle size={16} className="shrink-0 mt-0.5" />
+                  <span>{error}</span>
                 </div>
               )}
 
@@ -322,7 +341,7 @@ const QuickRollModal: React.FC<QuickRollModalProps> = ({ onCreate, onClose }) =>
             
             <div className="p-6 bg-zinc-950/50 border-t border-zinc-800 text-center">
                 <p className="text-[10px] text-zinc-600 uppercase font-black tracking-widest">
-                    AI will roll stats, pick skills, and create a backstory
+                    AI will roll stats, pick equipment, and write a backstory
                 </p>
             </div>
           </div>
