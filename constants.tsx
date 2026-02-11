@@ -760,6 +760,521 @@ export const CLASS_SPELLS_1ST: Record<string, string[]> = {
 };
 
 // ==========================================
+// Class 2nd-Level Spell Lists (PHB)
+// ==========================================
+export const CLASS_SPELLS_2ND: Record<string, string[]> = {
+  'Bard': ['Animal Messenger','Blindness/Deafness','Calm Emotions','Cloud of Daggers','Crown of Madness','Detect Thoughts','Enhance Ability','Enthrall','Heat Metal','Hold Person','Invisibility','Knock','Lesser Restoration','Locate Animals or Plants','Locate Object','Magic Mouth','Phantasmal Force','See Invisibility','Shatter','Silence','Suggestion','Zone of Truth'],
+  'Cleric': ['Aid','Augury','Blindness/Deafness','Calm Emotions','Continual Flame','Enhance Ability','Find Traps','Gentle Repose','Hold Person','Lesser Restoration','Locate Object','Prayer of Healing','Protection from Poison','Silence','Spiritual Weapon','Warding Bond','Zone of Truth'],
+  'Druid': ['Animal Messenger','Barkskin','Beast Sense','Darkvision','Enhance Ability','Find Traps','Flame Blade','Flaming Sphere','Gust of Wind','Heat Metal','Hold Person','Lesser Restoration','Locate Animals or Plants','Locate Object','Moonbeam','Pass without Trace','Protection from Poison','Spike Growth'],
+  'Paladin': ['Aid','Branding Smite','Find Steed','Lesser Restoration','Locate Object','Magic Weapon','Protection from Poison','Zone of Truth'],
+  'Ranger': ['Animal Messenger','Barkskin','Darkvision','Find Traps','Lesser Restoration','Locate Animals or Plants','Locate Object','Pass without Trace','Protection from Poison','Silence','Spike Growth'],
+  'Sorcerer': ['Alter Self','Blindness/Deafness','Blur','Cloud of Daggers','Crown of Madness','Darkness','Darkvision','Detect Thoughts','Enhance Ability','Enlarge/Reduce','Gust of Wind','Hold Person','Invisibility','Knock','Levitate','Mirror Image','Misty Step','Phantasmal Force','Scorching Ray','See Invisibility','Shatter','Spider Climb','Suggestion','Web'],
+  'Warlock': ['Cloud of Daggers','Crown of Madness','Darkness','Enthrall','Hold Person','Invisibility','Mirror Image','Misty Step','Ray of Enfeeblement','Shatter','Spider Climb','Suggestion'],
+  'Wizard': ['Alter Self','Arcane Lock','Blindness/Deafness','Blur','Cloud of Daggers','Continual Flame','Crown of Madness','Darkness','Darkvision','Detect Thoughts','Enlarge/Reduce','Flaming Sphere','Gentle Repose','Gust of Wind','Hold Person','Invisibility','Knock','Levitate','Locate Object','Magic Mouth','Magic Weapon','Melf\'s Acid Arrow','Mirror Image','Misty Step','Nystul\'s Magic Aura','Phantasmal Force','Ray of Enfeeblement','Rope Trick','Scorching Ray','See Invisibility','Shatter','Spider Climb','Suggestion','Web'],
+};
+
+// ==========================================
+// Class 3rd-Level Spell Lists (PHB)
+// ==========================================
+export const CLASS_SPELLS_3RD: Record<string, string[]> = {
+  'Bard': ['Bestow Curse','Clairvoyance','Dispel Magic','Fear','Feign Death','Glyph of Warding','Hypnotic Pattern','Leomund\'s Tiny Hut','Major Image','Nondetection','Plant Growth','Sending','Speak with Dead','Speak with Plants','Stinking Cloud','Tongues'],
+  'Cleric': ['Animate Dead','Beacon of Hope','Bestow Curse','Clairvoyance','Create Food and Water','Daylight','Dispel Magic','Feign Death','Glyph of Warding','Magic Circle','Mass Healing Word','Meld into Stone','Protection from Energy','Remove Curse','Revivify','Sending','Speak with Dead','Spirit Guardians','Tongues','Water Walk'],
+  'Druid': ['Call Lightning','Conjure Animals','Daylight','Dispel Magic','Feign Death','Meld into Stone','Plant Growth','Protection from Energy','Sleet Storm','Speak with Plants','Water Breathing','Water Walk','Wind Wall'],
+  'Paladin': ['Create Food and Water','Daylight','Dispel Magic','Elemental Weapon','Magic Circle','Remove Curse','Revivify'],
+  'Ranger': ['Conjure Animals','Conjure Barrage','Daylight','Lightning Arrow','Nondetection','Plant Growth','Protection from Energy','Speak with Plants','Water Breathing','Water Walk','Wind Wall'],
+  'Sorcerer': ['Blink','Clairvoyance','Counterspell','Daylight','Dispel Magic','Fear','Fireball','Fly','Gaseous Form','Haste','Hypnotic Pattern','Lightning Bolt','Major Image','Protection from Energy','Sleet Storm','Slow','Stinking Cloud','Tongues','Water Breathing','Water Walk'],
+  'Warlock': ['Counterspell','Dispel Magic','Fear','Fly','Gaseous Form','Hunger of Hadar','Hypnotic Pattern','Magic Circle','Major Image','Remove Curse','Tongues','Vampiric Touch'],
+  'Wizard': ['Animate Dead','Bestow Curse','Blink','Clairvoyance','Counterspell','Dispel Magic','Fear','Feign Death','Fireball','Fly','Gaseous Form','Glyph of Warding','Haste','Hypnotic Pattern','Leomund\'s Tiny Hut','Lightning Bolt','Magic Circle','Major Image','Nondetection','Phantom Steed','Protection from Energy','Remove Curse','Sending','Sleet Storm','Slow','Stinking Cloud','Tongues','Vampiric Touch','Water Breathing'],
+};
+
+// ==========================================
+// Class 4th-Level Spell Lists (PHB)
+// ==========================================
+export const CLASS_SPELLS_4TH: Record<string, string[]> = {
+  'Bard': ['Compulsion','Confusion','Dimension Door','Freedom of Movement','Greater Invisibility','Hallucinatory Terrain','Locate Creature','Polymorph'],
+  'Cleric': ['Banishment','Control Water','Death Ward','Divination','Freedom of Movement','Guardian of Faith','Locate Creature','Stone Shape'],
+  'Druid': ['Blight','Confusion','Conjure Minor Elementals','Conjure Woodland Beings','Control Water','Dominate Beast','Freedom of Movement','Giant Insect','Grasping Vine','Hallucinatory Terrain','Ice Storm','Locate Creature','Polymorph','Stone Shape','Stoneskin','Wall of Fire'],
+  'Paladin': ['Banishment','Death Ward','Locate Creature','Staggering Smite'],
+  'Ranger': ['Conjure Woodland Beings','Freedom of Movement','Grasping Vine','Locate Creature','Stoneskin'],
+  'Sorcerer': ['Banishment','Blight','Confusion','Dimension Door','Dominate Beast','Greater Invisibility','Ice Storm','Polymorph','Stoneskin','Wall of Fire'],
+  'Warlock': ['Banishment','Blight','Dimension Door','Hallucinatory Terrain'],
+  'Wizard': ['Arcane Eye','Banishment','Blight','Confusion','Conjure Minor Elementals','Control Water','Dimension Door','Fabricate','Fire Shield','Greater Invisibility','Hallucinatory Terrain','Ice Storm','Leomund\'s Secret Chest','Locate Creature','Mordenkainen\'s Faithful Hound','Mordenkainen\'s Private Sanctum','Otiluke\'s Resilient Sphere','Phantasmal Killer','Polymorph','Stone Shape','Stoneskin','Wall of Fire'],
+};
+
+// ==========================================
+// Class 5th-Level Spell Lists (PHB)
+// ==========================================
+export const CLASS_SPELLS_5TH: Record<string, string[]> = {
+  'Bard': ['Animate Objects','Awaken','Dominate Person','Dream','Geas','Greater Restoration','Hold Monster','Legend Lore','Mass Cure Wounds','Mislead','Modify Memory','Planar Binding','Raise Dead','Scrying','Seeming','Teleportation Circle'],
+  'Cleric': ['Commune','Contagion','Dispel Evil and Good','Flame Strike','Geas','Greater Restoration','Hallow','Insect Plague','Legend Lore','Mass Cure Wounds','Planar Binding','Raise Dead','Scrying'],
+  'Druid': ['Antilife Shell','Awaken','Commune with Nature','Conjure Elemental','Contagion','Geas','Greater Restoration','Insect Plague','Mass Cure Wounds','Planar Binding','Reincarnate','Scrying','Tree Stride','Wall of Stone'],
+  'Paladin': ['Banishing Smite','Circle of Power','Destructive Wave','Dispel Evil and Good','Geas','Raise Dead'],
+  'Ranger': ['Commune with Nature','Conjure Volley','Swift Quiver','Tree Stride'],
+  'Sorcerer': ['Animate Objects','Cloudkill','Cone of Cold','Creation','Dominate Person','Hold Monster','Insect Plague','Seeming','Telekinesis','Teleportation Circle','Wall of Stone'],
+  'Warlock': ['Contact Other Plane','Dream','Hold Monster','Scrying'],
+  'Wizard': ['Animate Objects','Bigby\'s Hand','Cloudkill','Cone of Cold','Conjure Elemental','Contact Other Plane','Creation','Dominate Person','Dream','Geas','Hold Monster','Legend Lore','Mislead','Modify Memory','Passwall','Planar Binding','Rary\'s Telepathic Bond','Scrying','Seeming','Telekinesis','Teleportation Circle','Wall of Force','Wall of Stone'],
+};
+
+// ==========================================
+// Class 6th-Level Spell Lists (PHB)
+// ==========================================
+export const CLASS_SPELLS_6TH: Record<string, string[]> = {
+  'Bard': ['Eyebite','Find the Path','Guards and Wards','Mass Suggestion','Otto\'s Irresistible Dance','Programmed Illusion','True Seeing'],
+  'Cleric': ['Blade Barrier','Create Undead','Find the Path','Forbiddance','Harm','Heal','Heroes\' Feast','Planar Ally','True Seeing','Word of Recall'],
+  'Druid': ['Conjure Fey','Find the Path','Heal','Heroes\' Feast','Move Earth','Sunbeam','Transport via Plants','Wall of Thorns','Wind Walk'],
+  'Sorcerer': ['Chain Lightning','Circle of Death','Disintegrate','Eyebite','Globe of Invulnerability','Mass Suggestion','Move Earth','Sunbeam','True Seeing'],
+  'Warlock': ['Arcane Gate','Circle of Death','Conjure Fey','Create Undead','Eyebite','Flesh to Stone','Mass Suggestion','True Seeing'],
+  'Wizard': ['Arcane Gate','Chain Lightning','Circle of Death','Contingency','Create Undead','Disintegrate','Drawmij\'s Instant Summons','Eyebite','Flesh to Stone','Globe of Invulnerability','Guards and Wards','Magic Jar','Mass Suggestion','Move Earth','Otiluke\'s Freezing Sphere','Otto\'s Irresistible Dance','Programmed Illusion','Sunbeam','True Seeing','Wall of Ice'],
+};
+
+// ==========================================
+// Class 7th-Level Spell Lists (PHB)
+// ==========================================
+export const CLASS_SPELLS_7TH: Record<string, string[]> = {
+  'Bard': ['Etherealness','Forcecage','Mirage Arcane','Mordenkainen\'s Magnificent Mansion','Mordenkainen\'s Sword','Project Image','Regenerate','Resurrection','Symbol','Teleport'],
+  'Cleric': ['Conjure Celestial','Divine Word','Etherealness','Fire Storm','Plane Shift','Regenerate','Resurrection','Symbol','Temple of the Gods'],
+  'Druid': ['Fire Storm','Mirage Arcane','Plane Shift','Regenerate','Reverse Gravity'],
+  'Sorcerer': ['Delayed Blast Fireball','Etherealness','Finger of Death','Fire Storm','Plane Shift','Prismatic Spray','Reverse Gravity','Teleport'],
+  'Warlock': ['Etherealness','Finger of Death','Forcecage','Plane Shift'],
+  'Wizard': ['Delayed Blast Fireball','Etherealness','Finger of Death','Forcecage','Mirage Arcane','Mordenkainen\'s Magnificent Mansion','Mordenkainen\'s Sword','Plane Shift','Prismatic Spray','Project Image','Reverse Gravity','Sequester','Simulacrum','Symbol','Teleport'],
+};
+
+// ==========================================
+// Class 8th-Level Spell Lists (PHB)
+// ==========================================
+export const CLASS_SPELLS_8TH: Record<string, string[]> = {
+  'Bard': ['Dominate Monster','Feeblemind','Glibness','Mind Blank','Power Word Stun'],
+  'Cleric': ['Antimagic Field','Control Weather','Earthquake','Holy Aura'],
+  'Druid': ['Animal Shapes','Antipathy/Sympathy','Control Weather','Earthquake','Feeblemind','Sunburst','Tsunami'],
+  'Sorcerer': ['Dominate Monster','Earthquake','Incendiary Cloud','Power Word Stun','Sunburst'],
+  'Warlock': ['Demiplane','Dominate Monster','Feeblemind','Glibness','Power Word Stun'],
+  'Wizard': ['Antimagic Field','Antipathy/Sympathy','Clone','Control Weather','Demiplane','Dominate Monster','Feeblemind','Incendiary Cloud','Maze','Mind Blank','Power Word Stun','Sunburst','Telepathy'],
+};
+
+// ==========================================
+// Class 9th-Level Spell Lists (PHB)
+// ==========================================
+export const CLASS_SPELLS_9TH: Record<string, string[]> = {
+  'Bard': ['Foresight','Power Word Heal','Power Word Kill','True Polymorph'],
+  'Cleric': ['Astral Projection','Gate','Mass Heal','True Resurrection'],
+  'Druid': ['Foresight','Shapechange','Storm of Vengeance','True Resurrection'],
+  'Sorcerer': ['Gate','Meteor Swarm','Power Word Kill','Time Stop','Wish'],
+  'Warlock': ['Astral Projection','Foresight','Imprisonment','Power Word Kill','True Polymorph'],
+  'Wizard': ['Astral Projection','Foresight','Gate','Imprisonment','Meteor Swarm','Power Word Kill','Prismatic Wall','Shapechange','Time Stop','True Polymorph','Weird','Wish'],
+};
+
+// ==========================================
+// Unified Spell List Accessor
+// ==========================================
+const SPELL_LIST_BY_LEVEL: Record<number, Record<string, string[]>> = {
+  1: CLASS_SPELLS_1ST, 2: CLASS_SPELLS_2ND, 3: CLASS_SPELLS_3RD, 4: CLASS_SPELLS_4TH,
+  5: CLASS_SPELLS_5TH, 6: CLASS_SPELLS_6TH, 7: CLASS_SPELLS_7TH, 8: CLASS_SPELLS_8TH, 9: CLASS_SPELLS_9TH,
+};
+export const getClassSpellsForLevel = (className: string, spellLevel: number): string[] =>
+  SPELL_LIST_BY_LEVEL[spellLevel]?.[className] || [];
+
+export const getMaxSpellLevelForClass = (className: string, charLevel: number): number => {
+  const cls = DND_CLASSES.find(c => c.name === className);
+  if (!cls?.isCaster) return 0;
+  if (className === 'Warlock') {
+    const pact = WARLOCK_PACT_SLOTS[charLevel];
+    if (!pact) return 0;
+    // Warlock pact slots cap at 5th; Mystic Arcanum gives 6th-9th
+    let max = pact.level;
+    if (charLevel >= 17) max = 9; else if (charLevel >= 15) max = 8;
+    else if (charLevel >= 13) max = 7; else if (charLevel >= 11) max = 6;
+    return max;
+  }
+  const isHalf = className === 'Paladin' || className === 'Ranger';
+  const table = isHalf ? HALF_CASTER_SLOTS : FULL_CASTER_SLOTS;
+  const slots = table[charLevel] || [];
+  for (let i = slots.length - 1; i >= 0; i--) {
+    if (slots[i] > 0) return i + 1;
+  }
+  return 0;
+};
+
+// ==========================================
+// Subclass Options (PHB)
+// ==========================================
+export const SUBCLASS_OPTIONS: Record<string, string[]> = {
+  'Barbarian': ['Berserker', 'Totem Warrior'],
+  'Bard': ['College of Lore', 'College of Valor'],
+  'Cleric': ['Knowledge Domain', 'Life Domain', 'Light Domain', 'Nature Domain', 'Tempest Domain', 'Trickery Domain', 'War Domain'],
+  'Druid': ['Circle of the Land', 'Circle of the Moon'],
+  'Fighter': ['Champion', 'Battle Master', 'Eldritch Knight'],
+  'Monk': ['Way of the Open Hand', 'Way of Shadow', 'Way of the Four Elements'],
+  'Paladin': ['Oath of Devotion', 'Oath of the Ancients', 'Oath of Vengeance'],
+  'Ranger': ['Hunter', 'Beast Master'],
+  'Rogue': ['Thief', 'Assassin', 'Arcane Trickster'],
+  'Sorcerer': ['Draconic Bloodline', 'Wild Magic'],
+  'Warlock': ['The Archfey', 'The Fiend', 'The Great Old One'],
+  'Wizard': ['School of Abjuration', 'School of Conjuration', 'School of Divination', 'School of Enchantment', 'School of Evocation', 'School of Illusion', 'School of Necromancy', 'School of Transmutation'],
+};
+
+// ==========================================
+// Subclass Feature Progression (PHB)
+// ==========================================
+export const SUBCLASS_FEATURES: Record<string, Record<string, Record<number, ClassFeatureEntry[]>>> = {
+  'Barbarian': {
+    'Berserker': {
+      3: [{ name: 'Frenzy', description: 'While raging, you can make a single melee weapon attack as a bonus action each turn. When rage ends, suffer one level of exhaustion.' }],
+      6: [{ name: 'Mindless Rage', description: 'You can\'t be charmed or frightened while raging. If charmed/frightened when entering rage, the effect is suspended.' }],
+      10: [{ name: 'Intimidating Presence', description: 'Action: frighten one creature within 30 ft. WIS save DC = 8 + prof + CHA mod.' }],
+      14: [{ name: 'Retaliation', description: 'When you take damage from a creature within 5 ft, you can use your reaction to make a melee weapon attack against that creature.' }],
+    },
+    'Totem Warrior': {
+      3: [{ name: 'Totem Spirit', description: 'Choose Bear (resistance to all damage except psychic while raging), Eagle (opportunity attacks have disadvantage, Dash as bonus action while raging), or Wolf (allies have advantage on melee attacks vs creatures within 5 ft of you while raging).' }],
+      6: [{ name: 'Aspect of the Beast', description: 'Choose Bear (carrying capacity doubled, advantage on STR checks to push/pull/lift), Eagle (see up to 1 mile clearly, dim light doesn\'t impose disadvantage on Perception), or Wolf (track at fast pace, move stealthily at normal pace).' }],
+      10: [{ name: 'Spirit Walker', description: 'Cast Commune with Nature as a ritual.' }],
+      14: [{ name: 'Totemic Attunement', description: 'Choose Bear (while raging, hostile creatures within 5 ft have disadvantage on attacks vs allies), Eagle (flying speed equal to walking speed while raging), or Wolf (bonus action to knock Large or smaller creature prone on melee hit while raging).' }],
+    },
+  },
+  'Bard': {
+    'College of Lore': {
+      3: [{ name: 'Bonus Proficiencies', description: 'Gain proficiency with any three skills of your choice.' },
+          { name: 'Cutting Words', description: 'Reaction: when a creature you can see within 60 ft makes an attack roll, ability check, or damage roll, expend one Bardic Inspiration die to subtract the result from their roll.' }],
+      6: [{ name: 'Additional Magical Secrets', description: 'Learn two spells from any class. They count as bard spells for you.' }],
+      14: [{ name: 'Peerless Skill', description: 'When you make an ability check, you can expend one Bardic Inspiration die and add it to the result.' }],
+    },
+    'College of Valor': {
+      3: [{ name: 'Bonus Proficiencies', description: 'Gain proficiency with medium armor, shields, and martial weapons.' },
+          { name: 'Combat Inspiration', description: 'Creatures using your Bardic Inspiration can also add the die to a weapon damage roll or to AC against one attack.' }],
+      6: [{ name: 'Extra Attack', description: 'Attack twice per Attack action.' }],
+      14: [{ name: 'Battle Magic', description: 'When you cast a bard spell as an action, you can make one weapon attack as a bonus action.' }],
+    },
+  },
+  'Cleric': {
+    'Knowledge Domain': {
+      1: [{ name: 'Blessings of Knowledge', description: 'Proficiency and double proficiency in two of: Arcana, History, Nature, or Religion.' }],
+      2: [{ name: 'Knowledge of the Ages', description: 'Channel Divinity: gain proficiency with one skill or tool for 10 minutes.' }],
+      6: [{ name: 'Read Thoughts', description: 'Channel Divinity: read a creature\'s surface thoughts and cast Suggestion on it.' }],
+      8: [{ name: 'Potent Spellcasting', description: 'Add WIS modifier to cleric cantrip damage.' }],
+      17: [{ name: 'Visions of the Past', description: 'Meditate to receive visions about an object or area.' }],
+    },
+    'Life Domain': {
+      1: [{ name: 'Bonus Proficiency', description: 'Gain proficiency with heavy armor.' },
+          { name: 'Disciple of Life', description: 'Healing spells heal an additional 2 + spell level HP.' }],
+      2: [{ name: 'Preserve Life', description: 'Channel Divinity: restore HP equal to 5 × cleric level, divided among creatures within 30 ft.' }],
+      6: [{ name: 'Blessed Healer', description: 'When you cast a healing spell on another creature, you also regain 2 + spell level HP.' }],
+      8: [{ name: 'Divine Strike', description: 'Once per turn, deal +1d8 radiant damage with a weapon attack. +2d8 at 14th level.' }],
+      17: [{ name: 'Supreme Healing', description: 'Healing spells always heal maximum instead of rolling.' }],
+    },
+    'Light Domain': {
+      1: [{ name: 'Bonus Cantrip', description: 'You gain the Light cantrip if you don\'t already know it.' },
+          { name: 'Warding Flare', description: 'Reaction: impose disadvantage on an attack roll against you. WIS mod uses per long rest.' }],
+      2: [{ name: 'Radiance of the Dawn', description: 'Channel Divinity: dispel magical darkness within 30 ft and deal 2d10 + cleric level radiant damage (CON save for half).' }],
+      6: [{ name: 'Improved Flare', description: 'You can use Warding Flare when a creature attacks an ally within 30 ft.' }],
+      8: [{ name: 'Potent Spellcasting', description: 'Add WIS modifier to cleric cantrip damage.' }],
+      17: [{ name: 'Corona of Light', description: 'Action: emit bright light 60 ft. Enemies in it have disadvantage on saves vs fire/radiant spells.' }],
+    },
+    'Tempest Domain': {
+      1: [{ name: 'Bonus Proficiencies', description: 'Gain proficiency with martial weapons and heavy armor.' },
+          { name: 'Wrath of the Storm', description: 'Reaction: when hit by melee attack, deal 2d8 lightning or thunder damage (DEX save for half). WIS mod uses per long rest.' }],
+      2: [{ name: 'Destructive Wrath', description: 'Channel Divinity: deal maximum damage on lightning or thunder damage rolls.' }],
+      6: [{ name: 'Thunderbolt Strike', description: 'When you deal lightning damage to a Large or smaller creature, push it up to 10 ft away.' }],
+      8: [{ name: 'Divine Strike', description: 'Once per turn, deal +1d8 thunder damage with a weapon attack. +2d8 at 14th level.' }],
+      17: [{ name: 'Stormborn', description: 'You have a flying speed equal to your walking speed when outdoors.' }],
+    },
+    'Trickery Domain': {
+      1: [{ name: 'Blessing of the Trickster', description: 'Touch a willing creature to give it advantage on Stealth checks for 1 hour.' }],
+      2: [{ name: 'Invoke Duplicity', description: 'Channel Divinity: create an illusory double for 1 minute. Advantage on attacks against enemies within 5 ft of it.' }],
+      6: [{ name: 'Cloak of Shadows', description: 'Channel Divinity: become invisible until end of next turn or until you attack or cast a spell.' }],
+      8: [{ name: 'Divine Strike', description: 'Once per turn, deal +1d8 poison damage with a weapon attack. +2d8 at 14th level.' }],
+      17: [{ name: 'Improved Duplicity', description: 'You can create up to four duplicates instead of one.' }],
+    },
+    'War Domain': {
+      1: [{ name: 'Bonus Proficiencies', description: 'Gain proficiency with martial weapons and heavy armor.' },
+          { name: 'War Priest', description: 'When you take the Attack action, make one weapon attack as a bonus action. WIS mod uses per long rest.' }],
+      2: [{ name: 'Guided Strike', description: 'Channel Divinity: +10 to an attack roll.' }],
+      6: [{ name: 'War God\'s Blessing', description: 'Channel Divinity: give a creature within 30 ft +10 to an attack roll (reaction).' }],
+      8: [{ name: 'Divine Strike', description: 'Once per turn, deal +1d8 damage (same type as weapon) on a weapon attack. +2d8 at 14th level.' }],
+      17: [{ name: 'Avatar of Battle', description: 'Resistance to bludgeoning, piercing, and slashing damage from nonmagical attacks.' }],
+    },
+    'Nature Domain': {
+      1: [{ name: 'Acolyte of Nature', description: 'Learn one druid cantrip and gain proficiency in one of: Animal Handling, Nature, or Survival.' },
+          { name: 'Bonus Proficiency', description: 'Gain proficiency with heavy armor.' }],
+      2: [{ name: 'Charm Animals and Plants', description: 'Channel Divinity: charm all beasts and plant creatures within 30 ft (WIS save).' }],
+      6: [{ name: 'Dampen Elements', description: 'Reaction: grant resistance to acid, cold, fire, lightning, or thunder damage to a creature within 30 ft.' }],
+      8: [{ name: 'Divine Strike', description: 'Once per turn, deal +1d8 cold, fire, or lightning damage with a weapon attack. +2d8 at 14th level.' }],
+      17: [{ name: 'Master of Nature', description: 'Command creatures charmed by your Charm Animals and Plants feature.' }],
+    },
+  },
+  'Druid': {
+    'Circle of the Land': {
+      2: [{ name: 'Bonus Cantrip', description: 'Learn one additional druid cantrip.' },
+          { name: 'Natural Recovery', description: 'Recover spell slots totaling up to half druid level (rounded up) during short rest. 1/long rest.' }],
+      3: [{ name: 'Circle Spells', description: 'Choose a land type. Gain bonus spells at 3rd, 5th, 7th, and 9th level based on chosen terrain.' }],
+      6: [{ name: 'Land\'s Stride', description: 'Moving through nonmagical difficult terrain costs no extra movement. Advantage on saves vs plants that impede movement.' }],
+      10: [{ name: 'Nature\'s Ward', description: 'Immune to poison, disease, and being charmed or frightened by elementals or fey.' }],
+      14: [{ name: 'Nature\'s Sanctuary', description: 'Beasts and plant creatures must make WIS save to attack you.' }],
+    },
+    'Circle of the Moon': {
+      2: [{ name: 'Combat Wild Shape', description: 'Use Wild Shape as bonus action. Spend a spell slot to regain 1d8 HP per slot level in beast form.' },
+          { name: 'Circle Forms', description: 'Wild Shape into beasts with CR up to 1 (CR increases at higher levels).' }],
+      6: [{ name: 'Primal Strike', description: 'Attacks in beast form count as magical.' }],
+      10: [{ name: 'Elemental Wild Shape', description: 'Expend two Wild Shape uses to transform into an elemental.' }],
+      14: [{ name: 'Thousand Forms', description: 'Cast Alter Self at will.' }],
+    },
+  },
+  'Fighter': {
+    'Champion': {
+      3: [{ name: 'Improved Critical', description: 'Your weapon attacks score a critical hit on a roll of 19 or 20.' }],
+      7: [{ name: 'Remarkable Athlete', description: 'Add half proficiency bonus (rounded up) to any STR, DEX, or CON check that doesn\'t already use your proficiency bonus. Running long jump distance increases by STR modifier feet.' }],
+      10: [{ name: 'Additional Fighting Style', description: 'Choose a second Fighting Style option.' }],
+      15: [{ name: 'Superior Critical', description: 'Your weapon attacks score a critical hit on a roll of 18-20.' }],
+      18: [{ name: 'Survivor', description: 'At the start of each turn, if you have no more than half your HP and at least 1 HP, regain 5 + CON modifier HP.' }],
+    },
+    'Battle Master': {
+      3: [{ name: 'Combat Superiority', description: 'Learn 3 maneuvers and gain 4 superiority dice (d8). Regain all on short/long rest.' },
+          { name: 'Student of War', description: 'Gain proficiency with one artisan\'s tool.' }],
+      7: [{ name: 'Know Your Enemy', description: 'After 1 minute observing a creature, learn if it is equal, superior, or inferior in two characteristics.' }],
+      10: [{ name: 'Improved Combat Superiority', description: 'Superiority dice become d10. Learn 2 additional maneuvers.' }],
+      15: [{ name: 'Relentless', description: 'If you have no superiority dice on initiative, you regain 1.' }],
+      18: [{ name: 'Improved Combat Superiority (d12)', description: 'Superiority dice become d12. Learn 2 additional maneuvers.' }],
+    },
+    'Eldritch Knight': {
+      3: [{ name: 'Spellcasting', description: 'Learn 2 cantrips and 3 1st-level wizard spells (abjuration/evocation). INT-based. Use Fighter spell slot progression.' },
+          { name: 'Weapon Bond', description: 'Bond with up to two weapons. Cannot be disarmed; summon bonded weapon as bonus action.' }],
+      7: [{ name: 'War Magic', description: 'When you cast a cantrip, make one weapon attack as a bonus action.' }],
+      10: [{ name: 'Eldritch Strike', description: 'When you hit with a weapon attack, target has disadvantage on next save vs your spell before end of your next turn.' }],
+      15: [{ name: 'Arcane Charge', description: 'When you use Action Surge, you can teleport up to 30 ft to an unoccupied space before the extra action.' }],
+      18: [{ name: 'Improved War Magic', description: 'When you cast a spell as an action, make one weapon attack as a bonus action.' }],
+    },
+  },
+  'Monk': {
+    'Way of the Open Hand': {
+      3: [{ name: 'Open Hand Technique', description: 'When you hit with a Flurry of Blows attack, you can impose one effect: knock prone (DEX save), push 15 ft (STR save), or prevent reactions until end of your next turn.' }],
+      6: [{ name: 'Wholeness of Body', description: 'Action: regain HP equal to 3 × monk level. 1/long rest.' }],
+      11: [{ name: 'Tranquility', description: 'At end of long rest, gain effect of Sanctuary spell (WIS save DC = 8 + WIS mod + prof) until start of next long rest.' }],
+      17: [{ name: 'Quivering Palm', description: '3 ki: set up vibrations in a creature. You can end the vibrations to either deal 10d10 necrotic damage or reduce to 0 HP (CON save).' }],
+    },
+    'Way of Shadow': {
+      3: [{ name: 'Shadow Arts', description: '2 ki: cast Darkness, Darkvision, Pass without Trace, or Silence. Free: Minor Illusion cantrip.' }],
+      6: [{ name: 'Shadow Step', description: 'Bonus action: teleport up to 60 ft from one dim light/darkness area to another. Advantage on first melee attack after teleporting.' }],
+      11: [{ name: 'Cloak of Shadows', description: 'Action: become invisible in dim light or darkness until you make an attack or cast a spell.' }],
+      17: [{ name: 'Opportunist', description: 'Reaction: when a creature within 5 ft is hit by an attack from someone else, you can make a melee attack against that creature.' }],
+    },
+    'Way of the Four Elements': {
+      3: [{ name: 'Disciple of the Elements', description: 'Learn Elemental Attunement discipline and one other elemental discipline of your choice. Spend ki to cast associated spells.' }],
+      6: [{ name: 'Extra Discipline', description: 'Learn one additional elemental discipline.' }],
+      11: [{ name: 'Extra Discipline (2)', description: 'Learn one additional elemental discipline.' }],
+      17: [{ name: 'Extra Discipline (3)', description: 'Learn one additional elemental discipline.' }],
+    },
+  },
+  'Paladin': {
+    'Oath of Devotion': {
+      3: [{ name: 'Sacred Weapon', description: 'Channel Divinity: add CHA mod to attack rolls for 1 minute. Weapon emits bright light 20 ft.' },
+          { name: 'Turn the Unholy', description: 'Channel Divinity: each fiend/undead within 30 ft must make WIS save or be turned for 1 minute.' }],
+      7: [{ name: 'Aura of Devotion', description: 'You and friendly creatures within 10 ft can\'t be charmed.' }],
+      15: [{ name: 'Purity of Spirit', description: 'You are always under the effects of Protection from Evil and Good.' }],
+      20: [{ name: 'Holy Nimbus', description: 'Action: for 1 minute, emit bright light 30 ft, deal 10 radiant damage to enemies that start their turn in light. Advantage on saves vs fiend/undead spells.' }],
+    },
+    'Oath of the Ancients': {
+      3: [{ name: 'Nature\'s Wrath', description: 'Channel Divinity: restrain a creature within 10 ft with spectral vines (STR/DEX save).' },
+          { name: 'Turn the Faithless', description: 'Channel Divinity: turn fey and fiends within 30 ft (WIS save).' }],
+      7: [{ name: 'Aura of Warding', description: 'You and friendly creatures within 10 ft have resistance to spell damage.' }],
+      15: [{ name: 'Undying Sentinel', description: 'When reduced to 0 HP and not killed outright, drop to 1 HP instead. 1/long rest. No aging effects.' }],
+      20: [{ name: 'Elder Champion', description: 'Action: for 1 minute, regain 10 HP at start of each turn, cast paladin spells as bonus action, enemies within 10 ft have disadvantage on saves vs your spells and Channel Divinity.' }],
+    },
+    'Oath of Vengeance': {
+      3: [{ name: 'Abjure Enemy', description: 'Channel Divinity: one creature within 60 ft must make WIS save or be frightened and speed is 0. Fiends/undead have disadvantage.' },
+          { name: 'Vow of Enmity', description: 'Channel Divinity: advantage on attack rolls against one creature within 10 ft for 1 minute.' }],
+      7: [{ name: 'Relentless Avenger', description: 'When you hit with an opportunity attack, move up to half your speed immediately after without provoking opportunity attacks.' }],
+      15: [{ name: 'Soul of Vengeance', description: 'Reaction: when your Vow of Enmity target makes an attack, you can make a melee weapon attack against it.' }],
+      20: [{ name: 'Avenging Angel', description: 'Action: for 1 hour, sprout wings (60 ft fly speed), emit aura that frightens enemies within 30 ft (WIS save).' }],
+    },
+  },
+  'Ranger': {
+    'Hunter': {
+      3: [{ name: 'Hunter\'s Prey', description: 'Choose Colossus Slayer (+1d8 to injured targets), Giant Killer (reaction attack when Large+ creature misses), or Horde Breaker (extra attack against adjacent creature).' }],
+      7: [{ name: 'Defensive Tactics', description: 'Choose Escape the Horde (opportunity attacks have disadvantage), Multiattack Defense (+4 AC after being hit by multiattack), or Steel Will (advantage on saves vs frightened).' }],
+      11: [{ name: 'Multiattack', description: 'Choose Volley (ranged attack against all creatures within 10 ft of a point in range) or Whirlwind Attack (melee attack against all creatures within 5 ft).' }],
+      15: [{ name: 'Superior Hunter\'s Defense', description: 'Choose Evasion, Stand Against the Tide (redirect missed melee to another creature), or Uncanny Dodge.' }],
+    },
+    'Beast Master': {
+      3: [{ name: 'Ranger\'s Companion', description: 'Gain a beast companion (CR 1/4 or lower, Medium or smaller). It obeys your commands, adds your proficiency bonus to AC/attacks/saves/damage.' }],
+      7: [{ name: 'Exceptional Training', description: 'Bonus action: command companion to Dash, Disengage, Dodge, or Help. Its attacks count as magical.' }],
+      11: [{ name: 'Bestial Fury', description: 'Your companion can make two attacks when you command it to Attack.' }],
+      15: [{ name: 'Share Spells', description: 'When you cast a spell targeting yourself, it also affects your companion if within 30 ft.' }],
+    },
+  },
+  'Rogue': {
+    'Thief': {
+      3: [{ name: 'Fast Hands', description: 'Cunning Action lets you also make Sleight of Hand checks, use thieves\' tools, or Use an Object.' },
+          { name: 'Second-Story Work', description: 'Climbing costs no extra movement. Running jump distance increases by DEX modifier feet.' }],
+      9: [{ name: 'Supreme Sneak', description: 'Advantage on Stealth checks if you move no more than half your speed.' }],
+      13: [{ name: 'Use Magic Device', description: 'Ignore all class, race, and level requirements on magic items.' }],
+      17: [{ name: 'Thief\'s Reflexes', description: 'Two turns during the first round of combat (second turn at initiative minus 10).' }],
+    },
+    'Assassin': {
+      3: [{ name: 'Bonus Proficiencies', description: 'Gain proficiency with the disguise kit and poisoner\'s kit.' },
+          { name: 'Assassinate', description: 'Advantage on attacks against creatures that haven\'t taken a turn. Hits against surprised creatures are critical hits.' }],
+      9: [{ name: 'Infiltration Expertise', description: 'Spend 7 days and 25 gp to create a false identity with documentation and established persona.' }],
+      13: [{ name: 'Impostor', description: 'Unerringly mimic another person\'s speech, writing, and behavior after 3 hours of study.' }],
+      17: [{ name: 'Death Strike', description: 'When you hit a surprised creature, it must make a CON save (DC 8 + DEX mod + prof) or take double damage.' }],
+    },
+    'Arcane Trickster': {
+      3: [{ name: 'Spellcasting', description: 'Learn 2 cantrips (Mage Hand + 1) and 3 1st-level wizard spells (enchantment/illusion). INT-based.' },
+          { name: 'Mage Hand Legerdemain', description: 'Mage Hand is invisible. Use it to stash/retrieve objects, pick locks, and disarm traps at range.' }],
+      9: [{ name: 'Magical Ambush', description: 'If you are hidden when you cast a spell, target has disadvantage on the save.' }],
+      13: [{ name: 'Versatile Trickster', description: 'Bonus action: use Mage Hand to distract a creature within 5 ft of it, giving you advantage on attacks against that creature.' }],
+      17: [{ name: 'Spell Thief', description: 'Reaction: when a creature casts a spell targeting you, make ability check vs DC 10 + spell level to steal it. Creature can\'t cast it for 8 hours, and you can cast it using your slots.' }],
+    },
+  },
+  'Sorcerer': {
+    'Draconic Bloodline': {
+      1: [{ name: 'Dragon Ancestor', description: 'Choose a dragon type. You can speak Draconic. Double proficiency bonus on CHA checks with dragons.' },
+          { name: 'Draconic Resilience', description: 'HP maximum increases by 1 per sorcerer level. Without armor, AC = 13 + DEX modifier.' }],
+      6: [{ name: 'Elemental Affinity', description: 'When you cast a spell that deals your dragon type\'s damage, add CHA modifier to one damage roll. Spend 1 sorcery point to gain resistance to that damage type for 1 hour.' }],
+      14: [{ name: 'Dragon Wings', description: 'Bonus action: sprout dragon wings, gaining flying speed equal to your current speed. Don\'t work if wearing armor you\'re not proficient with.' }],
+      18: [{ name: 'Draconic Presence', description: '5 sorcery points: create a 60 ft aura of awe or fear for 1 minute (CHA save). Concentration.' }],
+    },
+    'Wild Magic': {
+      1: [{ name: 'Wild Magic Surge', description: 'After casting a sorcerer spell of 1st level or higher, DM can have you roll d20. On 1, roll on Wild Magic Surge table.' },
+          { name: 'Tides of Chaos', description: 'Gain advantage on one attack, ability check, or save. Recharges on long rest, or when DM triggers a Wild Magic Surge.' }],
+      6: [{ name: 'Bend Luck', description: '2 sorcery points (reaction): add or subtract 1d4 from a creature\'s attack roll, ability check, or save.' }],
+      14: [{ name: 'Controlled Chaos', description: 'When you roll on the Wild Magic Surge table, roll twice and use either result.' }],
+      18: [{ name: 'Spell Bombardment', description: 'When you roll damage for a spell and roll the highest number on a die, reroll that die and add it to the damage. Once per turn.' }],
+    },
+  },
+  'Warlock': {
+    'The Archfey': {
+      1: [{ name: 'Fey Presence', description: 'Action: charm or frighten creatures within 10 ft cube (WIS save). 1/short or long rest.' }],
+      6: [{ name: 'Misty Escape', description: 'Reaction: when you take damage, turn invisible and teleport up to 60 ft. Invisible until start of next turn. 1/short or long rest.' }],
+      10: [{ name: 'Beguiling Defenses', description: 'Immune to being charmed. Reaction: when a creature tries to charm you, turn the charm back on it (WIS save).' }],
+      14: [{ name: 'Dark Delirium', description: 'Action: charm or frighten a creature for 1 minute (WIS save). Target thinks it\'s lost in a misty realm. Concentration. 1/short or long rest.' }],
+    },
+    'The Fiend': {
+      1: [{ name: 'Dark One\'s Blessing', description: 'When you reduce a hostile creature to 0 HP, gain temporary HP equal to CHA modifier + warlock level.' }],
+      6: [{ name: 'Dark One\'s Own Luck', description: 'Add 1d10 to an ability check or saving throw. 1/short or long rest.' }],
+      10: [{ name: 'Fiendish Resilience', description: 'After a short or long rest, choose a damage type (not magical or silvered). You have resistance to it until you choose a different one.' }],
+      14: [{ name: 'Hurl Through Hell', description: 'When you hit with an attack, send the creature through the lower planes. It takes 10d10 psychic damage. 1/long rest.' }],
+    },
+    'The Great Old One': {
+      1: [{ name: 'Awakened Mind', description: 'Telepathically speak to any creature within 30 ft. No shared language needed.' }],
+      6: [{ name: 'Entropic Ward', description: 'Reaction: impose disadvantage on an attack against you. If it misses, gain advantage on your next attack against the attacker. 1/short or long rest.' }],
+      10: [{ name: 'Thought Shield', description: 'Thoughts can\'t be read by telepathy. Resistance to psychic damage. Creature that deals psychic damage to you takes the same amount.' }],
+      14: [{ name: 'Create Thrall', description: 'Touch an incapacitated humanoid to charm it permanently. Telepathic bond across any distance on the same plane.' }],
+    },
+  },
+  'Wizard': {
+    'School of Abjuration': {
+      2: [{ name: 'Abjuration Savant', description: 'Halved gold and time to copy abjuration spells into your spellbook.' },
+          { name: 'Arcane Ward', description: 'When you cast an abjuration spell of 1st+, create a ward with HP = 2 × wizard level + INT mod. Absorbs damage for you.' }],
+      6: [{ name: 'Projected Ward', description: 'Reaction: when a creature within 30 ft takes damage, your Arcane Ward absorbs the damage instead.' }],
+      10: [{ name: 'Improved Abjuration', description: 'Add proficiency bonus to ability checks for abjuration spells (like Counterspell and Dispel Magic).' }],
+      14: [{ name: 'Spell Resistance', description: 'Advantage on saves against spells. Resistance to damage from spells.' }],
+    },
+    'School of Conjuration': {
+      2: [{ name: 'Conjuration Savant', description: 'Halved gold and time to copy conjuration spells.' },
+          { name: 'Minor Conjuration', description: 'Action: conjure an inanimate object (up to 3 ft, 10 lbs) that lasts 1 hour.' }],
+      6: [{ name: 'Benign Transposition', description: 'Action: teleport up to 30 ft, or swap places with a willing Small/Medium creature within 30 ft. 1/long rest or until you cast a conjuration spell.' }],
+      10: [{ name: 'Focused Conjuration', description: 'Concentration on conjuration spells can\'t be broken by taking damage.' }],
+      14: [{ name: 'Durable Summons', description: 'Creatures you summon with conjuration spells gain 30 temporary HP.' }],
+    },
+    'School of Divination': {
+      2: [{ name: 'Divination Savant', description: 'Halved gold and time to copy divination spells.' },
+          { name: 'Portent', description: 'After a long rest, roll 2d20 and record the results. You can replace any attack roll, saving throw, or ability check made by you or a creature you can see with one of these rolls.' }],
+      6: [{ name: 'Expert Divination', description: 'When you cast a divination spell of 2nd+ using a spell slot, regain a lower-level spell slot.' }],
+      10: [{ name: 'The Third Eye', description: 'Action: gain one of darkvision 60 ft, ethereal sight 60 ft, read any language, or see invisible creatures within 10 ft. Until short/long rest.' }],
+      14: [{ name: 'Greater Portent', description: 'Roll 3d20 for Portent instead of 2.' }],
+    },
+    'School of Enchantment': {
+      2: [{ name: 'Enchantment Savant', description: 'Halved gold and time to copy enchantment spells.' },
+          { name: 'Hypnotic Gaze', description: 'Action: charm a creature within 5 ft (WIS save). Incapacitated and speed 0 while you maintain (action each turn). Lasts 1 minute.' }],
+      6: [{ name: 'Instinctive Charm', description: 'Reaction: when attacked by a creature within 30 ft, redirect the attack to another creature (WIS save). 1/long rest.' }],
+      10: [{ name: 'Split Enchantment', description: 'When you cast an enchantment spell of 1st+ targeting one creature, you can target a second creature.' }],
+      14: [{ name: 'Alter Memories', description: 'When you charm a creature, erase its memory of being charmed. Also cast Modify Memory on a charmed target without using a spell slot.' }],
+    },
+    'School of Evocation': {
+      2: [{ name: 'Evocation Savant', description: 'Halved gold and time to copy evocation spells.' },
+          { name: 'Sculpt Spells', description: 'When you cast an evocation spell affecting others, choose 1 + spell level creatures that automatically succeed on saves and take no damage.' }],
+      6: [{ name: 'Potent Cantrip', description: 'Creatures that succeed on saves against your cantrips still take half damage.' }],
+      10: [{ name: 'Empowered Evocation', description: 'Add INT modifier to one damage roll of any wizard evocation spell.' }],
+      14: [{ name: 'Overchannel', description: 'When you cast a wizard spell of 5th level or lower that deals damage, you can deal maximum damage. After first use between long rests, take 2d12 necrotic per spell level (increases each additional use).' }],
+    },
+    'School of Illusion': {
+      2: [{ name: 'Illusion Savant', description: 'Halved gold and time to copy illusion spells.' },
+          { name: 'Improved Minor Illusion', description: 'Learn Minor Illusion if you don\'t know it. You can create both a sound and an image with a single casting.' }],
+      6: [{ name: 'Malleable Illusions', description: 'When you cast an illusion spell with duration of 1 minute+, you can use an action to change the nature of the illusion.' }],
+      10: [{ name: 'Illusory Self', description: 'Reaction: when a creature attacks you, create an illusory duplicate that causes the attack to miss. 1/short or long rest.' }],
+      14: [{ name: 'Illusory Reality', description: 'Bonus action: make one inanimate, nonmagical object in your illusion spell real for 1 minute.' }],
+    },
+    'School of Necromancy': {
+      2: [{ name: 'Necromancy Savant', description: 'Halved gold and time to copy necromancy spells.' },
+          { name: 'Grim Harvest', description: 'When you kill a creature with a spell of 1st+, regain HP = 2 × spell level (3 × for necromancy spells). Not from undead or constructs.' }],
+      6: [{ name: 'Undead Thralls', description: 'Animate Dead adds extra HP (wizard level) and extra damage (proficiency bonus) to undead you create.' }],
+      10: [{ name: 'Inured to Undeath', description: 'Resistance to necrotic damage. HP maximum can\'t be reduced.' }],
+      14: [{ name: 'Command Undead', description: 'Action: target one undead (WIS save, INT 8+ gets advantage). On fail, it obeys your commands for 24 hours. 12+ INT undead can repeat saves.' }],
+    },
+    'School of Transmutation': {
+      2: [{ name: 'Transmutation Savant', description: 'Halved gold and time to copy transmutation spells.' },
+          { name: 'Minor Alchemy', description: 'Transform one nonmagical object (wood, stone, iron, copper, or silver) into one of the other materials. Duration: 1 hour per 10 minutes spent.' }],
+      6: [{ name: 'Transmuter\'s Stone', description: 'Create a stone granting one benefit: darkvision 60 ft, +10 ft speed, proficiency in CON saves, or resistance to acid/cold/fire/lightning/thunder.' }],
+      10: [{ name: 'Shapechanger', description: 'Add Polymorph to your spellbook if not there. Cast Polymorph on yourself without spending a spell slot. 1/short or long rest.' }],
+      14: [{ name: 'Master Transmuter', description: 'Action: destroy your transmuter\'s stone to: transmute one nonmagical object into another, remove all curses/diseases/poisons, cast Raise Dead without a slot, or reduce apparent age by 3d10 years.' }],
+    },
+  },
+};
+
+// ==========================================
+// Starting Gold by Level (DMG guidelines)
+// ==========================================
+export const STARTING_GOLD_BY_LEVEL: Record<number, number> = {
+  1: 150, 2: 200, 3: 300, 4: 400,
+  5: 500, 6: 600, 7: 750, 8: 900,
+  9: 1100, 10: 1300, 11: 1700, 12: 2100,
+  13: 2600, 14: 3200, 15: 3900, 16: 4700,
+  17: 5600, 18: 6800, 19: 8200, 20: 10000,
+};
+
+// ==========================================
+// Multi-Level Character Creation Helpers
+// ==========================================
+export const getAllFeaturesUpToLevel = (className: string, level: number): ClassFeatureEntry[] => {
+  const classFeats = CLASS_FEATURES[className];
+  if (!classFeats) return [];
+  const result: ClassFeatureEntry[] = [];
+  for (let l = 1; l <= level; l++) {
+    if (classFeats[l]) result.push(...classFeats[l]);
+  }
+  return result;
+};
+
+export const getSubclassFeaturesUpToLevel = (className: string, subclass: string, level: number): ClassFeatureEntry[] => {
+  const tree = SUBCLASS_FEATURES[className]?.[subclass];
+  if (!tree) return [];
+  const result: ClassFeatureEntry[] = [];
+  for (let l = 1; l <= level; l++) {
+    if (tree[l]) result.push(...tree[l]);
+  }
+  return result;
+};
+
+export const calculateMultiLevelHP = (hitDie: number, conMod: number, level: number, hpBonusPerLevel: number = 0): number => {
+  if (level <= 0) return 1;
+  // Level 1: max hit die + CON mod + racial bonus
+  const level1HP = hitDie + conMod + hpBonusPerLevel;
+  if (level === 1) return Math.max(1, level1HP);
+  // Levels 2+: average hit die (die/2 + 1) + CON mod + racial bonus per level
+  const avgPerLevel = Math.floor(hitDie / 2) + 1 + conMod + hpBonusPerLevel;
+  return Math.max(1, level1HP + avgPerLevel * (level - 1));
+};
+
+export const getASILevelsUpTo = (className: string, level: number): number[] => {
+  const cls = DND_CLASSES.find(c => c.name === className);
+  if (!cls) return [];
+  return cls.asiLevels.filter(l => l <= level);
+};
+
+export const getExpertiseLevelsUpTo = (className: string, level: number): number[] => {
+  const cls = DND_CLASSES.find(c => c.name === className);
+  if (!cls?.expertiseLevels) return [];
+  return cls.expertiseLevels.filter(l => l <= level);
+};
+
+// ==========================================
 // Helper Functions
 // ==========================================
 export const getClassFeatures = (className: string, level: number): ClassFeatureEntry[] =>

@@ -9,7 +9,10 @@ import {
   getAllRaceOptions, 
   DND_CLASSES, 
   getClassData, 
-  getRaceSpeed 
+  getRaceSpeed,
+  SUBCLASS_OPTIONS,
+  calculateMultiLevelHP,
+  STARTING_GOLD_BY_LEVEL,
 } from '../constants';
 
 interface QuickRollModalProps {
@@ -20,6 +23,7 @@ interface QuickRollModalProps {
 const QuickRollModal: React.FC<QuickRollModalProps> = ({ onCreate, onClose }) => {
   const [race, setRace] = useState('');
   const [charClass, setCharClass] = useState('');
+  const [quickLevel, setQuickLevel] = useState(1);
   const [vibe, setVibe] = useState('');
   const [isForging, setIsForging] = useState(false);
   const [ritualMessage, setRitualMessage] = useState('');
@@ -141,7 +145,8 @@ const QuickRollModal: React.FC<QuickRollModalProps> = ({ onCreate, onClose }) =>
                     }
                 },
                 appearance: { type: Type.STRING },
-                backstory: { type: Type.STRING }
+                backstory: { type: Type.STRING },
+                subclass: { type: Type.STRING }
             },
             required: ["name", "stats", "background", "alignment", "skills", "features", "spells", "appearance", "backstory"]
         };
@@ -149,13 +154,14 @@ const QuickRollModal: React.FC<QuickRollModalProps> = ({ onCreate, onClose }) =>
         const dataResponse = await Promise.race([
             ai.models.generateContent({
                 model: 'gemini-3-flash-preview',
-                contents: `Generate a detailed Level 1 D&D 5e character. 
+                contents: `Generate a detailed Level ${quickLevel} D&D 5e character. 
                           Race: ${race}. Class: ${charClass}. Vibe: ${vibe || 'Traditional'}.
                           Instructions:
-                          1. Ability scores must be valid Standard Array (15, 14, 13, 12, 10, 8) distributed correctly for the class, BEFORE racial bonuses.
+                          1. Ability scores must be valid Standard Array (15, 14, 13, 12, 10, 8) distributed correctly for the class, BEFORE racial bonuses. If level >= 4, apply ASI bonuses (+2 to primary ability at each ASI level).
                           2. Apply these racial bonuses to the scores: ${race}.
-                          3. Pick relevant Level 1 features and starting spells for ${charClass}.
-                          4. Include a physical description and backstory.`,
+                          3. Pick relevant features and spells appropriate for a Level ${quickLevel} ${charClass}.
+                          4. ${quickLevel >= (getClassData(charClass)?.subclassLevel ?? 3) ? `Include a subclass from: ${(SUBCLASS_OPTIONS[charClass] || []).join(', ')}.` : 'No subclass needed at this level.'}
+                          5. Include a physical description and backstory.`,
                 config: {
                     responseMimeType: 'application/json',
                     responseSchema: characterSchema,
@@ -223,20 +229,23 @@ const QuickRollModal: React.FC<QuickRollModalProps> = ({ onCreate, onClose }) =>
             };
         });
 
+        const totalHP = calculateMultiLevelHP(hitDie, stats.CON.modifier, quickLevel);
+
         const finalCharacter: CharacterData = {
             id: generateId(),
             name: charResult.name || 'Unnamed Adventurer',
             race: race,
             class: charClass,
-            level: 1,
+            subclass: charResult.subclass || undefined,
+            level: quickLevel,
             campaign: 'Quick Start',
             portraitUrl,
             stats,
             hp: { 
-                current: hitDie + stats.CON.modifier, 
-                max: hitDie + stats.CON.modifier 
+                current: totalHP, 
+                max: totalHP 
             },
-            hitDice: { current: 1, max: 1, die: `1d${hitDie}` },
+            hitDice: { current: quickLevel, max: quickLevel, die: `${quickLevel}d${hitDie}` },
             ac: 10 + stats.DEX.modifier,
             initiative: stats.DEX.modifier,
             speed: getRaceSpeed(race),
@@ -251,7 +260,7 @@ const QuickRollModal: React.FC<QuickRollModalProps> = ({ onCreate, onClose }) =>
             features: charResult.features || [],
             spells: charResult.spells || [],
             spellSlots: [], 
-            inventory: { gold: 10, items: [], load: "Light" },
+            inventory: { gold: STARTING_GOLD_BY_LEVEL[quickLevel] || 150, items: [], load: "Light" },
             journal: [{ 
                 id: 'origin', 
                 timestamp: Date.now(), 
@@ -312,10 +321,27 @@ const QuickRollModal: React.FC<QuickRollModalProps> = ({ onCreate, onClose }) =>
                  </div>
                  <h2 className="text-3xl font-display font-bold text-white">Quick Roll</h2>
               </div>
-              <p className="text-zinc-500 text-sm">Forge a complete level 1 guest character instantly with AI logic.</p>
+              <p className="text-zinc-500 text-sm">Forge a complete guest character instantly with AI logic.</p>
             </div>
 
             <div className="p-8 space-y-6">
+              <div className="space-y-2">
+                <label htmlFor="qr-level" className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest ml-1">Starting Level</label>
+                <div className="relative">
+                  <select
+                    id="qr-level"
+                    value={quickLevel}
+                    onChange={e => setQuickLevel(parseInt(e.target.value))}
+                    className="w-full bg-zinc-800 border border-zinc-700 rounded-2xl py-3.5 px-4 text-white focus:outline-none focus:ring-2 focus:ring-indigo-500/50 appearance-none cursor-pointer text-sm font-bold"
+                  >
+                    {Array.from({ length: 20 }, (_, i) => i + 1).map(l => (
+                      <option key={l} value={l}>Level {l}</option>
+                    ))}
+                  </select>
+                  <ChevronDown size={16} className="absolute right-4 top-1/2 -translate-y-1/2 text-zinc-500 pointer-events-none" />
+                </div>
+              </div>
+
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
                   <label htmlFor="qr-race" className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest ml-1">Lineage</label>

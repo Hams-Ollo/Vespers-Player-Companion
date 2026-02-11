@@ -2,7 +2,7 @@
 
 > Development tracking for The Player's Companion — organized by epics, features, user stories, and tasks.
 >
-> **Last updated:** 2026-02-11
+> **Last updated:** 2026-02-13
 
 ---
 
@@ -34,6 +34,7 @@
 | ✅ | Feature | Class feature progression | @Hams-Ollo | 12 classes, levels 1–20 |
 | ✅ | Feature | Spell slot progression tables | @Hams-Ollo | Full/half/pact caster |
 | ✅ | Feature | Starter equipment shop | @Hams-Ollo | Roll gold, buy gear post-creation |
+| ✅ | Feature | Full PHB marketplace catalog | @Hams-Ollo | 160+ items: all PHB Ch.5 weapons, armor, gear, consumables |
 | ✅ | Feature | Character selection & deletion | @Hams-Ollo | |
 | ✅ | Task | localStorage persistence | @Hams-Ollo | `vesper_chars` key (guest fallback) |
 | ⬜ | User Story | As a player, I want to export/import my character as JSON | — | Download `.json`, import from file |
@@ -54,7 +55,7 @@
 | ✅ | Feature | Detail overlay views (7) | @Hams-Ollo | Vitals, Combat, Skills, Features, Spells, Inventory, Journal |
 | ✅ | Feature | Dice roller | @Hams-Ollo | Advanced parser: Adv/Dis, complex expressions (2d6+4), crit/fail |
 | ✅ | Feature | Rest system (short + long) | @Hams-Ollo | Hit dice recovery |
-| ✅ | Feature | In-game equipment shop | @Hams-Ollo | Buy/sell from inventory |
+| ✅ | Feature | In-game equipment shop | @Hams-Ollo | Buy/sell from inventory; search bar, category filter, gp/sp/cp formatting |
 | ✅ | Feature | Settings modal (stat editor) | @Hams-Ollo | Manual stat overrides |
 | ✅ | User Story | As a player, I want stat edits to auto-update derived values | @Hams-Ollo | AC, initiative, skills, saves cascade via recalculateCharacterStats |
 | ⬜ | User Story | As a player, I want to track active conditions | — | Poisoned, Stunned, etc. with effects |
@@ -79,6 +80,8 @@
 | ✅ | Feature | Journal AI chronicles | @Hams-Ollo | Session summary generation |
 | ✅ | Task | Centralized Gemini client | @Hams-Ollo | `lib/gemini.ts` shared module |
 | ✅ | Task | Rate limiting (2s throttle) | @Hams-Ollo | Closure-based, tamper-resistant |
+| ✅ | Task | Gemini 3 API compatibility | @Hams-Ollo | `thinkingConfig: LOW`, removed incompatible temperature, `parseApiError()` helper |
+| ✅ | Feature | Quick Roll AI character gen | @Hams-Ollo | One-click AI character creation via `gemini-3-flash-preview` with structured output |
 | ✅ | Feature | Voice-to-text transcription | @Hams-Ollo | `TranscriptionButton` component |
 | 🟥 | User Story | As a developer, I want the API key not exposed in the bundle | — | Blocked: needs backend proxy |
 | ⬜ | Feature | Backend API proxy | — | Server-side Gemini key management |
@@ -245,9 +248,9 @@
 
 | Epic | Done | In Progress | Not Started | Total |
 |------|------|-------------|-------------|-------|
-| 1. Core Character Management | 13 | 0 | 4 | 17 |
+| 1. Core Character Management | 14 | 0 | 4 | 18 |
 | 2. Dashboard & Gameplay | 7 | 0 | 6 | 13 |
-| 3. AI Integration | 8 | 0 | 2 | 10 |
+| 3. AI Integration | 10 | 0 | 2 | 12 |
 | 4. Auth & Multiplayer | 4 | 0 | 2 | 6 |
 | 5. Deployment & Infrastructure | 9 | 0 | 1 | 10 |
 | 5b. Developer Experience | 7 | 0 | 4 | 11 |
@@ -256,7 +259,7 @@
 | 8. DM Tool Suite (Phase 3) | 0 | 0 | 14 | 14 |
 | 9. Higher-Level Char Creation (Phase 4) | 0 | 0 | 10 | 10 |
 | 10. Polish & Extras | 0 | 0 | 5 | 5 |
-| **Total** | **56** | **0** | **55** | **111** |
+| **Total** | **59** | **0** | **55** | **114** |
 
 ---
 

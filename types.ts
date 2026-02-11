@@ -74,6 +74,7 @@ export interface CharacterData {
   background?: string;
   alignment?: string;
   level: number;
+  subclass?: string;
   campaign?: string;
   portraitUrl: string;
   stats: Record<StatKey, Stat>;

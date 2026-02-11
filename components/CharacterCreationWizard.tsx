@@ -24,6 +24,14 @@ import {
   getSpellsKnownCount,
   getSpellSlotsForLevel,
   getRaceTraits,
+  SUBCLASS_OPTIONS,
+  getClassSpellsForLevel,
+  getMaxSpellLevelForClass,
+  getAllFeaturesUpToLevel,
+  getSubclassFeaturesUpToLevel,
+  calculateMultiLevelHP,
+  getASILevelsUpTo,
+  STARTING_GOLD_BY_LEVEL,
 } from '../constants';
 import { GoogleGenAI } from "@google/genai";
 import { checkRateLimit, recalculateCharacterStats, calculateModifier } from '../utils';
@@ -43,15 +51,19 @@ interface WizardState {
   alignment: string;
   campaign: string;
   halfElfBonuses: StatKey[];
+  startingLevel: number;
+  subclass: string;
   // Step 2: Ability Scores
   statMethod: StatMethod;
   baseStats: Record<StatKey, number>;
   standardAssignment: Record<StatKey, number | null>;
+  asiAllocations: Record<number, [StatKey, StatKey]>;
   // Step 3: Skills & Proficiencies
   selectedSkills: string[];
   selectedTools: string[];
   // Step 4: Initial Spells & Powers
   selectedPowers: string[];
+  higherLevelSpells: Record<number, string[]>;
   // Step 5: Character Concept
   appearance: string;
   backstory: string;
@@ -67,12 +79,16 @@ const INITIAL_STATE: WizardState = {
   alignment: '',
   campaign: '',
   halfElfBonuses: [],
+  startingLevel: 1,
+  subclass: '',
   statMethod: 'standard',
   baseStats: { STR: 8, DEX: 8, CON: 8, INT: 8, WIS: 8, CHA: 8 },
   standardAssignment: { STR: null, DEX: null, CON: null, INT: null, WIS: null, CHA: null },
+  asiAllocations: {},
   selectedSkills: [],
   selectedTools: [],
   selectedPowers: [],
+  higherLevelSpells: {},
   appearance: '',
   backstory: '',
   motivations: '',
@@ -219,6 +235,42 @@ const StepIdentity: React.FC<{
             <option value="Solo Adventure">Solo Adventure</option>
           </select>
         </div>
+
+        <div className="grid grid-cols-2 gap-4">
+          <div>
+            <label htmlFor="wizard-level" className="text-xs font-bold text-zinc-500 uppercase tracking-widest block mb-1">Starting Level</label>
+            <select
+              id="wizard-level"
+              value={state.startingLevel}
+              onChange={e => onChange({ startingLevel: parseInt(e.target.value), subclass: '', selectedPowers: [], higherLevelSpells: {}, asiAllocations: {} })}
+              className="w-full bg-zinc-950 border border-zinc-700 rounded-lg p-3 text-white focus:outline-none focus:border-amber-500"
+            >
+              {Array.from({ length: 20 }, (_, i) => i + 1).map(l => (
+                <option key={l} value={l}>Level {l}</option>
+              ))}
+            </select>
+          </div>
+          {state.charClass && (() => {
+            const cd = getClassData(state.charClass);
+            const subclassLevel = cd?.subclassLevel ?? 3;
+            const options = SUBCLASS_OPTIONS[state.charClass] || [];
+            if (state.startingLevel < subclassLevel || options.length === 0) return null;
+            return (
+              <div>
+                <label htmlFor="wizard-subclass" className="text-xs font-bold text-zinc-500 uppercase tracking-widest block mb-1">{cd?.subclassName || 'Subclass'}</label>
+                <select
+                  id="wizard-subclass"
+                  value={state.subclass}
+                  onChange={e => onChange({ subclass: e.target.value })}
+                  className="w-full bg-zinc-950 border border-zinc-700 rounded-lg p-3 text-white focus:outline-none focus:border-amber-500"
+                >
+                  <option value="">Select {cd?.subclassName || 'Subclass'}...</option>
+                  {options.map(s => <option key={s} value={s}>{s}</option>)}
+                </select>
+              </div>
+            );
+          })()}
+        </div>
       </div>
     </div>
   );
@@ -234,6 +286,26 @@ const StepAbilityScores: React.FC<{
   }, [state.baseStats, state.statMethod]);
 
   const pointsRemaining = POINT_BUY_TOTAL - pointsSpent;
+
+  const asiLevels = useMemo(() => getASILevelsUpTo(state.charClass, state.startingLevel), [state.charClass, state.startingLevel]);
+
+  // Auto-assign ASIs to primary ability when not user-overridden
+  const effectiveAsiAllocations = useMemo(() => {
+    const cd = getClassData(state.charClass);
+    const primary = cd?.primaryAbility || 'STR';
+    const result: Record<number, [StatKey, StatKey]> = {};
+    for (const lvl of asiLevels) {
+      result[lvl] = state.asiAllocations[lvl] || [primary, primary];
+    }
+    return result;
+  }, [asiLevels, state.asiAllocations, state.charClass]);
+
+  const handleAsiChange = (level: number, idx: 0 | 1, value: StatKey) => {
+    const current = effectiveAsiAllocations[level] || ['STR', 'STR'];
+    const updated: [StatKey, StatKey] = [...current];
+    updated[idx] = value;
+    onChange({ asiAllocations: { ...state.asiAllocations, [level]: updated } });
+  };
 
   const handlePointBuyChange = (key: StatKey, increment: boolean) => {
     const currentScore = state.baseStats[key];
@@ -388,9 +460,38 @@ const StepAbilityScores: React.FC<{
       <div className="bg-zinc-900/50 border border-zinc-800 rounded-xl p-4 flex gap-3 items-start">
         <Star size={16} className="text-amber-500 shrink-0 mt-0.5" />
         <p className="text-xs text-zinc-500 leading-relaxed italic">
-          Total Score = Base Score + Racial Bonus. Your Proficiency Bonus (+2) will be added to your skills and saves in the next step.
+          Total Score = Base Score + Racial Bonus{asiLevels.length > 0 ? ' + ASI Bonuses' : ''}. Your Proficiency Bonus (+{Math.floor((state.startingLevel - 1) / 4) + 2}) will be added to your skills and saves in the next step.
         </p>
       </div>
+
+      {asiLevels.length > 0 && (
+        <div className="space-y-3">
+          <h3 className="text-sm font-bold text-amber-400 uppercase tracking-widest">Ability Score Improvements</h3>
+          <p className="text-[10px] text-zinc-500">Your {state.charClass} gains ASIs at these levels. Each grants +1 to two abilities (or +2 to one). Auto-assigned to primary ability — click to override.</p>
+          <div className="space-y-2">
+            {asiLevels.map(lvl => {
+              const alloc = effectiveAsiAllocations[lvl];
+              return (
+                <div key={lvl} className="bg-zinc-800/60 border border-zinc-700 rounded-xl p-3 flex items-center gap-4">
+                  <span className="text-xs font-bold text-zinc-400 w-16 shrink-0">Level {lvl}</span>
+                  <div className="flex gap-2 flex-1">
+                    {([0, 1] as const).map(idx => (
+                      <select
+                        key={idx}
+                        value={alloc?.[idx] || 'STR'}
+                        onChange={e => handleAsiChange(lvl, idx, e.target.value as StatKey)}
+                        className="flex-1 bg-zinc-950 border border-zinc-700 rounded-lg p-2 text-xs font-bold text-white focus:outline-none focus:border-amber-500"
+                      >
+                        {STAT_KEYS.map(s => <option key={s} value={s}>{s} +1</option>)}
+                      </select>
+                    ))}
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      )}
     </div>
   );
 };
@@ -458,28 +559,55 @@ const StepPowers: React.FC<{
 }> = ({ state, onChange }) => {
   const classData = getClassData(state.charClass);
   const isCaster = classData?.isCaster ?? false;
+  const level = state.startingLevel;
   const cantrips = CLASS_CANTRIPS[state.charClass] || [];
-  const spells1st = CLASS_SPELLS_1ST[state.charClass] || [];
-  const cantripsNeeded = getCantripsKnownCount(state.charClass, 1);
-  const spellsNeeded = getSpellsKnownCount(state.charClass, 1);
+  const cantripsNeeded = getCantripsKnownCount(state.charClass, level);
+  const spellsNeeded = getSpellsKnownCount(state.charClass, level);
+  const maxSpellLevel = getMaxSpellLevelForClass(state.charClass, level);
   const raceTraits = getRaceTraits(state.race);
-  const racialSpellNames = (raceTraits?.racialSpells || []).filter(s => s.minCharLevel <= 1).map(s => s.name);
+  const racialSpellNames = (raceTraits?.racialSpells || []).filter(s => s.minCharLevel <= level).map(s => s.name);
 
-  const selectedCantrips = state.selectedPowers.filter(p => cantrips.includes(p) || racialSpellNames.includes(p));
-  const selectedSpells = state.selectedPowers.filter(p => spells1st.includes(p));
+  // Build combined spell list for all accessible levels
+  const spellsByLevel: Record<number, string[]> = {};
+  for (let sl = 1; sl <= maxSpellLevel; sl++) {
+    const spells = getClassSpellsForLevel(state.charClass, sl);
+    if (spells.length > 0) spellsByLevel[sl] = spells;
+  }
 
-  const togglePower = (powerName: string) => {
+  const selectedCantrips = state.selectedPowers.filter(p => cantrips.includes(p));
+  // Combine all non-cantrip selections across levels
+  const allHigherSelections = Object.values(state.higherLevelSpells).flat();
+  const totalSpellsSelected = state.selectedPowers.filter(p => !cantrips.includes(p) && !racialSpellNames.includes(p)).length + allHigherSelections.length;
+
+  const toggleCantrip = (name: string) => {
     const current = [...state.selectedPowers];
-    const idx = current.indexOf(powerName);
+    const idx = current.indexOf(name);
     if (idx >= 0) { current.splice(idx, 1); }
-    else {
-      const isCantrip = cantrips.includes(powerName);
-      if (isCantrip && selectedCantrips.length >= cantripsNeeded) return;
-      if (!isCantrip && spells1st.includes(powerName) && spellsNeeded > 0 && selectedSpells.length >= spellsNeeded) return;
-      current.push(powerName);
-    }
+    else if (selectedCantrips.length < cantripsNeeded) { current.push(name); }
     onChange({ selectedPowers: current });
   };
+
+  const toggleSpell = (spellLevel: number, name: string) => {
+    if (spellLevel === 1) {
+      // Handle 1st-level spells in selectedPowers for backward compat
+      const current = [...state.selectedPowers];
+      const idx = current.indexOf(name);
+      if (idx >= 0) { current.splice(idx, 1); }
+      else if (totalSpellsSelected < spellsNeeded) { current.push(name); }
+      onChange({ selectedPowers: current });
+    } else {
+      const levelSpells = [...(state.higherLevelSpells[spellLevel] || [])];
+      const idx = levelSpells.indexOf(name);
+      if (idx >= 0) { levelSpells.splice(idx, 1); }
+      else if (totalSpellsSelected < spellsNeeded) { levelSpells.push(name); }
+      onChange({ higherLevelSpells: { ...state.higherLevelSpells, [spellLevel]: levelSpells } });
+    }
+  };
+
+  const spells1st = getClassSpellsForLevel(state.charClass, 1);
+  const selected1stLevel = state.selectedPowers.filter(p => spells1st.includes(p));
+
+  const [spellSearch, setSpellSearch] = useState('');
 
   if (!isCaster && racialSpellNames.length === 0) {
     return (
@@ -490,7 +618,7 @@ const StepPowers: React.FC<{
         </div>
         <div className="bg-zinc-800/50 border border-zinc-700 rounded-xl p-6 text-center space-y-3">
           <Zap size={32} className="mx-auto text-zinc-600" />
-          <p className="text-zinc-400 text-sm">No spells to select at Level 1. You may gain spellcasting through your subclass at Level {classData?.subclassLevel || 3} (e.g., Eldritch Knight, Arcane Trickster).</p>
+          <p className="text-zinc-400 text-sm">No spells to select at Level {level}. You may gain spellcasting through your subclass at Level {classData?.subclassLevel || 3} (e.g., Eldritch Knight, Arcane Trickster).</p>
         </div>
       </div>
     );
@@ -500,21 +628,46 @@ const StepPowers: React.FC<{
     <div className="p-4 sm:p-6 md:p-8 space-y-6">
       <div className="text-center">
         <h2 className="text-xl sm:text-2xl md:text-3xl font-display font-bold text-white">Spells & Cantrips</h2>
-        <p className="text-zinc-500 text-sm mt-1">Choose from the {state.charClass} spell list</p>
+        <p className="text-zinc-500 text-sm mt-1">Choose from the {state.charClass} spell list (Level {level})</p>
       </div>
+
+      {maxSpellLevel > 1 && (
+        <input
+          type="text"
+          value={spellSearch}
+          onChange={e => setSpellSearch(e.target.value)}
+          placeholder="Search spells..."
+          className="w-full bg-zinc-950 border border-zinc-700 rounded-lg p-2.5 text-sm text-white focus:outline-none focus:border-amber-500"
+        />
+      )}
 
       <div className="space-y-6">
         <div className="bg-zinc-950 border border-zinc-800 rounded-xl p-4 flex flex-col gap-3">
           <div className="flex justify-between items-center">
             <h4 className="text-xs font-bold text-zinc-500 uppercase tracking-widest">Selected</h4>
+            {spellsNeeded > 0 && (
+              <span className={`text-xs font-bold ${totalSpellsSelected >= spellsNeeded ? 'text-green-500' : 'text-amber-500'}`}>
+                Spells: {totalSpellsSelected} / {spellsNeeded}
+              </span>
+            )}
           </div>
           <div className="flex flex-wrap gap-2 min-h-[32px]">
-            {state.selectedPowers.map(p => (
+            {[...state.selectedPowers, ...allHigherSelections].map(p => (
               <span key={p} className={`${cantrips.includes(p) ? 'bg-cyan-900/30 text-cyan-200 border-cyan-500/30' : 'bg-purple-900/30 text-purple-200 border-purple-500/30'} border px-3 py-1.5 rounded-full text-xs font-bold flex items-center gap-2`}>
-                {p} <button aria-label={`Remove ${p}`} onClick={() => togglePower(p)}><X size={12} /></button>
+                {p} <button aria-label={`Remove ${p}`} onClick={() => {
+                  if (cantrips.includes(p) || spells1st.includes(p) || racialSpellNames.includes(p)) {
+                    toggleCantrip(p); // reuse toggle for selectedPowers
+                    if (spells1st.includes(p)) toggleSpell(1, p);
+                  } else {
+                    // Find which level it belongs to and remove
+                    for (const [lvlStr, spells] of Object.entries(state.higherLevelSpells)) {
+                      if (spells.includes(p)) { toggleSpell(parseInt(lvlStr), p); break; }
+                    }
+                  }
+                }}><X size={12} /></button>
               </span>
             ))}
-            {state.selectedPowers.length === 0 && <span className="text-zinc-700 italic text-sm">Tap spells below to add...</span>}
+            {state.selectedPowers.length === 0 && allHigherSelections.length === 0 && <span className="text-zinc-700 italic text-sm">Tap spells below to add...</span>}
           </div>
         </div>
 
@@ -522,13 +675,13 @@ const StepPowers: React.FC<{
           <div className="space-y-2">
             <div className="flex justify-between items-center px-1">
               <span className="text-xs font-bold text-cyan-500 uppercase tracking-widest">Cantrips</span>
-              <span className={`text-xs font-bold ${selectedCantrips.filter(c => cantrips.includes(c)).length >= cantripsNeeded ? 'text-green-500' : 'text-amber-500'}`}>
-                {selectedCantrips.filter(c => cantrips.includes(c)).length} / {cantripsNeeded}
+              <span className={`text-xs font-bold ${selectedCantrips.length >= cantripsNeeded ? 'text-green-500' : 'text-amber-500'}`}>
+                {selectedCantrips.length} / {cantripsNeeded}
               </span>
             </div>
             <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
-              {cantrips.map(name => (
-                <button key={name} onClick={() => togglePower(name)}
+              {cantrips.filter(n => !spellSearch || n.toLowerCase().includes(spellSearch.toLowerCase())).map(name => (
+                <button key={name} onClick={() => toggleCantrip(name)}
                   className={`p-2 rounded-lg border text-xs font-bold transition-all text-left ${
                     state.selectedPowers.includes(name)
                     ? 'bg-cyan-600/20 border-cyan-500 text-cyan-200'
@@ -541,17 +694,14 @@ const StepPowers: React.FC<{
           </div>
         )}
 
-        {spellsNeeded > 0 && spells1st.length > 0 && (
+        {spells1st.length > 0 && spellsNeeded > 0 && (
           <div className="space-y-2">
             <div className="flex justify-between items-center px-1">
               <span className="text-xs font-bold text-purple-500 uppercase tracking-widest">1st-Level Spells</span>
-              <span className={`text-xs font-bold ${selectedSpells.length >= spellsNeeded ? 'text-green-500' : 'text-amber-500'}`}>
-                {selectedSpells.length} / {spellsNeeded}
-              </span>
             </div>
             <div className="grid grid-cols-2 gap-2">
-              {spells1st.map(name => (
-                <button key={name} onClick={() => togglePower(name)}
+              {spells1st.filter(n => !spellSearch || n.toLowerCase().includes(spellSearch.toLowerCase())).map(name => (
+                <button key={name} onClick={() => toggleSpell(1, name)}
                   className={`p-2 rounded-lg border text-xs font-bold transition-all text-left ${
                     state.selectedPowers.includes(name)
                     ? 'bg-purple-600/20 border-purple-500 text-purple-200'
@@ -563,6 +713,33 @@ const StepPowers: React.FC<{
             </div>
           </div>
         )}
+
+        {Object.entries(spellsByLevel).filter(([sl]) => parseInt(sl) >= 2).map(([sl, spells]) => {
+          const spellLevel = parseInt(sl);
+          const selected = state.higherLevelSpells[spellLevel] || [];
+          const levelColors = ['', '', 'indigo', 'violet', 'fuchsia', 'pink', 'rose', 'orange', 'red', 'yellow'];
+          const color = levelColors[spellLevel] || 'purple';
+          return (
+            <div key={spellLevel} className="space-y-2">
+              <div className="flex justify-between items-center px-1">
+                <span className={`text-xs font-bold text-${color}-500 uppercase tracking-widest`}>{spellLevel}{['', 'st', 'nd', 'rd'][spellLevel] || 'th'}-Level Spells</span>
+                <span className="text-xs font-bold text-zinc-500">{selected.length} selected</span>
+              </div>
+              <div className="grid grid-cols-2 gap-2">
+                {spells.filter(n => !spellSearch || n.toLowerCase().includes(spellSearch.toLowerCase())).map(name => (
+                  <button key={name} onClick={() => toggleSpell(spellLevel, name)}
+                    className={`p-2 rounded-lg border text-xs font-bold transition-all text-left ${
+                      selected.includes(name)
+                      ? `bg-purple-600/20 border-purple-500 text-purple-200`
+                      : 'bg-zinc-800/50 border-zinc-700 text-zinc-400 hover:border-purple-600'
+                    }`}>
+                    {name}
+                  </button>
+                ))}
+              </div>
+            </div>
+          );
+        })}
 
         {racialSpellNames.length > 0 && (
           <div className="space-y-2">
@@ -640,6 +817,18 @@ const StepReview: React.FC<{
             <span className="text-white font-bold">{state.race} {state.charClass}</span>
           </div>
         </div>
+        <div className="p-4 grid grid-cols-2 gap-4">
+          <div>
+            <span className="text-[10px] font-bold text-zinc-500 uppercase block tracking-widest">Level</span>
+            <span className="text-amber-400 font-bold">{state.startingLevel}</span>
+          </div>
+          {state.subclass && (
+            <div>
+              <span className="text-[10px] font-bold text-zinc-500 uppercase block tracking-widest">Subclass</span>
+              <span className="text-white font-bold">{state.subclass}</span>
+            </div>
+          )}
+        </div>
         <div className="p-4">
           <span className="text-[10px] font-bold text-zinc-500 uppercase block mb-1 tracking-widest">Proficiencies</span>
           <div className="flex flex-wrap gap-1">
@@ -683,7 +872,15 @@ const CharacterCreationWizard: React.FC<WizardProps> = ({ campaigns, onCreate, o
 
   const canAdvance = useMemo(() => {
     switch (step) {
-      case 0: return !!(state.name && state.race && state.charClass && state.background && state.alignment);
+      case 0: {
+        const basic = !!(state.name && state.race && state.charClass && state.background && state.alignment);
+        if (!basic) return false;
+        const cd = getClassData(state.charClass);
+        const subclassLevel = cd?.subclassLevel ?? 3;
+        const options = SUBCLASS_OPTIONS[state.charClass] || [];
+        if (state.startingLevel >= subclassLevel && options.length > 0 && !state.subclass) return false;
+        return true;
+      }
       case 1: 
         if (state.statMethod === 'standard') return Object.values(state.standardAssignment).every(v => v !== null);
         if (state.statMethod === 'pointbuy') {
@@ -724,8 +921,9 @@ const CharacterCreationWizard: React.FC<WizardProps> = ({ campaigns, onCreate, o
           }
         }
 
-        if (state.selectedPowers.length > 0) {
-          const rulesPrompt = `Provide full D&D 5e rules text for these abilities: ${state.selectedPowers.join(', ')}.
+        const allSpellPowerNames = [...state.selectedPowers, ...Object.values(state.higherLevelSpells).flat()];
+        if (allSpellPowerNames.length > 0) {
+          const rulesPrompt = `Provide full D&D 5e rules text for these abilities: ${allSpellPowerNames.join(', ')}.
           Return a JSON object with two arrays: "features" and "spells".
           Ensure cantrips have level 0.
           Format: { "features": [{ "name": "...", "source": "...", "description": "...", "fullText": "..." }], "spells": [{ "name": "...", "level": 0, "school": "...", "description": "...", "castingTime": "...", "range": "...", "duration": "...", "components": "..." }] }`;
@@ -752,10 +950,24 @@ const CharacterCreationWizard: React.FC<WizardProps> = ({ campaigns, onCreate, o
 
       // --- Build character (always runs even if AI fails) ---
       const hitDie = classData?.hitDie ?? 8;
+      const level = state.startingLevel;
+      const profBonus = Math.floor((level - 1) / 4) + 2;
+
+      // Compute base stats with racial + ASI bonuses
+      const asiLevels = getASILevelsUpTo(state.charClass, level);
+      const cd = getClassData(state.charClass);
+      const primaryAbility = cd?.primaryAbility || 'STR';
+      const asiBonuses: Record<StatKey, number> = { STR: 0, DEX: 0, CON: 0, INT: 0, WIS: 0, CHA: 0 };
+      for (const lvl of asiLevels) {
+        const alloc = state.asiAllocations[lvl] || [primaryAbility, primaryAbility];
+        asiBonuses[alloc[0]] += 1;
+        asiBonuses[alloc[1]] += 1;
+      }
+
       const stats: Record<StatKey, Stat> = {} as any;
       STAT_KEYS.forEach(stat => {
         let base = state.statMethod === 'standard' ? (state.standardAssignment[stat] ?? 8) : state.baseStats[stat];
-        let score = base + getRacialBonus(state.race, stat);
+        let score = Math.min(20, base + getRacialBonus(state.race, stat) + asiBonuses[stat]);
         let mod = Math.floor((score - 10) / 2);
         stats[stat] = {
           score,
@@ -765,35 +977,42 @@ const CharacterCreationWizard: React.FC<WizardProps> = ({ campaigns, onCreate, o
         };
       });
 
+      const hpBonusPerLevel = (state.charClass === 'Sorcerer' && state.subclass === 'Draconic Bloodline') ? 1 : 0;
+      const totalHP = calculateMultiLevelHP(hitDie, stats.CON.modifier, level, hpBonusPerLevel);
+
       const character: CharacterData = {
         id: generateId(),
         campaign: state.campaign || 'Solo Adventure',
         name: state.name || 'Unnamed Adventurer',
         race: state.race,
         class: state.charClass,
+        subclass: state.subclass || undefined,
         background: state.background,
         alignment: state.alignment,
-        level: 1,
+        level,
         portraitUrl,
         stats,
-        hp: { current: hitDie + stats.CON.modifier, max: hitDie + stats.CON.modifier },
-        hitDice: { current: 1, max: 1, die: `1d${hitDie}` },
+        hp: { current: totalHP, max: totalHP },
+        hitDice: { current: level, max: level, die: `${level}d${hitDie}` },
         ac: 10 + stats.DEX.modifier,
         initiative: stats.DEX.modifier,
         speed: getRaceSpeed(state.race),
-        passivePerception: 10 + stats.WIS.modifier,
-        skills: DND_SKILLS.map(s => ({
-          name: s.name,
-          ability: s.ability,
-          modifier: stats[s.ability].modifier + (state.selectedSkills.includes(s.name) ? 2 : 0),
-          proficiency: state.selectedSkills.includes(s.name) ? 'proficient' : 'none'
-        })),
+        passivePerception: 10 + stats.WIS.modifier + (state.selectedSkills.includes('Perception') ? profBonus : 0),
+        skills: DND_SKILLS.map(s => {
+          const isProficient = state.selectedSkills.includes(s.name);
+          return {
+            name: s.name,
+            ability: s.ability,
+            modifier: stats[s.ability].modifier + (isProficient ? profBonus : 0),
+            proficiency: isProficient ? 'proficient' : 'none'
+          };
+        }),
         attacks: [],
         features: detailedResult.features || [],
         spells: detailedResult.spells || [],
-        spellSlots: getSpellSlotsForLevel(state.charClass, 1).map(s => ({ level: s.level, current: s.max, max: s.max })),
-        inventory: { gold: 150, items: [], load: "Light" },
-        journal: [{ id: 'creation', timestamp: Date.now(), type: 'note', content: `Created ${state.name}, the ${state.race} ${state.charClass}. Background: ${state.background}.` }]
+        spellSlots: getSpellSlotsForLevel(state.charClass, level).map(s => ({ level: s.level, current: s.max, max: s.max })),
+        inventory: { gold: STARTING_GOLD_BY_LEVEL[level] || 150, items: [], load: "Light" },
+        journal: [{ id: 'creation', timestamp: Date.now(), type: 'note', content: `Created ${state.name}, the Level ${level} ${state.race} ${state.charClass}${state.subclass ? ` (${state.subclass})` : ''}. Background: ${state.background}.` }]
       };
 
       onCreate(recalculateCharacterStats(character));

@@ -2,7 +2,7 @@
 
 > Living document tracking planned features, enhancements, and community requests for The Player's Companion.
 >
-> **Last updated:** 2026-02-11
+> **Last updated:** 2026-02-13
 
 ---
 
@@ -142,6 +142,8 @@
 
 > Move items here as they're finished. Include the version/date.
 
+- [x] **Gemini 3 API compatibility** — Added `thinkingConfig: { thinkingLevel: 'LOW' }` to all Gemini calls, removed incompatible `temperature: 0.8`, added `parseApiError()` helper for user-friendly error messages _(v0.3.1 — 2026-02-13)_
+- [x] **Full PHB marketplace overhaul** — Expanded shop from 6 items to 160+ (37 weapons, 14 armor, 100+ gear, 9 consumables), added search bar, `formatCost()` for gp/sp/cp display, `useMemo` filtering _(v0.3.1 — 2026-02-13)_
 - [x] **Cloud Run deployment infrastructure** — Dockerfile (multi-stage), nginx.conf, .dockerignore, env var handling, deployment guide _(v0.2.3 — 2026-02-11)_
 - [x] **CI/CD pipeline** — Cloud Build trigger on `main` branch, inline YAML with build-arg substitution, auto-deploy to Cloud Run _(v0.2.3 — 2026-02-11)_
 - [x] **Firestore character persistence** — `lib/firestore.ts` service + `CharacterContext` provider, dual-mode (Firestore for Google users, localStorage for guests), debounced writes, migration banner, security rules + composite index _(v0.3.0 — 2026-02-11)_
