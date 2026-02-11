@@ -26,9 +26,11 @@ const firebaseConfig = {
 let app: FirebaseApp;
 let auth: Auth | null = null;
 const googleProvider = new GoogleAuthProvider();
+// Set standard scopes
+googleProvider.addScope('profile');
+googleProvider.addScope('email');
 
 try {
-  // Check if API key exists to avoid crashing on start
   if (firebaseConfig.apiKey && firebaseConfig.apiKey !== 'undefined') {
     app = getApps().length === 0 ? initializeApp(firebaseConfig) : getApps()[0];
     auth = getAuth(app);
@@ -59,7 +61,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       return;
     }
 
-    // Modern modular listener for auth state changes
     const unsubscribe = onAuthStateChanged(auth, (firebaseUser: User | null) => {
       if (firebaseUser) {
         const profile: UserProfile = {
@@ -82,20 +83,30 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const signInWithGoogle = async () => {
     if (!auth) {
-      alert("Auth system not initialized. Check console for configuration errors.");
+      alert("Auth system not initialized. Check your project environment variables.");
       return;
     }
     try {
       await signInWithPopup(auth, googleProvider);
     } catch (error: any) {
       console.error("Google Sign-In Error:", error);
-      alert(`Sign-in failed: ${error.message}`);
+      
+      // Handle the most common Google Cloud Run / Firebase domain issue
+      if (error.code === 'auth/unauthorized-domain') {
+        const domain = window.location.hostname;
+        alert(`Authentication failed: Domain "${domain}" is not authorized in your Firebase console. \n\nTo fix this: Go to Firebase Console > Authentication > Settings > Authorized Domains and add "${domain}".`);
+      } else if (error.code === 'auth/popup-blocked') {
+        alert("The sign-in popup was blocked by your browser. Please allow popups for this site.");
+      } else if (error.code === 'auth/operation-not-allowed') {
+        alert("Google sign-in is not enabled in your Firebase project. Please enable it in the Authentication > Sign-in method tab.");
+      } else {
+        alert(`Sign-in failed: ${error.message}`);
+      }
     }
   };
 
   const signInAsGuest = async () => {
     if (!auth) {
-      // Manual fallback if Firebase is not connected
       const mockUser = { uid: 'guest-offline', displayName: 'Offline Guest', email: null, photoURL: null };
       setUser(mockUser);
       setLoading(false);
@@ -105,7 +116,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       await signInAnonymously(auth);
     } catch (error: any) {
       console.error("Guest Sign-In Error:", error);
-      // Local fallback for guest mode if network/config is down
       const mockUser = { 
         uid: 'guest-' + Math.random().toString(36).substr(2, 5), 
         displayName: 'Guest Adventurer', 
