@@ -78,8 +78,22 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const signInAsGuest = async () => {
     try {
       await signInAnonymously(auth);
-    } catch (error) {
+    } catch (error: any) {
       console.error("Guest Sign-In Error:", error);
+      // Fallback: if anonymous auth is not enabled or Firebase fails,
+      // create a local-only guest session so the app is still usable
+      if (error?.code === 'auth/operation-not-allowed' || error?.code === 'auth/admin-restricted-operation') {
+        console.warn("Anonymous auth not enabled in Firebase. Using local guest session.");
+        setUser({
+          uid: 'guest-local-' + Date.now(),
+          displayName: 'Guest Adventurer',
+          email: null,
+          photoURL: null,
+        });
+        setLoading(false);
+      } else {
+        alert(`Guest sign-in failed: ${error?.message || 'Unknown error'}`);
+      }
     }
   };
 
