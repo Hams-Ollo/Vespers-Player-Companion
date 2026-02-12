@@ -176,6 +176,7 @@ app.post('/api/gemini/live-token', async (req, res) => {
 
 // ─── Serve static SPA ────────────────────────────────────────────────
 const distPath = path.resolve(__dirname, '..', 'dist');
+
 app.use(express.static(distPath, {
   maxAge: '1y',
   immutable: true,
