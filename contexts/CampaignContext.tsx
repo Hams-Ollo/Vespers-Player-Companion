@@ -23,10 +23,12 @@ import {
   deleteCampaign as firestoreDeleteCampaign,
   joinCampaignByCode,
   leaveCampaign as firestoreLeaveCampaign,
+  removeMember as firestoreRemoveMember,
   acceptInvite as firestoreAcceptInvite,
   declineInvite as firestoreDeclineInvite,
   createInvite as firestoreCreateInvite,
   updateMemberCharacter as firestoreUpdateMemberCharacter,
+  regenerateJoinCode as firestoreRegenerateJoinCode,
 } from '../lib/campaigns';
 
 // ─── Types ──────────────────────────────────────────────────────────
@@ -69,6 +71,8 @@ interface CampaignContextType {
   declineInvite: (inviteId: string) => Promise<void>;
   sendInvite: (email: string) => Promise<void>;
   updateMemberCharacter: (characterId: string | null) => Promise<void>;
+  removeMember: (targetUid: string) => Promise<void>;
+  regenerateJoinCode: () => Promise<string>;
 }
 
 const CampaignContext = createContext<CampaignContextType | undefined>(undefined);
@@ -343,6 +347,24 @@ export const CampaignProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     [activeCampaignId, user?.uid],
   );
 
+  const removeMemberAction = useCallback(
+    async (targetUid: string) => {
+      if (!activeCampaignId) throw new Error('No active campaign');
+      if (!isDM) throw new Error('Only the DM can remove members');
+      await firestoreRemoveMember(activeCampaignId, targetUid);
+    },
+    [activeCampaignId, isDM],
+  );
+
+  const regenerateJoinCodeAction = useCallback(
+    async () => {
+      if (!activeCampaignId) throw new Error('No active campaign');
+      if (!isDM) throw new Error('Only the DM can regenerate the join code');
+      return await firestoreRegenerateJoinCode(activeCampaignId);
+    },
+    [activeCampaignId, isDM],
+  );
+
   return (
     <CampaignContext.Provider
       value={{
@@ -367,6 +389,8 @@ export const CampaignProvider: React.FC<{ children: React.ReactNode }> = ({ chil
         declineInvite: declineInviteAction,
         sendInvite: sendInviteAction,
         updateMemberCharacter: updateMemberCharacterAction,
+        removeMember: removeMemberAction,
+        regenerateJoinCode: regenerateJoinCodeAction,
       }}
     >
       {children}

@@ -30,8 +30,6 @@ import {
   getDoc,
   writeBatch,
   serverTimestamp,
-  arrayUnion,
-  arrayRemove,
   Unsubscribe,
 } from 'firebase/firestore';
 import { firebaseApp } from '../contexts/AuthContext';
@@ -337,10 +335,8 @@ export async function joinCampaignByCode(
     joinedAt: Date.now(),
   };
 
-  const batch = writeBatch(db);
-  batch.set(doc(db, 'campaigns', campaign.id, 'members', uid), member);
-  batch.update(doc(db, 'campaigns', campaign.id), { memberUids: arrayUnion(uid), updatedAt: Date.now() });
-  await batch.commit();
+  // Write member doc — Cloud Function syncs memberUids automatically
+  await setDoc(doc(db, 'campaigns', campaign.id, 'members', uid), member);
   return campaign;
 }
 
@@ -357,10 +353,8 @@ export async function leaveCampaign(
     throw new Error('DM cannot leave their own campaign. Archive it instead.');
   }
 
-  const batch = writeBatch(db);
-  batch.delete(doc(db, 'campaigns', campaignId, 'members', uid));
-  batch.update(doc(db, 'campaigns', campaignId), { memberUids: arrayRemove(uid), updatedAt: Date.now() });
-  await batch.commit();
+  // Delete member doc — Cloud Function syncs memberUids automatically
+  await deleteDoc(doc(db, 'campaigns', campaignId, 'members', uid));
 }
 
 /** Remove a player from the campaign (DM only action). */
@@ -368,10 +362,8 @@ export async function removeMember(
   campaignId: string,
   targetUid: string,
 ): Promise<void> {
-  const batch = writeBatch(db);
-  batch.delete(doc(db, 'campaigns', campaignId, 'members', targetUid));
-  batch.update(doc(db, 'campaigns', campaignId), { memberUids: arrayRemove(targetUid), updatedAt: Date.now() });
-  await batch.commit();
+  // Delete member doc — Cloud Function syncs memberUids automatically
+  await deleteDoc(doc(db, 'campaigns', campaignId, 'members', targetUid));
 }
 
 /** Update which character a member is playing in a campaign. */
@@ -402,7 +394,21 @@ export async function createInvite(
   invitedByUid: string,
   invitedByName: string,
 ): Promise<CampaignInvite> {
+  // Check for existing pending invite to the same email for the same campaign
+  const dupeQuery = query(
+    invitesCol(),
+    where('email', '==', email.toLowerCase()),
+    where('campaignId', '==', campaignId),
+    where('status', '==', 'pending'),
+    limit(1),
+  );
+  const dupeSnap = await getDocs(dupeQuery);
+  if (!dupeSnap.empty) {
+    throw new Error('An invite has already been sent to this email for this campaign.');
+  }
+
   const id = generateId();
+  const now = Date.now();
   const invite: CampaignInvite = {
     id,
     email: email.toLowerCase(),
@@ -410,7 +416,8 @@ export async function createInvite(
     invitedByName,
     campaignId,
     campaignName,
-    createdAt: Date.now(),
+    createdAt: now,
+    expiresAt: now + 7 * 24 * 60 * 60 * 1000, // 7 days
     status: 'pending',
   };
 
@@ -434,7 +441,11 @@ export function subscribeToMyInvites(
   return onSnapshot(
     q,
     (snapshot) => {
-      onData(snapshot.docs.map(d => ({ ...d.data(), id: d.id } as CampaignInvite)));
+      const now = Date.now();
+      const invites = snapshot.docs
+        .map(d => ({ ...d.data(), id: d.id } as CampaignInvite))
+        .filter(inv => !inv.expiresAt || inv.expiresAt > now); // Filter out expired
+      onData(invites);
     },
     (err) => {
       console.error('[Campaigns] invites subscription error:', err);
@@ -455,6 +466,12 @@ export async function acceptInvite(
 
   const invite = inviteSnap.data() as CampaignInvite;
 
+  // Check if invite has expired
+  if (invite.expiresAt && invite.expiresAt < Date.now()) {
+    await updateDoc(doc(db, 'invites', inviteId), { status: 'declined' });
+    throw new Error('This invite has expired. Ask the DM to send a new one.');
+  }
+
   const batch = writeBatch(db);
 
   // Update invite status
@@ -469,7 +486,6 @@ export async function acceptInvite(
     joinedAt: Date.now(),
   };
   batch.set(doc(db, 'campaigns', invite.campaignId, 'members', uid), member);
-  batch.update(doc(db, 'campaigns', invite.campaignId), { memberUids: arrayUnion(uid), updatedAt: Date.now() });
 
   await batch.commit();
 }

@@ -146,9 +146,9 @@ service cloud.firestore {
       allow create: if isSignedIn()
                     && request.resource.data.invitedByUid == request.auth.uid;
 
-      // Only the invite recipient or the campaign DM can update (accept/decline)
+      // Only the invite recipient or the invite creator can update (accept/decline)
       allow update: if isSignedIn()
-                    && (resource.data.toEmail == request.auth.token.email
+                    && (resource.data.email == request.auth.token.email
                         || resource.data.invitedByUid == request.auth.uid);
 
       allow delete: if false; // Invites are permanent records

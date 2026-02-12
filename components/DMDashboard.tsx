@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useCampaign } from '../contexts/CampaignContext';
 import { useAuth } from '../contexts/AuthContext';
 import { CharacterData, CampaignMember } from '../types';
-import { Crown, Users, Eye, Swords, ScrollText, Settings, LogOut, Hash, Copy, Check, Loader2 } from 'lucide-react';
+import { Crown, Users, Eye, Swords, ScrollText, Settings, LogOut, Hash, Copy, Check, Loader2, RefreshCw } from 'lucide-react';
 import DMPartyOverview from './DMPartyOverview';
 import { doc, getDoc } from 'firebase/firestore';
 import { db } from '../lib/firestore';
@@ -22,12 +22,14 @@ const DMDashboard: React.FC<DMDashboardProps> = ({ onExit }) => {
     updateCampaign,
     archiveCampaign,
     setActiveCampaignId,
+    regenerateJoinCode,
   } = useCampaign();
 
   const [activeTab, setActiveTab] = useState<'overview' | 'combat' | 'notes' | 'settings'>('overview');
   const [partyCharacters, setPartyCharacters] = useState<Map<string, CharacterData>>(new Map());
   const [loadingChars, setLoadingChars] = useState(true);
   const [copiedCode, setCopiedCode] = useState(false);
+  const [regeneratingCode, setRegeneratingCode] = useState(false);
 
   // Fetch all party characters
   useEffect(() => {
@@ -213,8 +215,21 @@ const DMDashboard: React.FC<DMDashboardProps> = ({ onExit }) => {
                   <label className="text-xs font-bold text-zinc-500 uppercase tracking-widest block mb-1">Join Code</label>
                   <div className="flex items-center gap-2">
                     <span className="font-mono text-amber-500 font-bold text-lg">{activeCampaign.joinCode}</span>
-                    <button onClick={handleCopyCode} className="text-zinc-500 hover:text-white transition-colors">
+                    <button onClick={handleCopyCode} className="text-zinc-500 hover:text-white transition-colors" title="Copy code">
                       {copiedCode ? <Check size={14} className="text-green-400" /> : <Copy size={14} />}
+                    </button>
+                    <button
+                      onClick={async () => {
+                        if (!confirm('Regenerate join code? The old code will stop working.')) return;
+                        setRegeneratingCode(true);
+                        try { await regenerateJoinCode(); } catch {}
+                        finally { setRegeneratingCode(false); }
+                      }}
+                      disabled={regeneratingCode}
+                      className="text-zinc-500 hover:text-amber-400 transition-colors"
+                      title="Regenerate join code"
+                    >
+                      <RefreshCw size={14} className={regeneratingCode ? 'animate-spin' : ''} />
                     </button>
                   </div>
                 </div>
@@ -226,6 +241,30 @@ const DMDashboard: React.FC<DMDashboardProps> = ({ onExit }) => {
                   }`}>
                     {activeCampaign.status}
                   </span>
+                </div>
+
+                {/* Allow Player Invites Toggle */}
+                <div className="flex items-center justify-between py-2">
+                  <div>
+                    <label className="text-xs font-bold text-zinc-500 uppercase tracking-widest block">Allow Player Invites</label>
+                    <p className="text-[10px] text-zinc-600 mt-0.5">Let players send email invites to new members</p>
+                  </div>
+                  <button
+                    onClick={() => updateCampaign({
+                      settings: {
+                        ...activeCampaign.settings,
+                        allowPlayerInvites: !activeCampaign.settings?.allowPlayerInvites,
+                      },
+                    })}
+                    className={`relative w-11 h-6 rounded-full transition-colors ${
+                      activeCampaign.settings?.allowPlayerInvites ? 'bg-amber-600' : 'bg-zinc-700'
+                    }`}
+                    title="Toggle player invites"
+                  >
+                    <span className={`absolute top-0.5 left-0.5 w-5 h-5 bg-white rounded-full shadow transition-transform ${
+                      activeCampaign.settings?.allowPlayerInvites ? 'translate-x-5' : 'translate-x-0'
+                    }`} />
+                  </button>
                 </div>
               </div>
 

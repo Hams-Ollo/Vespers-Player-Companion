@@ -333,14 +333,14 @@ const CampaignManager: React.FC = () => {
         </div>
       </div>
 
-      {/* DM Invite Players Panel — only shown when DM has an active campaign */}
-      {isDM && activeCampaign && (
+      {/* Invite Players Panel — shown to DM always, and players when allowPlayerInvites is on */}
+      {activeCampaign && (isDM || activeCampaign.settings?.allowPlayerInvites) && (
         <div className="bg-zinc-900 border border-zinc-800 rounded-2xl p-6 space-y-5">
           <h3 className="text-xs font-bold text-amber-500 uppercase tracking-widest flex items-center gap-2">
             <UserPlus size={12} /> Invite Players to {activeCampaign.name}
           </h3>
 
-          {/* Share Join Code — Primary Method */}
+          {/* Share Join Code — always visible here */}
           <div className="bg-zinc-950 border border-zinc-800 rounded-xl p-5 text-center space-y-3">
             <p className="text-xs text-zinc-400 font-bold uppercase tracking-widest">Share Join Code</p>
             <div className="flex items-center justify-center gap-3">
@@ -358,31 +358,33 @@ const CampaignManager: React.FC = () => {
             <p className="text-[10px] text-zinc-600">Players enter this code on the "Join a Party" card above</p>
           </div>
 
-          {/* Email Invite — Secondary Method */}
-          <div className="space-y-2">
-            <p className="text-xs text-zinc-500 font-bold uppercase tracking-widest">Or Invite by Email</p>
-            <div className="flex gap-2">
-              <div className="relative flex-1">
-                <Mail size={14} className="absolute left-3 top-3 text-zinc-500" />
-                <input
-                  type="email"
-                  placeholder="player@example.com"
-                  value={inviteEmail}
-                  onChange={e => setInviteEmail(e.target.value)}
-                  className="w-full bg-zinc-950 border border-zinc-700 rounded-lg py-2.5 pl-9 pr-3 text-sm text-white focus:outline-none focus:border-amber-500"
-                  onKeyDown={e => e.key === 'Enter' && handleSendInvite()}
-                />
+          {/* Email Invite — DM always sees this; players see it only when allowPlayerInvites */}
+          {(isDM || activeCampaign.settings?.allowPlayerInvites) && (
+            <div className="space-y-2">
+              <p className="text-xs text-zinc-500 font-bold uppercase tracking-widest">Or Invite by Email</p>
+              <div className="flex gap-2">
+                <div className="relative flex-1">
+                  <Mail size={14} className="absolute left-3 top-3 text-zinc-500" />
+                  <input
+                    type="email"
+                    placeholder="player@example.com"
+                    value={inviteEmail}
+                    onChange={e => setInviteEmail(e.target.value)}
+                    className="w-full bg-zinc-950 border border-zinc-700 rounded-lg py-2.5 pl-9 pr-3 text-sm text-white focus:outline-none focus:border-amber-500"
+                    onKeyDown={e => e.key === 'Enter' && handleSendInvite()}
+                  />
+                </div>
+                <button
+                  onClick={handleSendInvite}
+                  disabled={sendingInvite || !inviteEmail.trim() || !inviteEmail.includes('@')}
+                  className="bg-amber-600 hover:bg-amber-500 disabled:opacity-50 disabled:cursor-not-allowed text-white font-bold px-4 rounded-lg transition-colors flex items-center gap-2 text-sm"
+                >
+                  {sendingInvite ? <Loader2 size={14} className="animate-spin" /> : inviteSent ? <><Check size={14} className="text-green-300" /> Sent!</> : <><Send size={14} /> Send</>}
+                </button>
               </div>
-              <button
-                onClick={handleSendInvite}
-                disabled={sendingInvite || !inviteEmail.trim() || !inviteEmail.includes('@')}
-                className="bg-amber-600 hover:bg-amber-500 disabled:opacity-50 disabled:cursor-not-allowed text-white font-bold px-4 rounded-lg transition-colors flex items-center gap-2 text-sm"
-              >
-                {sendingInvite ? <Loader2 size={14} className="animate-spin" /> : inviteSent ? <><Check size={14} className="text-green-300" /> Sent!</> : <><Send size={14} /> Send</>}
-              </button>
+              <p className="text-[10px] text-zinc-600">They'll see a notification when they log in with that email</p>
             </div>
-            <p className="text-[10px] text-zinc-600">They'll see a notification when they log in with that email</p>
-          </div>
+          )}
         </div>
       )}
 

@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useCampaign } from '../contexts/CampaignContext';
 import { useAuth } from '../contexts/AuthContext';
 import { CharacterData, CampaignMember } from '../types';
-import { Heart, Shield, Crown, User, Users, Swords, Copy, Check, Loader2 } from 'lucide-react';
+import { Heart, Shield, Crown, User, Users, Swords, Copy, Check, Loader2, UserMinus } from 'lucide-react';
 import { doc, getDoc } from 'firebase/firestore';
 import { db } from '../lib/firestore';
 
@@ -14,9 +14,10 @@ interface PartyMemberCard {
 
 const PartyRoster: React.FC<{ onClose: () => void }> = ({ onClose }) => {
   const { user } = useAuth();
-  const { activeCampaign, members, isDM } = useCampaign();
+  const { activeCampaign, members, isDM, removeMember } = useCampaign();
   const [partyCards, setPartyCards] = useState<PartyMemberCard[]>([]);
   const [copiedCode, setCopiedCode] = useState(false);
+  const [removingUid, setRemovingUid] = useState<string | null>(null);
 
   // Fetch character data for each member
   useEffect(() => {
@@ -56,6 +57,18 @@ const PartyRoster: React.FC<{ onClose: () => void }> = ({ onClose }) => {
       navigator.clipboard.writeText(activeCampaign.joinCode);
       setCopiedCode(true);
       setTimeout(() => setCopiedCode(false), 2000);
+    }
+  };
+
+  const handleRemoveMember = async (uid: string, name: string) => {
+    if (!confirm(`Remove ${name} from the campaign? They can rejoin with the join code.`)) return;
+    setRemovingUid(uid);
+    try {
+      await removeMember(uid);
+    } catch (e: any) {
+      alert(e.message || 'Failed to remove member');
+    } finally {
+      setRemovingUid(null);
     }
   };
 
@@ -162,6 +175,22 @@ const PartyRoster: React.FC<{ onClose: () => void }> = ({ onClose }) => {
                       </p>
                     )}
                   </div>
+
+                  {/* DM Kick Button — only visible to DM, not on DM's own card */}
+                  {isDM && !memberIsDM && !isMe && (
+                    <button
+                      onClick={() => handleRemoveMember(member.uid, character?.name || member.displayName)}
+                      disabled={removingUid === member.uid}
+                      className="p-1.5 rounded-lg text-zinc-600 hover:text-red-400 hover:bg-red-900/20 transition-colors shrink-0 self-center"
+                      title={`Remove ${character?.name || member.displayName} from campaign`}
+                    >
+                      {removingUid === member.uid ? (
+                        <Loader2 size={14} className="animate-spin" />
+                      ) : (
+                        <UserMinus size={14} />
+                      )}
+                    </button>
+                  )}
                 </div>
               </div>
             );

@@ -170,6 +170,7 @@ export interface CampaignInvite {
   campaignId: string;
   campaignName: string;
   createdAt: number;
+  expiresAt?: number;
   status: 'pending' | 'accepted' | 'declined';
 }
 
