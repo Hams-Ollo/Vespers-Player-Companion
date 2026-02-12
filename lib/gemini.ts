@@ -10,6 +10,7 @@ export const IMAGE_MODEL = 'gemini-2.5-flash-image';
 
 const getAI = () => {
   const apiKey = process.env.API_KEY || process.env.GEMINI_API_KEY;
+  console.log('[Gemini] API key present:', !!apiKey, 'length:', apiKey?.length);
   if (!apiKey || apiKey === 'undefined') {
     throw new Error("Gemini API Key is missing. Ensure GEMINI_API_KEY is set in your .env file.");
   }

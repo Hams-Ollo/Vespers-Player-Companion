@@ -36,6 +36,10 @@ export default defineConfig(({ mode }) => {
         'process.env.VITE_GEMINI_FILE_URI_DMG': JSON.stringify(getVar('VITE_GEMINI_FILE_URI_DMG')),
         'process.env.VITE_GEMINI_FILE_URI_MM': JSON.stringify(getVar('VITE_GEMINI_FILE_URI_MM')),
         'process.env.VITE_GEMINI_FILE_URI_PHB': JSON.stringify(getVar('VITE_GEMINI_FILE_URI_PHB')),
+        // Catch-all: any remaining process.env.* refs in SDK code resolve to
+        // undefined instead of throwing a ReferenceError in the browser.
+        // Vite uses longest-match-first, so specific keys above still win.
+        'process.env': '{}',
       },
       resolve: {
         alias: {

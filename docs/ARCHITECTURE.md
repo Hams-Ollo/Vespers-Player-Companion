@@ -1,39 +1,48 @@
-# 🏗️ Architecture
+# ⚜️ The Architect's Blueprints ⚜️
 
+> *"Before the first stone was laid, the Architect drew these plans.  
+> Within them lies the fundamental structure of the Companion —  
+> its chambers, its passages, and the flow of magical energy throughout."*
+>
 > System design, data flow, and component map for The Player's Companion.
 
 ---
 
-## 📐 High-Level Architecture
+## Chapter 1: High-Level Architecture
+
+> *A bird's-eye view of the realm, as seen from a wizard's tower.*
 
 ```mermaid
 flowchart TB
-    subgraph Browser["🌐 Browser (Client)"]
+    subgraph Browser["🌐 The Material Plane (Browser)"]
         FA["🔐 Firebase Auth"] <--> RA["⚛️ React App (Vite SPA)"]
         RA <--> LS["💽 localStorage"]
     end
-    RA -->|"REST API calls"| GEM["🤖 Google Gemini API"]
+    RA -->|"REST API calls"| GEM["🤖 The Weave (Google Gemini API)"]
 ```
 
-The app is a **fully client-side SPA** — no backend server. Character state persists in **Cloud Firestore** for signed-in users and `localStorage` for guests. AI calls go directly from the browser to Google's Gemini API. Firebase handles authentication.
+The app is a **fully client-side SPA** — no backend server stands between the adventurer and their data. Character state persists in **Cloud Firestore** for signed-in users and `localStorage` for guest adventurers. AI calls travel directly from the browser to Google's Gemini API. Firebase guards the gates of authentication.
 
 ---
 
-## 🔄 Application Flow
+## Chapter 2: Application Flow
+
+> *The journey every adventurer takes through the Companion, from the tavern door  
+> to the dungeon depths.*
 
 ```mermaid
 flowchart TD
-    Login["🚪 LoginScreen"] -->|Google Sign-In| FA["🔐 Firebase Auth"]
+    Login["🚪 The Tavern Door (LoginScreen)"] -->|Google Sign-In| FA["🔐 Firebase Auth"]
     Login -->|Guest Mode| Anon["👤 Anonymous Auth / Local Fallback"]
-    FA --> CS["📜 CharacterSelection"]
+    FA --> CS["📜 The Heroes' Gallery"]
     Anon --> CS
 
-    CS -->|Select existing| Dash["📋 Dashboard"]
-    CS -->|Create new| Wiz["🧙 CharacterCreationWizard"]
+    CS -->|Select existing| Dash["📋 The Dashboard"]
+    CS -->|Create new| Wiz["🧙 The Ritual of Creation"]
     CS -->|Delete| CS
 
-    subgraph Wizard["🧙 Creation Wizard (6 Steps)"]
-        W1["1. Identity"] --> W2["2. Ability Scores"]
+    subgraph Wizard["🧙 The Ritual of Creation (6 Steps)"]
+        W1["1. Identity — Name, Race, Class"] --> W2["2. Ability Scores"]
         W2 --> W3["3. Skill Proficiencies"]
         W3 --> W4["4. Spells & Cantrips"]
         W4 --> W5["5. Character Concept"]
@@ -42,90 +51,97 @@ flowchart TD
     Wiz --> W1
     W6 --> Dash
 
-    subgraph DashboardModals["📋 Dashboard"]
-        Cards["🃏 CardStack"]
-        Detail["🔍 DetailOverlay"]
-        Dice["🎲 DiceRollModal"]
-        LvlUp["⬆️ LevelUpModal"]
-        Rest["🛏️ RestModal"]
-        Shop["🏪 ShopModal"]
-        DM["🤖 AskDMModal"]
-        Settings["⚙️ SettingsModal"]
-        Portrait["🎨 PortraitGenerator"]
+    subgraph DashboardModals["📋 The Dashboard"]
+        Cards["🃏 The Deck of Many Stats"]
+        Detail["🔍 The Scrying Glass"]
+        Dice["🎲 The Dice Tower"]
+        LvlUp["⬆️ The Ascension Chamber"]
+        Rest["🛏️ The Campfire"]
+        Shop["🏪 The Merchant's Stall"]
+        DM["🤖 The Oracle's Chamber"]
+        Settings["⚙️ The Tinkerer's Bench"]
+        Portrait["🎨 The Portrait Gallery"]
     end
     Dash --> Cards
 ```
 
 ---
 
-## 🧱 Component Map
+## Chapter 3: Component Map
 
-### 🏠 Root Layer
+> *Every chamber in the Companion has a purpose. Here is the registry,  
+> organized by the layer of the keep in which each component dwells.*
+
+### 🏠 The Root Layer
 
 | Component | File | Responsibility |
-|-----------|------|---------------|
-| `App` | `App.tsx` | Auth gate, routing between selection/dashboard |
+|:----------|:-----|:---------------|
+| `App` | `App.tsx` | Auth gate, routing between selection and dashboard |
 | `AuthProvider` | `contexts/AuthContext.tsx` | Firebase auth state, sign-in/out methods, React context |
 | `CharacterProvider` | `contexts/CharacterContext.tsx` | Character CRUD, Firestore/localStorage dual-mode, migration |
+| `CampaignProvider` | `contexts/CampaignContext.tsx` | Campaign CRUD, real-time subscriptions, invites |
 
-### 📜 Selection Layer
+### 📜 The Selection Layer
 
 | Component | File | Responsibility |
-|-----------|------|---------------|
-| `LoginScreen` | `components/LoginScreen.tsx` | Google sign-in button, guest mode |
+|:----------|:-----|:---------------|
+| `LoginScreen` | `components/LoginScreen.tsx` | Google sign-in button, guest adventurer mode |
 | `CharacterSelection` | `components/CharacterSelection.tsx` | Character list, create/delete, campaign management |
 | `CampaignManager` | `components/CampaignManager.tsx` | Create/join campaigns with shareable codes |
 
-### 🧙 Creation Layer
+### 🧙 The Creation Layer
 
 | Component | File | Responsibility |
-|-----------|------|---------------|
+|:----------|:-----|:---------------|
 | `CharacterCreationWizard` | `components/CharacterCreationWizard.tsx` | 6-step wizard with internal step components (`StepIdentity`, `StepAbilityScores`, `StepSkills`, `StepPowers`, `StepConcept`, `StepReview`) |
 
-### 📋 Dashboard Layer
+### 📋 The Dashboard Layer
 
 | Component | File | Responsibility |
-|-----------|------|---------------|
+|:----------|:-----|:---------------|
 | `Dashboard` | `components/Dashboard.tsx` | Main character view shell, modal orchestration |
 | `CardStack` | `components/CardStack.tsx` | Swipeable card-stack UI for stat categories |
 | `DetailOverlay` | `components/DetailOverlay.tsx` | Fullscreen detail view wrapper with slide animation |
 
-### 🔍 Detail Views (`components/details/`)
+### 🔍 The Detail Views (`components/details/`)
 
 | Component | View | Key Data |
-|-----------|------|----------|
-| `VitalsDetail` | ❤️ Vitals | HP, AC, speed, hit dice, conditions |
-| `CombatDetail` | ⚔️ Combat | Attacks, initiative, actions |
-| `SkillsDetail` | 🎯 Skills | 18 skills with proficiency/expertise |
-| `FeaturesDetail` | ✨ Features | Class/racial features with full text |
-| `SpellsDetail` | 📖 Spells | Spellbook, slot tracking, casting |
-| `InventoryDetail` | 🎒 Inventory | Items, gold, equip/unequip, encumbrance |
-| `JournalDetail` | 📓 Journal | Session notes, NPC log, AI chronicles |
+|:----------|:-----|:---------|
+| `VitalsDetail` | ❤️ The Life Force | HP, AC, speed, hit dice, conditions |
+| `CombatDetail` | ⚔️ The Armory | Attacks, initiative, actions |
+| `SkillsDetail` | 🎯 The Training Grounds | 18 skills with proficiency/expertise |
+| `FeaturesDetail` | ✨ The Hall of Abilities | Class/racial features with full text |
+| `SpellsDetail` | 📖 The Spellbook | Spellbook, slot tracking, casting |
+| `InventoryDetail` | 🎒 The Bag of Holding | Items, gold, equip/unequip, encumbrance |
+| `JournalDetail` | 📓 The Chronicle | Session notes, NPC log, AI chronicles |
 
-### 🎛️ Modal Components
+### 🎛️ The Modals
 
 | Component | File | Trigger |
-|-----------|------|---------|
+|:----------|:-----|:--------|
 | `DiceRollModal` | `components/DiceRollModal.tsx` | Tap any rollable stat |
 | `LevelUpModal` | `components/LevelUpModal.tsx` | Level up button on dashboard |
 | `RestModal` | `components/RestModal.tsx` | Rest button on vitals |
 | `ShopModal` | `components/ShopModal.tsx` | Shop button on inventory |
 | `AskDMModal` | `components/AskDMModal.tsx` | DM button on dashboard |
-| `ItemDetailModal` | `components/ItemDetailModal.tsx` | Tap item/feature for AI lookup |
+| `ItemDetailModal` | `components/ItemDetailModal.tsx` | Tap any item/feature for AI rules lookup |
 | `SettingsModal` | `components/SettingsModal.tsx` | Settings gear icon |
 | `PortraitGenerator` | `components/PortraitGenerator.tsx` | Tap portrait on dashboard |
 | `TranscriptionButton` | `components/TranscriptionButton.tsx` | Mic icon on text fields |
 
 ---
 
-## 💾 Data Model
+## Chapter 4: The Data Model
+
+> *"A character is more than a name and a sword. Here lies the schema  
+> that defines every hero in the Companion's vault."*
 
 ### 📊 Core Type: `CharacterData`
 
 ```typescript
 interface CharacterData {
   id: string;
-  ownerUid?: string;                     // Firebase Auth UID (set for cloud users)
+  ownerUid?: string;                     // Firebase Auth UID (cloud users)
   createdAt?: number;                    // epoch ms
   updatedAt?: number;                    // epoch ms (auto-set on every save)
   name: string;
@@ -157,11 +173,13 @@ See `types.ts` for all interfaces (`Stat`, `Skill`, `Attack`, `Feature`, `Spell`
 
 ### 💽 Persistence
 
-| Data | Storage (Google users) | Storage (Guests) | Key/Collection |
-|------|----------------------|-------------------|----------------|
+> *Where do heroes go when the browser closes?*
+
+| Data | Storage (Google Users) | Storage (Guests) | Key / Collection |
+|:-----|:----------------------|:------------------|:-----------------|
 | Characters | Cloud Firestore | `localStorage` | `characters` collection / `vesper_chars` |
-| Campaigns | `localStorage` | `localStorage` | `vesper_campaigns` |
-| Auth session | Firebase Auth | Firebase Auth / local | Managed by Firebase SDK |
+| Campaigns | Cloud Firestore | `localStorage` | `campaigns` collection / `vesper_campaigns` |
+| Auth Session | Firebase Auth | Firebase Auth / local | Managed by Firebase SDK |
 
 **Firestore Schema:**
 - Collection: `characters` (top-level)
@@ -175,22 +193,23 @@ See `types.ts` for all interfaces (`Stat`, `Skill`, `Attack`, `Feature`, `Spell`
 - Writes are debounced (500ms) to avoid excessive Firestore operations during combat
 - Failed Firestore connections fall back to localStorage
 
-> ℹ️ Campaign data is still localStorage-only. Firestore migration for campaigns is planned for the Party System epic.
-
 ---
 
-## 🤖 AI Integration
+## Chapter 5: AI Integration
+
+> *"The Weave connects all magic in the world.  
+> Through it, the Companion channels the power of Gemini."*
 
 ### Models Used
 
-| Model | Purpose | Used By |
-|-------|---------|---------|
+| Model | Purpose | Summoned By |
+|:------|:--------|:------------|
 | `gemini-2.5-flash` | Text generation (rules, level-up, DM chat, quick roll) | `lib/gemini.ts` → `LevelUpModal`, `AskDMModal`, `ItemDetailModal`, `JournalDetail`, `QuickRollModal` |
 | `gemini-2.5-flash-image` | Image generation (portraits) | `lib/gemini.ts` → `CharacterCreationWizard`, `PortraitGenerator`, `QuickRollModal` |
 
-### Gemini Client (`lib/gemini.ts`)
+### The Gemini Client (`lib/gemini.ts`)
 
-Three exported functions:
+Three exported incantations:
 
 - **`generateWithContext(prompt, config?)`** — Single-shot text generation
 - **`createChatWithContext(history, systemInstruction)`** — Multi-turn chat session
@@ -198,63 +217,6 @@ Three exported functions:
 
 All use the `GEMINI_API_KEY` injected by Vite at build time via `process.env.API_KEY`. The `getAI()` private factory validates the key exists before creating a `GoogleGenAI` instance.
 
-> ℹ️ All AI-powered components import from `lib/gemini.ts` — no component directly instantiates `GoogleGenAI`. The only exception is `TranscriptionButton.tsx` which uses the Gemini Live Audio API (streaming, not supported by the shared helpers).
-
-### Rate Limiting (`utils.ts`)
-
-- `checkRateLimit()` — Enforces a 2-second minimum between AI calls
-- Throws a themed error if called too fast
-
 ---
 
-## ⚙️ Build & Configuration
-
-### Vite (`vite.config.ts`)
-
-```typescript
-define: {
-  'process.env.API_KEY': JSON.stringify(env.GEMINI_API_KEY),
-  'process.env.GEMINI_API_KEY': JSON.stringify(env.GEMINI_API_KEY)
-}
-```
-
-Environment variables from `.env` are injected as build-time constants. Firebase config uses `VITE_` prefixed vars which Vite exposes natively.
-
-### Styling
-
-Tailwind CSS is loaded via the `@tailwindcss/vite` plugin with tree-shaken CSS. The app uses Tailwind utility classes throughout with a dark zinc-based theme.
-
----
-
-## 🧮 D&D Game Data (`constants.tsx`)
-
-All PHB reference data lives in `constants.tsx` as typed exports:
-
-| Export | Description |
-|--------|-------------|
-| `DND_RACES` | 9 races with subraces, speed |
-| `DND_CLASSES` | 12 classes with hit die, saves, skills, caster info, ASI levels |
-| `RACIAL_BONUSES` | Ability score bonuses per race |
-| `RACE_TRAITS` | Racial features, languages, darkvision, racial spells |
-| `CLASS_FEATURES` | Feature progression tables per class (level 1–20) |
-| `FULL_CASTER_SLOTS` | Spell slot table for full casters (levels 1–20) |
-| `HALF_CASTER_SLOTS` | Spell slot table for Paladin/Ranger |
-| `WARLOCK_PACT_SLOTS` | Pact Magic slots per level |
-| `CANTRIPS_KNOWN` | Cantrips known at level thresholds |
-| `SPELLS_KNOWN` | Spells known for known-caster classes |
-| `CLASS_CANTRIPS` | Cantrip lists per class |
-| `CLASS_SPELLS_1ST` | 1st-level spell lists per class |
-| `SHOP_INVENTORY` | Equipment shop items |
-
-### Helper Functions
-
-| Function | Returns |
-|----------|---------|
-| `getClassFeatures(className, level)` | Features gained at that level |
-| `getSpellSlotsForLevel(className, charLevel)` | Spell slots array |
-| `getCantripsKnownCount(className, charLevel)` | Number of cantrips known |
-| `getSpellsKnownCount(className, charLevel)` | Number of spells known |
-| `isASILevel(className, level)` | Whether level grants ASI |
-| `isExpertiseLevel(className, level)` | Whether level grants expertise |
-| `getSneakAttackDice(rogueLevel)` | Sneak attack dice string |
-| `recalculateCharacterStats(data)` | Recompute AC, attacks, passive perception |
+<p align="center"><em>⚔️ Thus concludes the Architect's Blueprints. ⚔️</em></p>

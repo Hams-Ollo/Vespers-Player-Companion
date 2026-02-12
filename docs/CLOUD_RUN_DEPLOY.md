@@ -1,394 +1,376 @@
-# Vesper — Cloud Run Deployment Guide
+# ⚜️ The Planar Gate Manual — Cloud Run Deployment ⚜️
 
-A step-by-step guide to deploy **The Player's Companion (Vesper)** to Google Cloud Run.
-
----
-
-## Table of Contents
-
-1. [Prerequisites](#1-prerequisites)
-2. [Google Cloud Project Setup](#2-google-cloud-project-setup)
-3. [Firebase Configuration](#3-firebase-configuration)
-4. [Deploy to Cloud Run](#4-deploy-to-cloud-run)
-   - [Option A: One-Command Source Deploy (Recommended)](#option-a-one-command-source-deploy-recommended)
-   - [Option B: Manual Docker Build + Deploy](#option-b-manual-docker-build--deploy)
-5. [Configure Firebase Auth for Your Cloud Run Domain](#5-configure-firebase-auth-for-your-cloud-run-domain)
-6. [Verify the Deployment](#6-verify-the-deployment)
-7. [Updating the App](#7-updating-the-app)
-8. [Custom Domain (Optional)](#8-custom-domain-optional)
-9. [Troubleshooting](#9-troubleshooting)
+> *"To transport The Player's Companion from the Material Plane  
+> to the Ethereal Plane of Google Cloud, one must follow  
+> the ancient deployment ritual precisely."*
+>
+> Complete guide to deploying the application on Google Cloud Run  
+> with Firebase Authentication and Firestore persistence.
 
 ---
 
-## 1. Prerequisites
+## Chapter 1: Prerequisites
 
-Before you begin, make sure you have the following installed and ready:
+> *"Before you can open a Planar Gate, you must gather these components."*
 
-| Tool | Purpose | Install Link |
-|------|---------|-------------|
-| **Google Cloud SDK (`gcloud`)** | CLI to deploy to Cloud Run | https://cloud.google.com/sdk/docs/install |
-| **Node.js 20+** | Build the app locally (optional) | https://nodejs.org/ |
-| **Docker** (optional) | For local container testing | https://docs.docker.com/get-docker/ |
-| **A Google Cloud account** | Billing enabled | https://console.cloud.google.com/ |
-| **A Firebase project** | Authentication | https://console.firebase.google.com/ |
+- [ ] **Google Cloud account** with billing enabled
+- [ ] **Google Cloud CLI** (`gcloud`) installed and authenticated
+- [ ] **Firebase CLI** (`firebase-tools`) installed globally
+- [ ] **Docker** (optional — only needed for Option B manual builds)
+- [ ] **Node.js 18+** and npm
 
-### Gather your secrets
-
-You'll need these values from your `.env` file. Have them ready:
-
-```
-GEMINI_API_KEY=your-gemini-api-key
-VITE_FIREBASE_API_KEY=your-firebase-api-key
-VITE_FIREBASE_AUTH_DOMAIN=your-project.firebaseapp.com
-VITE_FIREBASE_PROJECT_ID=your-project-id
-VITE_FIREBASE_STORAGE_BUCKET=your-project.firebasestorage.app
-VITE_FIREBASE_MESSAGING_SENDER_ID=123456789
-VITE_FIREBASE_APP_ID=1:123456789:web:abcdef
+```bash
+# Verify your arcane toolkit
+gcloud --version
+firebase --version
+node --version
 ```
 
 ---
 
-## 2. Google Cloud Project Setup
+## Chapter 2: The Ritual Circle — Google Cloud Project Setup
 
-### 2.1 Authenticate with Google Cloud
+> *"Draw the circle carefully. A misplaced rune will doom the ritual."*
 
-```bash
-gcloud auth login
-```
-
-### 2.2 Create or select a project
+### Step 1: Create the Project
 
 ```bash
-# Create a new project (or skip if you already have one)
-gcloud projects create vesper-dnd --name="Vesper D&D"
+# Create a new Google Cloud project (or use existing)
+gcloud projects create YOUR_PROJECT_ID --name="The Players Companion"
 
-# Set it as the active project
-gcloud config set project vesper-dnd
-```
+# Set it as your active project
+gcloud config set project YOUR_PROJECT_ID
 
-> Replace `vesper-dnd` with your preferred project ID throughout this guide.
-
-### 2.3 Enable billing
-
-Billing must be enabled for Cloud Run. Go to:
-https://console.cloud.google.com/billing/linkedaccount
-
-### 2.4 Enable required APIs
-
-```bash
+# Enable required APIs — the three pillars of the Gate
 gcloud services enable \
   run.googleapis.com \
   cloudbuild.googleapis.com \
   artifactregistry.googleapis.com
 ```
 
-### 2.5 Set your default region
+### Step 2: Set the Region
 
 ```bash
-gcloud config set run/region us-west1
+# Choose your deployment region (where the Gate opens)
+gcloud config set run/region us-central1
 ```
-
-> Choose a region close to your users. Common options: `us-central1`, `us-west1`, `us-east1`, `europe-west1`.
 
 ---
 
-## 3. Firebase Configuration
+## Chapter 3: The Sacred Flame — Firebase Configuration
 
-If you haven't already set up Firebase:
+> *"Firebase provides the sacred flame that authenticates worthy adventurers  
+> and stores their heroic deeds."*
 
-### 3.1 Create a Firebase project
+### Step 1: Create Firebase Project
 
-1. Go to https://console.firebase.google.com/
-2. Click **Add project**
-3. Select your existing Google Cloud project (`vesper-dnd`) or create a new one
-4. Follow the setup wizard
+1. Visit the [Firebase Console](https://console.firebase.google.com/)
+2. Click **"Add project"** → select your Google Cloud project
+3. Enable **Google Analytics** (optional)
+4. Wait for provisioning to complete
 
-### 3.2 Register a web app
+### Step 2: Enable Authentication
 
-1. In the Firebase console, click the **Web** icon (`</>`) to add a web app
-2. Give it a nickname (e.g., "Vesper Web")
-3. Copy the Firebase config values — you'll need them for deployment
+1. Navigate to **Authentication** → **Sign-in method**
+2. Enable **Google** sign-in provider
+3. Enable **Anonymous** sign-in (for guest adventurers)
+4. Note your **Project ID** and **Web API Key**
 
-### 3.3 Enable Authentication providers
+### Step 3: Create Firestore Database
 
-1. Go to **Authentication** > **Sign-in method**
-2. Enable **Google** sign-in
-3. Enable **Anonymous** sign-in
-4. Click **Save**
+1. Navigate to **Firestore Database** → **Create database**
+2. Select **Production mode**
+3. Choose the same region as your Cloud Run service
+4. Deploy security rules:
 
-### 3.4 Add your Cloud Run domain to authorized domains
+```bash
+firebase deploy --only firestore:rules --project YOUR_PROJECT_ID
+```
 
-> **This step is critical!** Without it, Google sign-in will fail on your deployed app.
+### Step 4: Register Web App
 
-1. Go to **Authentication** > **Settings** > **Authorized domains**
-2. After deploying (Step 4), add your Cloud Run service URL:
-   ```
-   the-players-companion-XXXXXXXXXX-uw.a.run.app
-   ```
-   (You'll get this URL after deployment — come back to add it)
+1. In Firebase Console → **Project Settings** → **General**
+2. Under "Your apps", click **Add app** → **Web** (</> icon)
+3. Register with name "The Players Companion"
+4. Copy the config values — you'll need them for environment variables
+
+### Step 5: Get Gemini API Key
+
+1. Visit [Google AI Studio](https://aistudio.google.com/apikey)
+2. Create a new API key for your project
+3. Guard this key as you would a dragon's hoard
 
 ---
 
-## 4. Deploy to Cloud Run
+## Chapter 4: Opening the Gate — Deploy to Cloud Run
 
-### Option A: One-Command Source Deploy (Recommended)
+> *"The incantation is spoken. The gate shimmers into being."*
 
-This is the simplest approach. Cloud Run detects your `Dockerfile`, builds the container in the cloud using Cloud Build, and deploys it — all in one command.
+### Option A: Source Deploy (Recommended)
+
+> *"The simplest path — Cloud Build handles the construction for you."*
 
 ```bash
+# Set your environment variables in a single invocation
 gcloud run deploy the-players-companion \
   --source . \
-  --region us-west1 \
+  --region us-central1 \
   --allow-unauthenticated \
-  --port 8080 \
-  --set-build-env-vars="GEMINI_API_KEY=YOUR_GEMINI_KEY,VITE_FIREBASE_API_KEY=YOUR_FB_API_KEY,VITE_FIREBASE_AUTH_DOMAIN=YOUR_PROJECT.firebaseapp.com,VITE_FIREBASE_PROJECT_ID=YOUR_PROJECT_ID,VITE_FIREBASE_STORAGE_BUCKET=YOUR_PROJECT.firebasestorage.app,VITE_FIREBASE_MESSAGING_SENDER_ID=YOUR_SENDER_ID,VITE_FIREBASE_APP_ID=YOUR_APP_ID"
+  --set-env-vars "\
+GEMINI_API_KEY=your-gemini-key,\
+VITE_FIREBASE_API_KEY=your-firebase-api-key,\
+VITE_FIREBASE_AUTH_DOMAIN=your-project.firebaseapp.com,\
+VITE_FIREBASE_PROJECT_ID=your-project-id,\
+VITE_FIREBASE_STORAGE_BUCKET=your-project.firebasestorage.app,\
+VITE_FIREBASE_MESSAGING_SENDER_ID=your-sender-id,\
+VITE_FIREBASE_APP_ID=your-app-id"
 ```
 
-> **Important**: Replace every `YOUR_*` placeholder with your actual values.
+Cloud Build will:
+1. Detect the `Dockerfile`
+2. Build the container image
+3. Push to Artifact Registry
+4. Deploy to Cloud Run
+5. Return a service URL
 
-**What happens behind the scenes:**
-1. Your source code is uploaded to Cloud Build
-2. Cloud Build finds the `Dockerfile` and builds the container
-3. The `--set-build-env-vars` flag passes your secrets as build-time environment variables (Vite bakes them into the JS bundle during `npm run build`)
-4. The built container image is pushed to Artifact Registry
-5. Cloud Run deploys the container and gives you a URL
+### Option B: Manual Docker Build
 
-**If values contain commas**, use the `^@^` delimiter syntax:
-```bash
-gcloud run deploy the-players-companion \
-  --source . \
-  --region us-west1 \
-  --allow-unauthenticated \
-  --port 8080 \
-  --set-build-env-vars="^@^GEMINI_API_KEY=YOUR_KEY@VITE_FIREBASE_API_KEY=YOUR_KEY@VITE_FIREBASE_AUTH_DOMAIN=YOUR_DOMAIN"
-```
-
-### Option B: Manual Docker Build + Deploy
-
-Use this if you want more control, or if you want to test locally first.
-
-#### Step 1: Create an Artifact Registry repository (one-time)
+> *"For those who prefer to forge the container themselves."*
 
 ```bash
-gcloud artifacts repositories create vesper-repo \
-  --repository-format=docker \
-  --location=us-west1 \
-  --description="Vesper container images"
-```
-
-#### Step 2: Configure Docker authentication
-
-```bash
-gcloud auth configure-docker us-west1-docker.pkg.dev
-```
-
-#### Step 3: Build the Docker image
-
-```bash
+# Step 1: Build the image locally
 docker build \
-  --build-arg GEMINI_API_KEY="YOUR_GEMINI_KEY" \
-  --build-arg VITE_FIREBASE_API_KEY="YOUR_FB_API_KEY" \
-  --build-arg VITE_FIREBASE_AUTH_DOMAIN="YOUR_PROJECT.firebaseapp.com" \
-  --build-arg VITE_FIREBASE_PROJECT_ID="YOUR_PROJECT_ID" \
-  --build-arg VITE_FIREBASE_STORAGE_BUCKET="YOUR_PROJECT.firebasestorage.app" \
-  --build-arg VITE_FIREBASE_MESSAGING_SENDER_ID="YOUR_SENDER_ID" \
-  --build-arg VITE_FIREBASE_APP_ID="YOUR_APP_ID" \
-  -t us-west1-docker.pkg.dev/vesper-dnd/vesper-repo/vesper:latest \
-  .
-```
+  --build-arg GEMINI_API_KEY=your-gemini-key \
+  --build-arg VITE_FIREBASE_API_KEY=your-firebase-api-key \
+  --build-arg VITE_FIREBASE_AUTH_DOMAIN=your-project.firebaseapp.com \
+  --build-arg VITE_FIREBASE_PROJECT_ID=your-project-id \
+  --build-arg VITE_FIREBASE_STORAGE_BUCKET=your-project.firebasestorage.app \
+  --build-arg VITE_FIREBASE_MESSAGING_SENDER_ID=your-sender-id \
+  --build-arg VITE_FIREBASE_APP_ID=your-app-id \
+  -t gcr.io/YOUR_PROJECT_ID/the-players-companion .
 
-> **Mac with Apple Silicon?** Add `--platform linux/amd64` to the command.
+# Step 2: Push to Container Registry
+docker push gcr.io/YOUR_PROJECT_ID/the-players-companion
 
-#### Step 4: (Optional) Test locally
-
-```bash
-docker run -p 8080:8080 us-west1-docker.pkg.dev/vesper-dnd/vesper-repo/vesper:latest
-```
-
-Open http://localhost:8080 — you should see the Vesper login screen.
-
-#### Step 5: Push to Artifact Registry
-
-```bash
-docker push us-west1-docker.pkg.dev/vesper-dnd/vesper-repo/vesper:latest
-```
-
-#### Step 6: Deploy to Cloud Run
-
-```bash
+# Step 3: Deploy to Cloud Run
 gcloud run deploy the-players-companion \
-  --image us-west1-docker.pkg.dev/vesper-dnd/vesper-repo/vesper:latest \
-  --region us-west1 \
+  --image gcr.io/YOUR_PROJECT_ID/the-players-companion \
+  --region us-central1 \
   --allow-unauthenticated \
   --port 8080
 ```
 
 ---
 
-## 5. Configure Firebase Auth for Your Cloud Run Domain
+## Chapter 5: The Auth Domain Ward
 
-After deployment, Cloud Run prints a service URL like:
+> *"Firebase Auth requires that your service URL be registered  
+> as an authorized domain — lest the Gate reject worthy visitors."*
 
-```
-Service URL: https://the-players-companion-abcdef123-uw.a.run.app
-```
+### Add Cloud Run URL to Authorized Domains
 
-**You must add this domain to Firebase:**
+1. Copy your Cloud Run service URL (e.g., `https://the-players-companion-xxxxx-uc.a.run.app`)
+2. Go to **Firebase Console** → **Authentication** → **Settings** → **Authorized domains**
+3. Click **"Add domain"**
+4. Paste just the domain: `the-players-companion-xxxxx-uc.a.run.app`
 
-1. Go to [Firebase Console](https://console.firebase.google.com/) > **Authentication** > **Settings**
-2. Under **Authorized domains**, click **Add domain**
-3. Add the domain portion (without `https://`):
-   ```
-   the-players-companion-abcdef123-uw.a.run.app
-   ```
-4. Click **Add**
-
-Without this step, the "Enter with Google" button will fail with an `auth/unauthorized-domain` error.
+> ⚠️ **Critical:** Without this step, Google sign-in will fail with `auth/unauthorized-domain`. The most common cause of "the gate won't open" reports.
 
 ---
 
-## 6. Verify the Deployment
+## Chapter 6: Verification — Testing the Gate
 
-1. Open the Cloud Run service URL in your browser
-2. You should see the Vesper login screen (crown logo, "Enter with Google" button)
-3. Try signing in with Google or as a Guest Adventurer
-4. Verify character creation and AI features work
-
-### Quick verification via CLI
+> *"Never trust. Always verify."*
 
 ```bash
 # Check the service is running
-gcloud run services describe the-players-companion --region us-west1
+gcloud run services describe the-players-companion \
+  --region us-central1 \
+  --format "value(status.url)"
 
-# Get the URL
-gcloud run services describe the-players-companion --region us-west1 --format='value(status.url)'
-
-# Check logs if something is wrong
-gcloud run services logs read the-players-companion --region us-west1 --limit 50
+# Quick smoke test
+curl -s -o /dev/null -w "%{http_code}" https://YOUR_SERVICE_URL
+# Should return: 200
 ```
+
+### Manual Verification Checklist
+
+- [ ] App loads at the Cloud Run URL
+- [ ] Google sign-in works (no `auth/unauthorized-domain` error)
+- [ ] Anonymous/guest mode works
+- [ ] Characters save to Firestore (check Firebase Console → Firestore)
+- [ ] AI features work (ask the DM a question)
+- [ ] Portrait generation works
+- [ ] Campaign creation/joining works
 
 ---
 
-## 7. Updating the App
+## Chapter 7: Updating the Deployment
 
-After making code changes, redeploy with the same command:
+> *"The Gate must be refreshed when new enchantments are added."*
 
-### Source deploy (Option A)
+### Redeploy with Source Deploy
 
 ```bash
+# Same command — Cloud Build detects changes and rebuilds
 gcloud run deploy the-players-companion \
   --source . \
-  --region us-west1 \
-  --allow-unauthenticated \
-  --port 8080 \
-  --set-build-env-vars="GEMINI_API_KEY=YOUR_KEY,VITE_FIREBASE_API_KEY=YOUR_KEY,VITE_FIREBASE_AUTH_DOMAIN=YOUR_DOMAIN,VITE_FIREBASE_PROJECT_ID=YOUR_PROJECT,VITE_FIREBASE_STORAGE_BUCKET=YOUR_BUCKET,VITE_FIREBASE_MESSAGING_SENDER_ID=YOUR_ID,VITE_FIREBASE_APP_ID=YOUR_APP_ID"
+  --region us-central1 \
+  --allow-unauthenticated
 ```
 
-### Docker deploy (Option B)
+### Update Environment Variables Only
 
 ```bash
-docker build --build-arg GEMINI_API_KEY="..." ... -t us-west1-docker.pkg.dev/vesper-dnd/vesper-repo/vesper:latest .
-docker push us-west1-docker.pkg.dev/vesper-dnd/vesper-repo/vesper:latest
-gcloud run deploy the-players-companion \
-  --image us-west1-docker.pkg.dev/vesper-dnd/vesper-repo/vesper:latest \
-  --region us-west1
+gcloud run services update the-players-companion \
+  --region us-central1 \
+  --set-env-vars "GEMINI_API_KEY=new-key-here"
+```
+
+### Update Firestore Rules Only
+
+```bash
+firebase deploy --only firestore:rules --project YOUR_PROJECT_ID
+```
+
+### View Deployment Logs
+
+```bash
+# Stream logs in real-time
+gcloud run services logs read the-players-companion \
+  --region us-central1 \
+  --limit 50
+
+# Or tail live
+gcloud run services logs tail the-players-companion \
+  --region us-central1
 ```
 
 ---
 
-## 8. Custom Domain (Optional)
+## Chapter 8: Custom Domain — Name Your Realm
 
-To use a custom domain like `vesper.yourdomain.com`:
+> *"Every great realm deserves a proper name."*
 
 ```bash
-# Map your domain
+# Map a custom domain to your Cloud Run service
 gcloud run domain-mappings create \
   --service the-players-companion \
-  --domain vesper.yourdomain.com \
-  --region us-west1
+  --domain your-domain.com \
+  --region us-central1
 ```
 
-Then add the DNS records shown in the output to your domain registrar. Don't forget to also add `vesper.yourdomain.com` to Firebase's **Authorized domains** list.
+Then add the DNS records shown in the output to your domain registrar. Remember to also add the custom domain to Firebase Auth's authorized domains list.
 
 ---
 
-## 9. Troubleshooting
+## Chapter 9: Troubleshooting — The Sage's Wisdom
 
-### Black screen after deploy
+> *"When the gate falters, consult the sage."*
 
-| Cause | Fix |
-|-------|-----|
-| Missing build-time env vars | Redeploy with `--set-build-env-vars` (all `VITE_*` and `GEMINI_API_KEY`) |
-| Old import map in `index.html` | Make sure the `<script type="importmap">` block has been removed |
-| No Dockerfile | Confirm `Dockerfile` and `nginx.conf` exist in your repo root |
-| Wrong port | Cloud Run defaults to port 8080; our nginx config listens on 8080 |
-
-### Google sign-in fails with `auth/unauthorized-domain`
-
-Add your Cloud Run domain to Firebase Authentication > Settings > Authorized domains (see [Step 5](#5-configure-firebase-auth-for-your-cloud-run-domain)).
-
-### "Container failed to start" in Cloud Run logs
+### "Build failed" during deployment
 
 ```bash
-gcloud run services logs read the-players-companion --region us-west1 --limit 50
-```
-
-Usually means the container isn't listening on port 8080. Our nginx config handles this.
-
-### Build fails in Cloud Build
-
-Check build logs:
-```bash
+# Check Cloud Build logs
 gcloud builds list --limit 5
 gcloud builds log BUILD_ID
 ```
 
-Common issues:
-- Missing `package-lock.json` (needed by `npm ci`)
-- Node version mismatch
+**Common causes:**
+- Missing `package-lock.json` (run `npm install` locally first)
+- Node version mismatch (Dockerfile uses Node 18)
+- TypeScript errors (run `npm run build` locally to check)
 
-### Gemini AI not working
+### "auth/unauthorized-domain" on sign-in
 
-The Gemini API key is baked into the JS bundle at build time. If you changed the key, you must **rebuild and redeploy** — you can't just update a runtime env var.
+1. Check Firebase Console → Authentication → Settings → Authorized domains
+2. Ensure your Cloud Run domain is listed (without `https://`)
+3. Wait 1–2 minutes for propagation after adding
+
+### App loads but shows blank page
+
+```bash
+# Check container logs
+gcloud run services logs read the-players-companion --limit 20
+```
+
+**Common causes:**
+- Missing environment variables (all `VITE_*` vars must be set at **build time**)
+- nginx config mismatch (check `nginx.conf` sends all routes to `index.html`)
+
+### AI features return errors
+
+- Verify `GEMINI_API_KEY` is set correctly
+- Check the API key is enabled for the Gemini API in Google AI Studio
+- Ensure rate limiting isn't blocking requests (2s cooldown)
+
+### Characters not saving
+
+- Verify Firestore rules are deployed: `firebase deploy --only firestore:rules`
+- Check the user is authenticated (not a guest trying to use cloud features)
+- Look for document size warnings in browser console (>800KB)
+
+### Container crashes on startup
+
+```bash
+# Check for port binding issues
+gcloud run services describe the-players-companion \
+  --format "value(spec.template.spec.containers[0].ports[0].containerPort)"
+# Should be 8080
+```
 
 ---
 
-## Architecture Overview
+## Chapter 10: Architecture Overview
+
+> *"A map of the ethereal infrastructure."*
 
 ```
-┌─────────────┐     ┌──────────────┐     ┌───────────────┐
-│  Your Code  │────>│  Cloud Build │────>│  Artifact     │
-│  (Source)    │     │  (Dockerfile)│     │  Registry     │
-└─────────────┘     └──────────────┘     └───────┬───────┘
-                                                  │
-                                                  ▼
-                                         ┌───────────────┐
-                                         │   Cloud Run   │
-                                         │   (nginx +    │
-                                         │    static     │
-                                         │    files)     │
-                                         └───────┬───────┘
-                                                  │
-                                    ┌─────────────┼─────────────┐
-                                    ▼             ▼             ▼
-                              ┌──────────┐ ┌──────────┐ ┌────────────┐
-                              │ Firebase │ │ Gemini   │ │  Browser   │
-                              │   Auth   │ │   API    │ │ (User)     │
-                              └──────────┘ └──────────┘ └────────────┘
+┌─────────────────┐     ┌──────────────────────┐     ┌───────────────────┐
+│                  │     │                      │     │                   │
+│   Browser        │────▶│   Cloud Run          │     │   Firebase        │
+│   (React SPA)    │     │   (nginx + static)   │     │                   │
+│                  │     │                      │     │   • Auth          │
+└────────┬─────────┘     └──────────────────────┘     │   • Firestore    │
+         │                                            │                   │
+         │  Direct client-side calls                  └───────────────────┘
+         │                                                     ▲
+         ├─────────────────────────────────────────────────────┘
+         │  Firebase SDK (Auth + Firestore)
+         │
+         ▼
+┌─────────────────┐
+│                  │
+│   Google AI      │
+│   (Gemini API)   │
+│                  │
+└─────────────────┘
 ```
 
-- **Cloud Build** reads your `Dockerfile`, runs `npm ci && npm run build`, and packages the output into a container
-- **nginx** serves the static Vite build output on port 8080
-- **Firebase Auth** handles Google/Anonymous sign-in (client-side)
-- **Gemini API** is called directly from the browser (API key is in the JS bundle)
+**Key architectural notes:**
+- Cloud Run serves **static files only** (nginx). No server-side logic.
+- All API calls (Firebase, Gemini) happen **client-side** from the browser.
+- `GEMINI_API_KEY` is baked into the JS bundle at **build time** via Vite's `define`.
+- `VITE_*` environment variables are also baked at build time — changing them requires a redeploy.
 
 ---
 
-## Cost Estimate
+## Chapter 11: Cost Estimate
 
-Cloud Run has a generous free tier:
-- **2 million requests/month** free
-- **360,000 vCPU-seconds/month** free
-- **1 GiB outbound data/month** free
+> *"Even adventurers must manage their gold."*
 
-For a personal D&D companion app, you'll likely stay within the free tier. See [Cloud Run Pricing](https://cloud.google.com/run/pricing) for details.
+| Service | Free Tier | Estimated Monthly Cost |
+|:--------|:----------|:----------------------|
+| Cloud Run | 2M requests/month, 360K vCPU-seconds | **$0** for hobby use |
+| Cloud Build | 120 build-minutes/day | **$0** for most projects |
+| Artifact Registry | 0.5 GB storage free | **$0** unless many images |
+| Firebase Auth | 10K verifications/month | **$0** for hobby use |
+| Firestore | 1 GiB storage, 50K reads/day, 20K writes/day | **$0** for small parties |
+| Gemini API | Free tier with rate limits | **$0** with free API key |
+| **Total** | | **$0/month** for typical hobby use |
+
+> 💡 **Adventurer's Tip:** The entire stack runs within free tiers for a typical D&D group (4–6 players). Costs only arise at scale (thousands of concurrent users).
+
+---
+
+<p align="center"><em>⚔️ The Gate stands open. Your realm awaits beyond. ⚔️</em></p>

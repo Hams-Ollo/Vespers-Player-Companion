@@ -1,57 +1,91 @@
 <p align="center">
-  <h1 align="center">🏰 The Player's Companion</h1>
-  <p align="center">A D&D 5e digital character sheet & AI companion — built with React, TypeScript, and Google Gemini</p>
+  <img src="https://img.shields.io/badge/🏰-The%20Player's%20Companion-B8860B?style=for-the-badge&labelColor=1a1a2e" alt="The Player's Companion" />
+</p>
+
+<h1 align="center">⚜️ The Player's Companion ⚜️</h1>
+
+<p align="center"><em>A Tome of Digital Sorcery for the Modern Adventurer</em></p>
+
+<p align="center">
+  <strong>D&D 5th Edition Character Sheet & AI Dungeon Master</strong><br/>
+  <sub>Forged with React, TypeScript, and the arcane power of Google Gemini</sub>
 </p>
 
 ---
 
-## 🎯 Overview
+> *"Every adventurer needs a companion — not just in the dungeon, but at the table.  
+> This tome serves as your faithful squire: tracking your abilities, managing your  
+> inventory, and consulting the ancient texts so you don't have to."*
 
-The Player's Companion is a mobile-first web app for managing D&D 5th Edition characters. Create characters with a guided wizard, track stats and inventory, roll dice, level up with AI assistance, and consult an AI Dungeon Master grounded in official rulebook text.
+---
 
-## ✨ Features
+## Chapter 1: Introduction
+
+**The Player's Companion** is a mobile-first web application for managing D&D 5th Edition characters. Create heroes with a guided wizard, track stats and inventory, roll dice, level up with AI assistance, and consult an AI Dungeon Master grounded in official rulebook text.
+
+Whether you are a battle-scarred veteran of a hundred campaigns or a wide-eyed newcomer stepping into your first tavern, this companion will serve you well.
+
+---
+
+## Chapter 2: Features of the Companion
+
+> *Record all the features that your companion grants you here.*
 
 | Feature | Description |
-|---------|-------------|
-| 🧙 **Character Creation Wizard** | 6-step guided flow — Identity, Ability Scores (Standard Array / Point Buy / Manual), Skills, Spells (data-driven PHB lists), Concept, Review + AI portrait |
-| 🛒 **Starter Equipment Shop** | Roll or take average starting gold, browse 5 gear categories, buy items |
-| 📋 **Dashboard** | Card-stack UI with swipeable detail views — Vitals, Combat, Skills, Features, Spells, Inventory, Journal |
-| 🎲 **Dice Roller** | Complex expressions (`2d6+4`), crit/fail detection on d20 rolls |
-| 📖 **Spell Slot Tracking** | Full/half/pact caster progression tables from the PHB |
-| ⬆️ **Level Up** | AI-assisted leveling with HP rolls, ASI, new features, spell slot updates |
+|:--------|:------------|
+| 🧙 **Character Creation Wizard** | A 6-step guided ritual — Identity, Ability Scores (Standard Array / Point Buy / Manual), Skills, Spells (data-driven PHB lists), Concept, Review + AI Portrait |
+| 🛒 **Starter Equipment Shop** | Roll or take average starting gold, browse 5 gear categories, purchase supplies |
+| 📋 **The Dashboard** | Card-stack UI with swipeable detail views — Vitals, Combat, Skills, Features, Spells, Inventory, Journal |
+| 🎲 **Dice Roller** | Complex expressions (`2d6+4`), critical hit & fumble detection on d20 rolls |
+| 📖 **Spell Slot Tracking** | Full/half/pact caster progression tables faithfully transcribed from the PHB |
+| ⬆️ **Level Up Wizard** | AI-assisted ascension with HP rolls, ASI, new features, and spell slot updates |
 | 🤖 **Ask the DM** | Multi-turn AI chat grounded in uploaded PHB/DMG/MM/Basic Rules PDFs |
-| 🛏️ **Rest System** | Short & long rest with hit dice recovery |
-| 🗺️ **Campaign Manager** | Create or join campaigns with shareable codes |
+| 🛏️ **Rest System** | Short & long rest with hit dice recovery, as the gods intended |
+| 🗺️ **Campaign Manager** | Create or join campaigns with shareable join codes |
 | 🔐 **Authentication** | Firebase Google sign-in + anonymous guest mode |
-| ☁️ **Cloud Sync** | Firestore character persistence for signed-in users — real-time sync across devices |
-| 🎨 **AI Portraits** | Gemini 2.5 Flash image model for character portraits |
-| 🎲 **Quick Roll** | One-click AI-generated character from a vibe prompt, complete with stats, backstory, and portrait |
-| 🎭 **Class Theming** | Dynamic color themes per D&D class — borders, gradients, and glow effects on the Dashboard |
+| ☁️ **Cloud Sync** | Firestore character persistence — real-time sync across devices |
+| 🎨 **AI Portraits** | Gemini 2.5 Flash image model conjures character portraits from description |
+| 🎲 **Quick Roll** | One-click AI-generated character from a vibe prompt — stats, backstory, portrait |
+| 🎭 **Class Theming** | Dynamic color themes per D&D class — borders, gradients, and arcane glow effects |
 | 🎙️ **Voice Input** | Live audio transcription via Gemini Native Audio for hands-free DM chat |
 
-## 🛠️ Tech Stack
+---
 
-| Layer | Technology |
-|-------|-----------|
+## Chapter 3: The Arcane Components
+
+> *Every work of great magic requires the right components. Here you will find the  
+> material, somatic, and verbal components that power the Companion.*
+
+| Layer | Component |
+|:------|:----------|
 | **Framework** | React 19.2 + TypeScript 5.8 |
-| **Build** | Vite 6 |
+| **Forge** | Vite 6 |
 | **Styling** | Tailwind CSS (CDN) |
-| **Icons** | Lucide React |
-| **AI** | Google Gemini (`@google/genai` v1.41+) — `gemini-2.5-flash` (text), `gemini-2.5-flash-image` (portraits) |
-| **Auth** | Firebase Authentication (Google + Anonymous providers) |
-| **Database** | Cloud Firestore (character sync for authenticated users) |
-| **Storage** | localStorage (guest/offline fallback) |
-| **Deployment** | Docker (multi-stage) → Google Cloud Run |
+| **Iconography** | Lucide React |
+| **The Weave (AI)** | Google Gemini (`@google/genai` v1.41+) — `gemini-2.5-flash` (text), `gemini-2.5-flash-image` (portraits) |
+| **Ward (Auth)** | Firebase Authentication (Google + Anonymous providers) |
+| **Vault (Database)** | Cloud Firestore (character sync for authenticated users) |
+| **Scroll Case (Storage)** | localStorage (guest/offline fallback) |
+| **Planar Gate (Deploy)** | Docker (multi-stage) → Google Cloud Run |
 
-## 🚀 Getting Started
+---
+
+## Chapter 4: Summoning the Companion
+
+> *Before you can summon this companion to your side, you must gather the  
+> requisite components and speak the proper incantations.*
 
 ### Prerequisites
 
-- **Node.js** 18+
-- A [Google AI Studio](https://aistudio.google.com/) API key
-- A [Firebase](https://console.firebase.google.com/) project with Authentication enabled (Google + Anonymous sign-in)
+- **Node.js** 18+ *(the arcane runtime)*
+- A [Google AI Studio](https://aistudio.google.com/) API key *(your connection to the Weave)*
+- A [Firebase](https://console.firebase.google.com/) project with Authentication enabled *(Google + Anonymous sign-in)*
 
-### 1️⃣ Clone & Install
+---
+
+### Step 1. Clone the Repository
+
+*Reach through the planes and pull the source code to your local realm:*
 
 ```bash
 git clone https://github.com/Hams-Ollo/The-Players-Companion.git
@@ -59,124 +93,157 @@ cd The-Players-Companion
 npm install
 ```
 
-### 2️⃣ Configure Environment
+### Step 2. Configure Your Secrets
 
-Copy the example file and fill in your keys:
+*A wizard never reveals their secrets — but they do store them in `.env`:*
 
 ```bash
 cp .env.example .env
 ```
 
-Then edit `.env` with your Gemini API key and Firebase config. See [`.env.example`](.env.example) for all available variables with descriptions.
+Edit `.env` with your Gemini API key and Firebase config. See [`.env.example`](.env.example) for all available variables with descriptions.
 
-> ⚠️ **Never commit `.env` to version control.** It's already in `.gitignore`.
+> ⚠️ **Ward of Protection:** Never commit `.env` to version control. It is already guarded by `.gitignore`.
 
-### 3️⃣ (Optional) Upload Reference PDFs
+### Step 3. Upload Reference Tomes *(Optional)*
 
-Place your D&D reference PDFs in `reference-docs/`, then run:
+*For the truest answers, the DM must consult the original texts:*
 
 ```bash
 npm run upload-pdfs
 ```
 
-This uploads PDFs to Google's Gemini File API and writes the file URIs back to `.env`. On app startup, a context cache is created so all AI answers are grounded in actual book text with page citations.
+Place your D&D reference PDFs in `reference-docs/`, then run the command above. This uploads PDFs to Google's Gemini File API and writes the file URIs back to `.env`. On app startup, a context cache grounds all AI answers in actual book text with page citations.
 
-### 4️⃣ Run the Dev Server
+### Step 4. Ignite the Dev Server
 
 ```bash
 npm run dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) in your browser.
+Open [http://localhost:3000](http://localhost:3000) in your browser. Your companion awaits.
 
-### 5️⃣ Build for Production
+### Step 5. Forge for Production
 
 ```bash
 npm run build
 npm run preview
 ```
 
-## 📁 Project Structure
+---
+
+## Chapter 5: The Map of the Realm
+
+> *A complete cartographic survey of the Companion's directory structure.  
+> Study it well, for navigating these halls is essential to understanding the magic within.*
 
 ```
-├── App.tsx                     # 🏠 Root — auth gate, routing (uses CharacterContext)
-├── constants.tsx               # 📊 D&D data: races, classes, spells, features, slot tables
-├── types.ts                    # 📝 TypeScript interfaces (CharacterData, Campaign, etc.)
-├── utils.ts                    # 🔧 Rate limiting, stat recalculation, helpers
-├── vite.config.ts              # ⚙️ Vite config with env var injection
-├── index.html                  # 🌐 HTML entry point
-├── Dockerfile                  # 🐳 Multi-stage build (node → nginx)
-├── nginx.conf                  # 🌐 Production SPA server config
-├── firebase.json               # 🔥 Firebase project config (Firestore rules + indexes)
-├── firestore.rules             # 🔒 Firestore security rules
-├── firestore.indexes.json      # 📇 Firestore composite indexes
+├── App.tsx                        # 🏠 The Great Hall — auth gate & routing
+├── constants.tsx                  # 📜 The Compendium — races, classes, spells, features
+├── types.ts                      # 📝 The Codex — TypeScript interfaces
+├── utils.ts                      # 🔧 The Artificer's Tools — stat calculation, helpers
+├── vite.config.ts                # ⚙️ The Forge Config — Vite with env var injection
+├── index.html                    # 🌐 Portal of Entry
+├── Dockerfile                    # 🐳 Blueprint for the Iron Golem (container)
+├── nginx.conf                    # 🌐 The Gatekeeper's Orders
+├── firebase.json                 # 🔥 Pact of the Flame (Firebase config)
+├── firestore.rules               # 🔒 Wards of Protection (security rules)
+├── firestore.indexes.json        # 📇 Index of Forbidden Knowledge
 │
 ├── lib/
-│   ├── gemini.ts               # 🤖 Centralized Gemini AI client (generateWithContext, generatePortrait, createChatWithContext)
-│   └── firestore.ts            # 🔥 Firestore CRUD, real-time subscriptions, migration
+│   ├── gemini.ts                 # 🤖 The Weave — centralized Gemini AI client
+│   ├── firestore.ts              # 🔥 The Vault — Firestore CRUD & real-time sync
+│   └── campaigns.ts              # 🗺️ The Campaign Ledger — campaign Firestore operations
 │
 ├── contexts/
-│   ├── AuthContext.tsx          # 🔐 Firebase auth provider + hooks
-│   └── CharacterContext.tsx     # 📦 Character state provider (Firestore/localStorage dual-mode)
+│   ├── AuthContext.tsx            # 🔐 The Wardkeeper — Firebase auth provider
+│   ├── CharacterContext.tsx       # 📦 The Character Vault — state provider
+│   └── CampaignContext.tsx        # 🗺️ The Campaign Keeper — campaign state
 │
 ├── components/
-│   ├── LoginScreen.tsx          # 🚪 Google sign-in / guest mode
-│   ├── CharacterSelection.tsx   # 📜 Character list + create/delete
-│   ├── CharacterCreationWizard.tsx # 🧙 6-step character builder
-│   ├── Dashboard.tsx            # 📋 Main character view shell
-│   ├── CardStack.tsx            # 🃏 Swipeable card-stack dashboard
-│   ├── DetailOverlay.tsx        # 🔍 Fullscreen detail view wrapper
-│   ├── DiceRollModal.tsx        # 🎲 Dice roller with expression parser
-│   ├── LevelUpModal.tsx         # ⬆️ AI-powered level up flow
-│   ├── RestModal.tsx            # 🛏️ Short/long rest with hit dice
-│   ├── ShopModal.tsx            # 🏪 In-game equipment shop
-│   ├── AskDMModal.tsx           # 🤖 AI DM multi-turn chat
-│   ├── ItemDetailModal.tsx      # 🔎 AI-powered item/feature lookup
-│   ├── CampaignManager.tsx      # 🗺️ Create/join campaigns
-│   ├── SettingsModal.tsx        # ⚙️ Character stat editor
-│   ├── PortraitGenerator.tsx    # 🎨 AI portrait generation (uses shared generatePortrait)
-│   ├── TranscriptionButton.tsx  # 🎙️ Voice-to-text via Gemini Live Audio API
-│   ├── QuickRollModal.tsx       # 🎲 AI-generated quick character (uses shared helpers)
-│   ├── ErrorBoundary.tsx        # 🛡️ React error boundary
+│   ├── LoginScreen.tsx            # 🚪 The Tavern Door
+│   ├── CharacterSelection.tsx     # 📜 The Heroes' Gallery
+│   ├── CharacterCreationWizard.tsx # 🧙 The Ritual of Creation (6 steps)
+│   ├── Dashboard.tsx              # 📋 The Adventurer's Dashboard
+│   ├── CardStack.tsx              # 🃏 The Deck of Many Stats
+│   ├── DetailOverlay.tsx          # 🔍 The Scrying Glass
+│   ├── DiceRollModal.tsx          # 🎲 The Dice Tower
+│   ├── LevelUpModal.tsx           # ⬆️ The Ascension Chamber
+│   ├── RestModal.tsx              # 🛏️ The Campfire
+│   ├── ShopModal.tsx              # 🏪 The Merchant's Stall
+│   ├── AskDMModal.tsx             # 🤖 The Oracle's Chamber
+│   ├── ItemDetailModal.tsx        # 🔎 The Identify Spell
+│   ├── CampaignManager.tsx        # 🗺️ The War Room
+│   ├── SettingsModal.tsx          # ⚙️ The Tinkerer's Bench
+│   ├── PortraitGenerator.tsx      # 🎨 The Portrait Gallery
+│   ├── TranscriptionButton.tsx    # 🎙️ The Sending Stone
+│   ├── QuickRollModal.tsx         # 🎲 The Quicksilver Forge
+│   ├── ErrorBoundary.tsx          # 🛡️ The Shield Guardian
 │   │
 │   └── details/
-│       ├── VitalsDetail.tsx     # ❤️ HP, AC, speed, conditions
-│       ├── CombatDetail.tsx     # ⚔️ Attacks, actions, initiative
-│       ├── SkillsDetail.tsx     # 🎯 Skill list with proficiency
-│       ├── FeaturesDetail.tsx   # ✨ Class/racial features
-│       ├── SpellsDetail.tsx     # 📖 Spellbook + slot tracking
-│       ├── InventoryDetail.tsx  # 🎒 Items, gold, encumbrance
-│       └── JournalDetail.tsx    # 📓 Session notes + AI chronicles
+│       ├── VitalsDetail.tsx       # ❤️ The Life Force
+│       ├── CombatDetail.tsx       # ⚔️ The Armory
+│       ├── SkillsDetail.tsx       # 🎯 The Training Grounds
+│       ├── FeaturesDetail.tsx     # ✨ The Hall of Abilities
+│       ├── SpellsDetail.tsx       # 📖 The Spellbook
+│       ├── InventoryDetail.tsx    # 🎒 The Bag of Holding
+│       └── JournalDetail.tsx      # 📓 The Chronicler's Journal
 │
-└── reference-docs/              # 📚 D&D PDFs (gitignored)
+└── reference-docs/                # 📚 The Forbidden Library (gitignored)
 ```
 
-## ☁️ Cloud Persistence
+---
 
-Signed-in users (Google Auth) get **automatic Firestore sync**:
+## Chapter 6: Cloud Persistence
+
+> *"Trust not the localStorage alone, for it is as fleeting as a cantrip's flame.  
+> Inscribe your heroes upon the eternal Firestore, and they shall endure."*
+
+Signed-in users (Google Auth) receive **automatic Firestore synchronization**:
 
 - Characters are stored in the `characters` collection, partitioned by `ownerUid`
-- Real-time `onSnapshot` listeners keep multiple browser tabs/devices in sync
-- Writes are **debounced** (500ms) to avoid excessive Firestore operations during combat
-- Guest users continue using localStorage with no cloud calls
+- Real-time `onSnapshot` listeners keep multiple browser tabs and devices in sync
+- Writes are **debounced** (500ms) to avoid excessive Firestore operations during heated combat
+- Guest adventurers continue using localStorage with no cloud calls
 - First-time sign-in detects local characters and offers a one-click **migration** to the cloud
-- Firestore security rules enforce per-user isolation — users can only read/write their own characters
+- Firestore security rules enforce per-user isolation — no adventurer may read another's character sheet
 
-## 🔒 Rate Limiting
+---
 
-Client-side multi-layer protection to prevent API abuse:
+## Chapter 7: Rate Limiting
+
+> *"The Weave resists those who draw upon it too hastily.  
+> Patience, young spellcaster — two seconds between castings."*
+
+Client-side multi-layer protection prevents abuse of the AI connection:
 
 - **Per-call throttle:** 2-second minimum between AI requests
-- **Tamper detection:** Rate limit state stored in closure (not localStorage)
+- **Tamper detection:** Rate limit state stored in closure (not localStorage) — immune to console trickery
 
-## 📚 Documentation
+---
 
-- [🏗️ Architecture](docs/ARCHITECTURE.md) — System design, data flow, component map
-- [🔌 API Reference](docs/API.md) — Gemini AI integration, helper functions, data schemas
-- [🤝 Contributing](docs/CONTRIBUTING.md) — Setup, code style, PR guidelines
-- [� Roadmap & TODO](docs/TODO.md) — Planned features, enhancements, community requests
-- [� Project Tracker](docs/PROJECT_TRACKER.md) — Epics, features, user stories, tasks with status tracking
+## Chapter 8: The Library
 
-## 📄 License
+> *"Knowledge is the greatest treasure — more valuable than gold, more powerful  
+> than magic. These tomes contain the deeper lore of the Companion's construction."*
 
-MIT
+| Tome | Contents |
+|:-----|:---------|
+| [🏗️ Architecture](docs/ARCHITECTURE.md) | *The Architect's Blueprints* — system design, data flow, component map |
+| [🔌 API Reference](docs/API.md) | *The Spellbook* — Gemini AI integration, helper functions, data schemas |
+| [🤝 Contributing](docs/CONTRIBUTING.md) | *The Adventurer's Code* — setup, code style, PR guidelines |
+| [📋 Roadmap & TODO](docs/TODO.md) | *The Quest Board* — planned features, enhancements, community requests |
+| [📊 Project Tracker](docs/PROJECT_TRACKER.md) | *The War Council's Ledger* — epics, features, user stories with status |
+| [☁️ Cloud Deployment](docs/CLOUD_RUN_DEPLOY.md) | *The Planar Gate Manual* — Docker → Cloud Run deployment guide |
+
+---
+
+## Appendix A: License
+
+*This work is released under the **MIT License** — free for all adventurers to use, modify, and distribute across the Material Plane and beyond.*
+
+---
+
+<p align="center">
+  <sub><em>⚔️ May your rolls be high and your saves be true. ⚔️</em></sub>
+</p>

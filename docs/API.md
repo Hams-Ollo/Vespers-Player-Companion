@@ -1,16 +1,20 @@
-# 🔌 API Reference
+# ⚜️ The Spellbook — API Reference ⚜️
 
+> *"Within these pages lie the incantations that power the Companion's magic.  
+> Study them carefully — a miscast spell can have... unexpected consequences."*
+>
 > Gemini AI integration, helper functions, data schemas, and environment configuration.
 
 ---
 
-## 🤖 Gemini AI Client
+## Chapter 1: The Weave — Gemini AI Client
 
-The centralized AI client lives in `lib/gemini.ts`. All AI-powered components use this module.
+> *The centralized conduit to the Weave lives in `lib/gemini.ts`.  
+> All AI-powered components channel their magic through this module.*
 
 ### `generateWithContext(prompt, config?)`
 
-Single-shot text generation using Gemini.
+*A single incantation sent to the Weave. Speak your query, and the Weave answers.*
 
 ```typescript
 import { generateWithContext } from '../lib/gemini';
@@ -23,18 +27,18 @@ console.log(result); // string response
 ```
 
 | Parameter | Type | Description |
-|-----------|------|-------------|
+|:----------|:-----|:------------|
 | `prompt` | `string` | The text prompt to send |
 | `config` | `Partial<GenerateContentParameters['config']>` | Optional Gemini config (response format, temperature, etc.) |
 | **Returns** | `string \| undefined` | Generated text response |
 
-**Used by:** `LevelUpModal`, `ItemDetailModal`, `JournalDetail`, `QuickRollModal`, `CharacterCreationWizard`
+**Summoned by:** `LevelUpModal`, `ItemDetailModal`, `JournalDetail`, `QuickRollModal`, `CharacterCreationWizard`
 
 ---
 
 ### `createChatWithContext(history, systemInstruction)`
 
-Creates a multi-turn chat session with Gemini.
+*Opens a persistent channel to the Weave — a two-way Sending spell.*
 
 ```typescript
 import { createChatWithContext } from '../lib/gemini';
@@ -48,20 +52,22 @@ const response = await chat.sendMessage({ message: 'What does Magic Missile do?'
 ```
 
 | Parameter | Type | Description |
-|-----------|------|-------------|
+|:----------|:-----|:------------|
 | `history` | `any[]` | Array of previous chat messages |
 | `systemInstruction` | `string` | System prompt defining AI behavior |
 | **Returns** | `Chat` | Gemini chat session object |
 
-**Used by:** `AskDMModal`
+**Summoned by:** `AskDMModal`
 
 ---
 
-## 🎨 Portrait Generation
+## Chapter 2: Portrait Generation
+
+> *"The Weave can paint as well as it can speak."*
 
 ### `generatePortrait(prompt, parts?)`
 
-Generates an AI portrait using `gemini-2.5-flash-image`. All portrait generation is centralized through this shared helper in `lib/gemini.ts`.
+*Conjures an AI portrait using `gemini-2.5-flash-image`. All portrait generation is channeled through this shared incantation in `lib/gemini.ts`.*
 
 ```typescript
 import { generatePortrait } from '../lib/gemini';
@@ -80,16 +86,18 @@ const dataUri = await generatePortrait('Repaint in watercolor style', [
 ```
 
 | Parameter | Type | Description |
-|-----------|------|-------------|
+|:----------|:-----|:------------|
 | `prompt` | `string` | Text description of the portrait |
 | `parts` | `any[]` | Optional content parts array (for image-to-image mode) |
 | **Returns** | `Promise<string \| null>` | Base64 data URI on success, `null` if no image produced |
 
-**Used by:** `CharacterCreationWizard` (forge step), `PortraitGenerator`, `QuickRollModal`
+**Summoned by:** `CharacterCreationWizard` (forge step), `PortraitGenerator`, `QuickRollModal`
 
 ---
 
-## 🔒 Rate Limiting
+## Chapter 3: Rate Limiting
+
+> *"The Weave resists those who draw upon it too hastily."*
 
 ### `checkRateLimit()`
 
@@ -99,15 +107,20 @@ import { checkRateLimit } from '../utils';
 checkRateLimit(); // throws if called within 2 seconds of last call
 ```
 
-Enforces a 2-second cooldown between AI requests. State is stored in a module-level closure — not in `localStorage` — so it can't be tampered with from the console.
+Enforces a 2-second cooldown between AI requests. State is stored in a module-level closure — not in `localStorage` — so it cannot be tampered with from the console.
 
 **Throws:** `Error("Slow down, adventurer! The Weave needs a moment to settle.")`
 
 ---
 
-## 🔧 Utility Functions (`utils.ts`)
+## Chapter 4: The Artificer's Tools (`utils.ts`)
+
+> *"Every adventurer carries a toolkit. These are the shared utility functions  
+> that keep the Companion's magic running smoothly."*
 
 ### `calculateModifier(score)`
+
+*The fundamental formula, as old as the game itself:*
 
 ```typescript
 calculateModifier(16); // → 3
@@ -120,7 +133,7 @@ Standard D&D modifier formula: `Math.floor((score - 10) / 2)`
 
 ### `recalculateCharacterStats(data)`
 
-Recomputes derived stats from current character state:
+*Recomputes all derived attributes from current character state — like a Greater Restoration for your stat block:*
 
 ```typescript
 import { recalculateCharacterStats } from '../utils';
@@ -132,26 +145,30 @@ const updated = recalculateCharacterStats(character);
 // updated.initiative — DEX modifier
 ```
 
-**AC Calculation Logic:**
-- Base: `10 + DEX mod`
-- Leather: `11 + DEX mod`
-- Studded Leather: `12 + DEX mod`
-- Chain Shirt: `13 + min(2, DEX mod)`
-- Scale Mail: `14 + min(2, DEX mod)`
-- Plate: `18`
-- Shield: `+2`
+**AC Calculation — The Armor Table:**
+
+| Armor | Formula |
+|:------|:--------|
+| Unarmored | `10 + DEX mod` |
+| Leather | `11 + DEX mod` |
+| Studded Leather | `12 + DEX mod` |
+| Chain Shirt | `13 + min(2, DEX mod)` |
+| Scale Mail | `14 + min(2, DEX mod)` |
+| Plate | `18` |
+| Shield | `+2` |
 
 **Attack Generation:** Auto-generates attack entries from equipped weapons, detecting finesse/ranged properties and applying the correct ability modifier + proficiency bonus.
 
 ---
 
-## 📊 D&D Data Helpers (`constants.tsx`)
+## Chapter 5: The Compendium Helpers (`constants.tsx`)
+
+> *"The Compendium contains all the sacred tables of the PHB.  
+> These helper functions translate them into actionable magic."*
 
 ### Spell Slot Functions
 
 #### `getSpellSlotsForLevel(className, charLevel)`
-
-Returns the spell slots available for a class at a given level.
 
 ```typescript
 getSpellSlotsForLevel('Wizard', 3);
@@ -161,7 +178,7 @@ getSpellSlotsForLevel('Warlock', 5);
 // → [{ level: 3, max: 2 }]  (Pact Magic — all slots same level)
 
 getSpellSlotsForLevel('Fighter', 1);
-// → []  (non-caster)
+// → []  (non-caster — no slots granted)
 ```
 
 Handles full casters, half casters (Paladin/Ranger), and Warlock Pact Magic.
@@ -180,12 +197,12 @@ getCantripsKnownCount('Fighter', 1); // → 0
 
 #### `getSpellsKnownCount(className, charLevel)`
 
-For "known" casters only (Bard, Ranger, Sorcerer, Warlock). Returns 0 for prepared casters.
+*For "known" casters only (Bard, Ranger, Sorcerer, Warlock). Returns 0 for prepared casters.*
 
 ```typescript
-getSpellsKnownCount('Bard', 1);    // → 4
+getSpellsKnownCount('Bard', 1);     // → 4
 getSpellsKnownCount('Sorcerer', 5); // → 6
-getSpellsKnownCount('Cleric', 5);   // → 0 (prepared caster)
+getSpellsKnownCount('Cleric', 5);   // → 0 (prepared caster — consults their deity)
 ```
 
 ---
@@ -208,7 +225,7 @@ getClassFeatures('Rogue', 1);
 #### `isASILevel(className, level)`
 
 ```typescript
-isASILevel('Fighter', 6); // → true  (Fighters get extra ASIs)
+isASILevel('Fighter', 6); // → true  (Fighters get extra ASIs — lucky them)
 isASILevel('Wizard', 6);  // → false
 ```
 
@@ -229,7 +246,7 @@ isExpertiseLevel('Wizard', 1); // → false
 ```typescript
 getSneakAttackDice(1);  // → "1d6"
 getSneakAttackDice(5);  // → "3d6"
-getSneakAttackDice(20); // → "10d6"
+getSneakAttackDice(20); // → "10d6" (devastating)
 ```
 
 ---
@@ -237,7 +254,7 @@ getSneakAttackDice(20); // → "10d6"
 ### Race & Class Lookups
 
 | Function | Signature | Returns |
-|----------|-----------|---------|
+|:---------|:----------|:--------|
 | `getAllRaceOptions()` | `() → string[]` | Flat list of all races including subraces |
 | `getRaceSpeed(name)` | `(string) → number` | Walking speed (default 30) |
 | `getClassData(name)` | `(string) → ClassOption \| undefined` | Full class definition |
@@ -247,14 +264,16 @@ getSneakAttackDice(20); // → "10d6"
 
 ---
 
-## 📝 Data Schemas
+## Chapter 6: Data Schemas
+
+> *"Know the shape of your data as well as you know the shape of your sword."*
 
 ### `CharacterData`
 
 The core data model. See `types.ts` for the full interface. Key nested types:
 
 | Type | Fields |
-|------|--------|
+|:-----|:-------|
 | `Stat` | `score`, `modifier`, `save`, `proficientSave` |
 | `Skill` | `name`, `ability`, `modifier`, `proficiency` (`none` / `proficient` / `expertise`) |
 | `Attack` | `name`, `bonus`, `damage`, `type`, `range?`, `properties?` |
@@ -272,18 +291,25 @@ interface Campaign {
   dmId: string;
   description: string;
   joinCode: string;           // shareable 6-char code
+  memberUids: string[];       // denormalized for array-contains queries
   members: { uid: string; name: string }[];
+  status: 'active' | 'archived';
+  currentSessionNumber: number;
+  settings: CampaignSettings;
   createdAt: number;
+  updatedAt: number;
 }
 ```
 
 ---
 
-## ⚙️ Environment Variables
+## Chapter 7: Environment Variables
+
+> *"Guard these secrets as you would a dragon's hoard."*
 
 | Variable | Required | Description |
-|----------|----------|-------------|
-| `GEMINI_API_KEY` | ✅ | Google AI Studio API key for Gemini |
+|:---------|:---------|:------------|
+| `GEMINI_API_KEY` | ✅ | Google AI Studio API key — your connection to the Weave |
 | `VITE_FIREBASE_API_KEY` | ✅ | Firebase project API key |
 | `VITE_FIREBASE_AUTH_DOMAIN` | ✅ | Firebase auth domain |
 | `VITE_FIREBASE_PROJECT_ID` | ✅ | Firebase project ID |
@@ -297,18 +323,19 @@ interface Campaign {
 
 ### How Env Vars Are Injected
 
-- **`GEMINI_API_KEY`** → Injected by Vite's `define` in `vite.config.ts` as `process.env.API_KEY`
+- **`GEMINI_API_KEY`** → Forged by Vite's `define` in `vite.config.ts` as `process.env.API_KEY`
 - **`VITE_*`** → Automatically exposed by Vite as `import.meta.env.VITE_*` and via the `getEnv()` helper in `AuthContext.tsx`
 
 ---
 
-## 🔥 Firestore Service (`lib/firestore.ts`)
+## Chapter 8: The Vault — Firestore Service (`lib/firestore.ts`)
 
-The Firestore service module handles all Cloud Firestore operations for character persistence.
+> *"All roads lead to the Vault. Here lie the functions that store and  
+> retrieve heroes from the eternal Firestore."*
 
 ### `subscribeUserCharacters(uid, onData, onError?)`
 
-Subscribes to a user's characters in real-time via `onSnapshot`.
+*Establishes a real-time scrying link to a user's characters:*
 
 ```typescript
 import { subscribeUserCharacters } from '../lib/firestore';
@@ -318,11 +345,11 @@ const unsubscribe = subscribeUserCharacters(
   (chars) => setCharacters(chars),
   (err) => console.error(err),
 );
-// Call unsubscribe() to stop listening
+// Call unsubscribe() to sever the connection
 ```
 
 | Parameter | Type | Description |
-|-----------|------|-------------|
+|:----------|:-----|:------------|
 | `uid` | `string` | Firebase Auth UID |
 | `onData` | `(chars: CharacterData[]) => void` | Callback with updated characters array |
 | `onError` | `(err: Error) => void` | Optional error handler |
@@ -334,7 +361,7 @@ const unsubscribe = subscribeUserCharacters(
 
 ### `saveCharacter(char)`
 
-Saves or updates a character document. **Debounced** (500ms) to prevent excessive writes during rapid gameplay changes.
+*Inscribes a character into the Vault. **Debounced** (500ms) to prevent excessive writes during the heat of battle.*
 
 ```typescript
 import { saveCharacter } from '../lib/firestore';
@@ -343,7 +370,7 @@ await saveCharacter({ ...character, updatedAt: Date.now() });
 ```
 
 | Parameter | Type | Description |
-|-----------|------|-------------|
+|:----------|:-----|:------------|
 | `char` | `CharacterData` | Full character data (must include `id` and `ownerUid`) |
 | **Returns** | `Promise<void>` | Resolves when write completes |
 
@@ -353,7 +380,7 @@ await saveCharacter({ ...character, updatedAt: Date.now() });
 
 ### `deleteCharacter(charId)`
 
-Deletes a character document and cancels any pending debounced write.
+*Banishes a character from the Vault. Cancels any pending debounced writes.*
 
 ```typescript
 import { deleteCharacter } from '../lib/firestore';
@@ -365,7 +392,7 @@ await deleteCharacter('char-uuid-123');
 
 ### `migrateLocalCharacters(uid, chars)`
 
-Batch-writes an array of local characters to Firestore, setting `ownerUid` on each.
+*Batch-writes an array of local characters to Firestore, inscribing `ownerUid` on each.*
 
 ```typescript
 import { migrateLocalCharacters } from '../lib/firestore';
@@ -373,13 +400,14 @@ import { migrateLocalCharacters } from '../lib/firestore';
 await migrateLocalCharacters(user.uid, localCharacters);
 ```
 
-Used by the migration prompt when a Google user first signs in and has existing localStorage characters.
+Used by the migration banner when a Google user first signs in and has existing localStorage characters.
 
 ---
 
-## 📦 Character Context (`contexts/CharacterContext.tsx`)
+## Chapter 9: The Character Vault (`contexts/CharacterContext.tsx`)
 
-The `CharacterProvider` manages all character state and provides a unified API regardless of storage backend.
+> *"The Vault knows all. It manages every hero, whether stored in the cloud  
+> or scratched onto parchment (localStorage)."*
 
 ### `useCharacters()` Hook
 
@@ -387,8 +415,8 @@ The `CharacterProvider` manages all character state and provides a unified API r
 import { useCharacters } from '../contexts/CharacterContext';
 
 const {
-  characters,           // CharacterData[]
-  activeCharacter,      // CharacterData | null
+  characters,           // CharacterData[] — all heroes in the vault
+  activeCharacter,      // CharacterData | null — currently selected hero
   activeCharacterId,    // string | null
   setActiveCharacterId, // (id: string | null) => void
   createCharacter,      // (char: CharacterData) => void
@@ -400,9 +428,14 @@ const {
   pendingMigration,     // CharacterData[] | null — local chars awaiting import
   acceptMigration,      // () => Promise<void>
   dismissMigration,     // () => void
+  saveError,            // string | null — any Firestore write error
 } = useCharacters();
 ```
 
 **Dual-mode behavior:**
-- **Google users** (`isCloudUser === true`): All CRUD operations write to Firestore. State updates come from `onSnapshot` listener.
-- **Guest users** (`isCloudUser === false`): All CRUD operations write to localStorage. State managed locally.
+- **Google Users** (`isCloudUser === true`): All CRUD operations write to Firestore. State updates flow from the `onSnapshot` listener.
+- **Guest Adventurers** (`isCloudUser === false`): All CRUD operations write to localStorage. State managed locally.
+
+---
+
+<p align="center"><em>⚔️ Thus concludes the Spellbook. Wield these incantations wisely. ⚔️</em></p>

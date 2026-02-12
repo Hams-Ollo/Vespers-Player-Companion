@@ -1,12 +1,18 @@
-# 🤝 Contributing
+# ⚜️ The Adventurer's Code ⚜️
 
-> Guidelines for contributing to The Player's Companion. Welcome to the party, adventurer!
+> *"Welcome to the party, adventurer! Before you draw your sword — or your IDE —  
+> read these bylaws. Every good adventuring company has rules, and these  
+> will keep our codebase as organized as a wizard's spellbook."*
+>
+> Guidelines for contributing to The Player's Companion.
 
 ---
 
-## 🏁 Quick Start
+## Chapter 1: Joining the Party
 
-### 1. Fork & Clone
+### Step 1. Fork & Clone
+
+*Create your own copy of the repository and pull it to your local realm:*
 
 ```bash
 git clone https://github.com/<your-username>/The-Players-Companion.git
@@ -14,9 +20,9 @@ cd The-Players-Companion
 npm install
 ```
 
-### 2. Set Up Environment
+### Step 2. Prepare Your Spellbook
 
-Copy the `.env` template and fill in your keys:
+*Copy the `.env` template and inscribe your personal keys:*
 
 ```env
 GEMINI_API_KEY=your_gemini_api_key
@@ -28,70 +34,73 @@ VITE_FIREBASE_MESSAGING_SENDER_ID=your_sender_id
 VITE_FIREBASE_APP_ID=your_app_id
 ```
 
-### 3. Run Dev Server
+### Step 3. Ignite the Dev Server
 
 ```bash
 npm run dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000). The app hot-reloads on save.
+Open [http://localhost:3000](http://localhost:3000). The app hot-reloads on save — like a Ring of Regeneration for your code.
 
-### 4. Verify TypeScript
+### Step 4. Verify Your Enchantments
 
 ```bash
 npx tsc --noEmit
 ```
 
-Ensure zero errors before submitting a PR.
+Ensure **zero errors** before submitting a PR. The TypeScript compiler is our first line of defense.
 
 ---
 
-## 📏 Code Style
+## Chapter 2: The Code Style Codex
 
-### 🔤 General
+### 🔤 General Laws
 
 - **Language:** TypeScript (`.tsx` for components, `.ts` for utilities)
-- **Framework:** React 19 with functional components and hooks
+- **Framework:** React 19 with functional components and hooks only
 - **Formatting:** 2-space indentation, single quotes for strings in TS, double quotes for JSX attributes
-- **Naming:**
+- **Naming Conventions:**
   - Components: `PascalCase` (`LevelUpModal.tsx`)
   - Functions/variables: `camelCase` (`getClassData`, `handleForge`)
   - Constants: `UPPER_SNAKE_CASE` (`DND_CLASSES`, `FULL_CASTER_SLOTS`)
   - Types/interfaces: `PascalCase` (`CharacterData`, `StatKey`)
-  - CSS classes: Tailwind utilities only
+  - CSS classes: Tailwind utilities only — no custom CSS
 
 ### 🧩 Component Patterns
 
-- **Functional components only** — no class components
+> *"Keep your components pure, like a Paladin's oath."*
+
+- **Functional components only** — no class components (this isn't 3rd Edition)
 - **Props interfaces** defined inline or co-located:
   ```typescript
   const MyModal: React.FC<{ data: CharacterData; onClose: () => void }> = ({ data, onClose }) => {
   ```
 - **State management:** React `useState`/`useEffect` — no external state libraries
-- **Modals:** Render as fixed overlays with `z-50`, dark backdrop, rounded cards
+- **Modals:** Fixed overlays with `z-50`, dark backdrop, rounded cards
 - **Icons:** Import from `lucide-react` only
 
-### 🎨 Styling Conventions
+### 🎨 The Color Palette
 
-- **Dark theme:** `bg-zinc-900` base, `bg-zinc-800` cards, `bg-zinc-950` inputs
-- **Accent colors:**
-  - 🟡 Amber (`amber-500/600`) — primary actions, headings
-  - 🔵 Blue (`blue-500/600`) — skills, proficiencies
-  - 🟣 Purple (`purple-500/600`) — spells (1st level+)
-  - 🔵 Cyan (`cyan-500/600`) — cantrips
-  - 🟠 Orange (`orange-500/600`) — warnings, secondary CTAs
-  - 🔴 Red (`red-500/600`) — errors, HP loss
-  - 🟢 Green (`green-500/600`) — success, healing
+> *"Every color has meaning in the dungeon."*
+
+- **Base:** `bg-zinc-900` (the darkness), `bg-zinc-800` (cards), `bg-zinc-950` (inputs)
+- 🟡 **Amber** (`amber-500/600`) — Primary actions, headings, gold
+- 🔵 **Blue** (`blue-500/600`) — Skills, proficiencies
+- 🟣 **Purple** (`purple-500/600`) — Spells (1st level+)
+- 🔵 **Cyan** (`cyan-500/600`) — Cantrips
+- 🟠 **Orange** (`orange-500/600`) — Warnings, secondary CTAs
+- 🔴 **Red** (`red-500/600`) — Errors, HP loss, danger
+- 🟢 **Green** (`green-500/600`) — Success, healing, level-up
 - **Font sizes:** `text-xs` for labels, `text-sm` for body, `text-xl`+ for headings
 - **Responsive:** Mobile-first (`p-4 sm:p-6 md:p-8`), max widths on modals
 
 ---
 
-## ♿ Accessibility
+## Chapter 3: Accessibility — The Universal Law
 
-Accessibility is a priority. Follow these guidelines:
+> *"A good tavern has a wide door so all may enter. So too must our app."*
 
-### ✅ Required
+### ✅ Required for All Contributions
 
 - All `<button>` elements with icon-only content **must** have `aria-label`:
   ```tsx
@@ -113,13 +122,16 @@ Accessibility is a priority. Follow these guidelines:
 
 - Interactive elements must have visible focus styles (Tailwind `focus:outline-none focus:border-amber-500` pattern)
 
-### 🧪 Testing
+### 🧪 Testing the Wards
 
-Run your browser's accessibility audit (Chrome DevTools > Lighthouse > Accessibility) before submitting. Target: **no warnings** for elements you've touched.
+Run your browser's accessibility audit (Chrome DevTools → Lighthouse → Accessibility) before submitting. Target: **no warnings** for elements you've touched.
 
 ---
 
-## 📦 D&D Data (`constants.tsx`)
+## Chapter 4: The Compendium of D&D Data (`constants.tsx`)
+
+> *"When adding to the Compendium, accuracy is paramount.  
+> A wrong saving throw can mean the difference between life and a very annoyed player."*
 
 When adding or modifying game data:
 
@@ -130,20 +142,22 @@ When adding or modifying game data:
 
 ---
 
-## 🔀 Git Workflow
+## Chapter 5: The Git Workflow
 
 ### Branch Naming
 
+*Name your branch like you'd name an expedition:*
+
 ```
-feat/short-description    # New features
-fix/short-description     # Bug fixes
-docs/short-description    # Documentation only
-refactor/short-description # Code restructuring
+feat/short-description     # A new feature (a quest)
+fix/short-description      # A bug fix (slaying a monster)
+docs/short-description     # Documentation (updating the lore)
+refactor/short-description # Code restructuring (renovating the keep)
 ```
 
 ### Commit Messages
 
-Use [Conventional Commits](https://www.conventionalcommits.org/):
+*Use [Conventional Commits](https://www.conventionalcommits.org/) — clear, structured, and to the point:*
 
 ```
 feat: Add spell preparation UI for prepared casters
@@ -152,7 +166,7 @@ docs: Update API reference with new helper functions
 refactor: Extract stat calculation into shared utility
 ```
 
-### Pull Request Process
+### The Pull Request Ritual
 
 1. 🍴 Fork the repo and create a feature branch
 2. 💻 Make your changes with clear, atomic commits
@@ -164,7 +178,9 @@ refactor: Extract stat calculation into shared utility
 
 ---
 
-## 🐛 Reporting Bugs
+## Chapter 6: Reporting Bugs
+
+> *"Encountered a beholder in the codebase? Report it immediately."*
 
 Open a GitHub issue with:
 
@@ -176,21 +192,27 @@ Open a GitHub issue with:
 
 ---
 
-## 🗺️ Roadmap Items Open for Contribution
+## Chapter 7: Quests Open for Contribution
 
-These are tracked in the README and are great first contributions:
+> *"Check the Quest Board at the tavern. These quests pay well in XP."*
 
-| Item | Difficulty | Description |
-|------|-----------|-------------|
-| 📖 Spellbook management | 🟡 Medium | Prepare/swap spells on long rest for prepared casters |
-| � Export/import JSON | 🟢 Easy | Download/upload character data as JSON files |
-| 🗺️ Campaign Firestore sync | 🔴 Hard | Migrate campaigns to Firestore (characters already done) |
-| 🛡️ Conditions tracker | 🟡 Medium | Track active conditions with mechanical effects |
-| 🔐 Backend API proxy | 🔴 Hard | Move Gemini API key to a server-side proxy |
-| 🎯 Subclass selection | 🟡 Medium | UI for choosing subclass at appropriate level |
+| Quest | Difficulty | Description |
+|:------|:-----------|:------------|
+| 📖 Spellbook Management | 🟡 Medium | Prepare/swap spells on long rest for prepared casters |
+| 📦 Export/Import JSON | 🟢 Easy | Download/upload character data as JSON files |
+| 🗺️ Campaign Firestore Sync | 🔴 Hard | Migrate campaigns to Firestore (characters already done) |
+| 🛡️ Conditions Tracker | 🟡 Medium | Track active conditions with mechanical effects |
+| 🔐 Backend API Proxy | 🔴 Hard | Move Gemini API key to a server-side proxy |
+| 🎯 Subclass Selection | 🟡 Medium | UI for choosing subclass at appropriate level |
 
 ---
 
-## 💬 Questions?
+## Chapter 8: Questions?
 
-Open a GitHub Discussion or reach out via Issues. We're happy to help new contributors get started!
+> *"The tavern keep is always happy to point you in the right direction."*
+
+Open a GitHub Discussion or reach out via Issues. We're happy to help new adventurers find their footing!
+
+---
+
+<p align="center"><em>⚔️ Welcome to the party. Let's build something legendary. ⚔️</em></p>
