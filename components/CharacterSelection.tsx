@@ -1,6 +1,6 @@
 
 import React, { useState } from 'react';
-import { CharacterData, Campaign } from '../types';
+import { CharacterData } from '../types';
 import { Plus, Play, Trash2, Scroll, Heart, Shield, Crown, Users, LogOut, User, Lock, Dices, AlertTriangle, Cloud, CloudOff, Upload } from 'lucide-react';
 import CharacterCreationWizard from './CharacterCreationWizard';
 import QuickRollModal from './QuickRollModal';
@@ -8,11 +8,10 @@ import CampaignManager from './CampaignManager';
 import ErrorBoundary from './ErrorBoundary';
 import { useAuth } from '../contexts/AuthContext';
 import { useCharacters } from '../contexts/CharacterContext';
+import { useCampaign } from '../contexts/CampaignContext';
 
 interface CharacterSelectionProps {
   characters: CharacterData[];
-  campaigns: Campaign[];
-  onUpdateCampaigns: (camps: Campaign[]) => void;
   onSelect: (id: string) => void;
   onCreate: (data: CharacterData) => void;
   onDelete: (id: string) => void;
@@ -20,8 +19,6 @@ interface CharacterSelectionProps {
 
 const CharacterSelection: React.FC<CharacterSelectionProps> = ({ 
   characters, 
-  campaigns, 
-  onUpdateCampaigns, 
   onSelect, 
   onCreate, 
   onDelete 
@@ -32,6 +29,7 @@ const CharacterSelection: React.FC<CharacterSelectionProps> = ({
   const [migrating, setMigrating] = useState(false);
   const { user, logout } = useAuth();
   const { isCloudUser, pendingMigration, acceptMigration, dismissMigration } = useCharacters();
+  const { campaigns } = useCampaign();
 
   const handleCreate = (newChar: CharacterData) => {
     onCreate(newChar);
@@ -285,18 +283,13 @@ const CharacterSelection: React.FC<CharacterSelectionProps> = ({
             </div>
         ) : (
             user && (
-              <CampaignManager 
-                user={user} 
-                campaigns={campaigns} 
-                onUpdateCampaigns={onUpdateCampaigns as any} 
-              />
+              <CampaignManager />
             )
         )}
       </div>
 
       {showWizard && (
         <CharacterCreationWizard
-          campaigns={campaigns}
           onCreate={handleCreate}
           onClose={() => setShowWizard(false)}
         />

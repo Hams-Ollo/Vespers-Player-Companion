@@ -15,7 +15,7 @@ import { firebaseApp } from '../contexts/AuthContext';
 import { CharacterData } from '../types';
 
 // ─── Firestore instance ─────────────────────────────────────────────
-const db = getFirestore(firebaseApp);
+export const db = getFirestore(firebaseApp);
 const CHARACTERS_COLLECTION = 'characters';
 
 // ─── Debounce helper ─────────────────────────────────────────────────

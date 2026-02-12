@@ -121,7 +121,7 @@ export interface UserProfile {
   photoURL: string | null;
 }
 
-export type StackType = 'vitals' | 'combat' | 'skills' | 'features' | 'inventory' | 'journal' | 'spells';
+export type StackType = 'vitals' | 'combat' | 'skills' | 'features' | 'inventory' | 'journal' | 'spells' | 'party';
 
 export type RollMode = 'normal' | 'advantage' | 'disadvantage';
 

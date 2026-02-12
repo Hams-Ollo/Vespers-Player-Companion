@@ -18,8 +18,10 @@ import ShopModal from './ShopModal';
 import LevelUpModal from './LevelUpModal';
 import ItemDetailModal from './ItemDetailModal';
 import RestModal from './RestModal';
+import PartyRoster from './PartyRoster';
 import ErrorBoundary from './ErrorBoundary';
-import { Heart, Sword, Brain, Sparkles, Backpack, Edit2, MessageSquare, Settings, LogOut, Book, ShoppingBag, Wand2, ChevronDown } from 'lucide-react';
+import { useCampaign } from '../contexts/CampaignContext';
+import { Heart, Sword, Brain, Sparkles, Backpack, Edit2, MessageSquare, Settings, LogOut, Book, ShoppingBag, Wand2, ChevronDown, Users, Swords } from 'lucide-react';
 
 interface DashboardProps {
   data: CharacterData;
@@ -29,6 +31,7 @@ interface DashboardProps {
 }
 
 const Dashboard: React.FC<DashboardProps> = ({ data, onUpdatePortrait, onUpdateData, onExit }) => {
+  const { activeCampaign, members, isDM, activeEncounter } = useCampaign();
   const [activeStack, setActiveStack] = useState<StackType | null>(null);
   const [rollResult, setRollResult] = useState<RollResult | null>(null);
   const [rollMode, setRollMode] = useState<RollMode>('normal');
@@ -190,6 +193,32 @@ const Dashboard: React.FC<DashboardProps> = ({ data, onUpdatePortrait, onUpdateD
                     </div>
                 </CardStack>
             </div>
+
+            {/* Party Card — only shown when in a campaign */}
+            {activeCampaign && (
+              <div className="col-span-2 h-40">
+                <CardStack type="party" title="Party" color="green" onClick={() => setActiveStack('party')} icon={<Users size={18} />}>
+                  <div className="flex justify-between items-center px-2">
+                    <div className="space-y-1">
+                      <span className="block text-lg font-bold text-green-400 truncate max-w-[160px]">{activeCampaign.name}</span>
+                      <span className="text-[10px] text-zinc-600 uppercase font-black tracking-widest">
+                        {members.length} Member{members.length !== 1 ? 's' : ''} &middot; {isDM ? 'DM' : 'Player'}
+                      </span>
+                    </div>
+                    <div className="text-right">
+                      {activeEncounter ? (
+                        <div className="flex items-center gap-2">
+                          <Swords size={16} className="text-red-400 animate-pulse" />
+                          <span className="text-xs font-bold text-red-400">In Combat</span>
+                        </div>
+                      ) : (
+                        <span className="text-xs text-zinc-600">Session #{activeCampaign.currentSessionNumber || 1}</span>
+                      )}
+                    </div>
+                  </div>
+                </CardStack>
+              </div>
+            )}
          </div>
        </div>
 
@@ -203,6 +232,7 @@ const Dashboard: React.FC<DashboardProps> = ({ data, onUpdatePortrait, onUpdateD
             {activeStack === 'features' && <FeaturesDetail data={data} onInspect={setSelectedItemForDetail} />}
             {activeStack === 'inventory' && <InventoryDetail data={data} onShop={() => setShowShop(true)} onInspect={setSelectedItemForDetail} onUpdate={onUpdateData} />}
             {activeStack === 'journal' && <JournalDetail data={data} onUpdate={onUpdateData} />}
+            {activeStack === 'party' && <PartyRoster onClose={() => setActiveStack(null)} />}
          </DetailOverlay>
        )}
 

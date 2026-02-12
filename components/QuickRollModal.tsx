@@ -2,7 +2,7 @@
 import React, { useState } from 'react';
 import { X, Dices, Sparkles, Wand2, Star, ChevronDown, Activity, AlertCircle } from 'lucide-react';
 import { CharacterData, StatKey, ProficiencyLevel } from '../types';
-import { GoogleGenAI, Type, ThinkingLevel } from "@google/genai";
+import { GoogleGenAI, ThinkingLevel } from "@google/genai";
 import { checkRateLimit, recalculateCharacterStats } from '../utils';
 import { TEXT_MODEL, IMAGE_MODEL } from '../lib/gemini';
 import { 
@@ -99,72 +99,6 @@ const QuickRollModal: React.FC<QuickRollModalProps> = ({ onCreate, onClose }) =>
         // 1. Generate Character Data
         setRitualMessage("Weaving the threads of destiny...");
         
-        const characterSchema = {
-            type: Type.OBJECT,
-            properties: {
-                name: { type: Type.STRING },
-                stats: {
-                    type: Type.OBJECT,
-                    properties: {
-                        STR: { type: Type.INTEGER },
-                        DEX: { type: Type.INTEGER },
-                        CON: { type: Type.INTEGER },
-                        INT: { type: Type.INTEGER },
-                        WIS: { type: Type.INTEGER },
-                        CHA: { type: Type.INTEGER },
-                    },
-                    required: ["STR", "DEX", "CON", "INT", "WIS", "CHA"]
-                },
-                background: { type: Type.STRING },
-                alignment: { type: Type.STRING },
-                skills: {
-                    type: Type.ARRAY,
-                    items: {
-                        type: Type.OBJECT,
-                        properties: {
-                            name: { type: Type.STRING },
-                            proficiency: { type: Type.STRING, enum: ["proficient", "expertise", "none"] }
-                        },
-                        required: ["name", "proficiency"]
-                    }
-                },
-                features: {
-                    type: Type.ARRAY,
-                    items: {
-                        type: Type.OBJECT,
-                        properties: {
-                            name: { type: Type.STRING },
-                            source: { type: Type.STRING },
-                            description: { type: Type.STRING },
-                            fullText: { type: Type.STRING }
-                        },
-                        required: ["name", "source", "description", "fullText"]
-                    }
-                },
-                spells: {
-                    type: Type.ARRAY,
-                    items: {
-                        type: Type.OBJECT,
-                        properties: {
-                            name: { type: Type.STRING },
-                            level: { type: Type.INTEGER },
-                            school: { type: Type.STRING },
-                            description: { type: Type.STRING },
-                            castingTime: { type: Type.STRING },
-                            range: { type: Type.STRING },
-                            duration: { type: Type.STRING },
-                            components: { type: Type.STRING }
-                        },
-                        required: ["name", "level", "school", "description"]
-                    }
-                },
-                appearance: { type: Type.STRING },
-                backstory: { type: Type.STRING },
-                subclass: { type: Type.STRING }
-            },
-            required: ["name", "stats", "background", "alignment", "skills", "features", "spells", "appearance", "backstory"]
-        };
-
         const dataResponse = await Promise.race([
             ai.models.generateContent({
                 model: TEXT_MODEL,
@@ -175,10 +109,23 @@ const QuickRollModal: React.FC<QuickRollModalProps> = ({ onCreate, onClose }) =>
                           2. Apply these racial bonuses to the scores: ${race}.
                           3. Pick relevant features and spells appropriate for a Level ${quickLevel} ${charClass}.
                           4. ${quickLevel >= (getClassData(charClass)?.subclassLevel ?? 3) ? `Include a subclass from: ${(SUBCLASS_OPTIONS[charClass] || []).join(', ')}.` : 'No subclass needed at this level.'}
-                          5. Include a physical description and backstory.`,
+                          5. Include a physical description and backstory.
+                          
+                          Return a JSON object with exactly this structure:
+                          {
+                            "name": "string",
+                            "stats": { "STR": number, "DEX": number, "CON": number, "INT": number, "WIS": number, "CHA": number },
+                            "background": "string",
+                            "alignment": "string",
+                            "skills": [{ "name": "string", "proficiency": "proficient"|"expertise"|"none" }],
+                            "features": [{ "name": "string", "source": "string", "description": "string", "fullText": "string" }],
+                            "spells": [{ "name": "string", "level": number, "school": "string", "description": "string", "castingTime": "string", "range": "string", "duration": "string", "components": "string" }],
+                            "appearance": "string",
+                            "backstory": "string",
+                            "subclass": "string or omit if no subclass"
+                          }`,
                 config: {
                     responseMimeType: 'application/json',
-                    responseSchema: characterSchema,
                     thinkingConfig: { thinkingLevel: ThinkingLevel.LOW }
                 }
             }),

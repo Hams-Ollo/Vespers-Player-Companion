@@ -1,14 +1,16 @@
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import LoginScreen from './components/LoginScreen';
 import CharacterSelection from './components/CharacterSelection';
 import Dashboard from './components/Dashboard';
+import DMDashboard from './components/DMDashboard';
 import ErrorBoundary from './components/ErrorBoundary';
 import { AuthProvider, useAuth } from './contexts/AuthContext';
 import { CharacterProvider, useCharacters } from './contexts/CharacterContext';
-import { Campaign } from './types';
+import { CampaignProvider, useCampaign } from './contexts/CampaignContext';
 
 const AppContent: React.FC = () => {
   const { user, loading: authLoading } = useAuth();
+  const { isDM, activeCampaign, setActiveCampaignId } = useCampaign();
   const {
     characters,
     activeCharacter,
@@ -20,26 +22,6 @@ const AppContent: React.FC = () => {
     deleteCharacter,
     isLoading: charsLoading,
   } = useCharacters();
-
-  const [campaigns, setCampaigns] = useState<Campaign[]>([]);
-
-  // Load campaigns from localStorage
-  useEffect(() => {
-    const savedCamps = localStorage.getItem('vesper_campaigns');
-    if (savedCamps) {
-      try {
-        const parsed = JSON.parse(savedCamps);
-        if (Array.isArray(parsed)) setCampaigns(parsed);
-      } catch (e) {
-        console.error("Failed to load campaigns", e);
-      }
-    }
-  }, []);
-
-  // Persist campaigns on change
-  useEffect(() => {
-    localStorage.setItem('vesper_campaigns', JSON.stringify(campaigns));
-  }, [campaigns]);
 
   if (authLoading || charsLoading) {
     return (
@@ -65,12 +47,18 @@ const AppContent: React.FC = () => {
     );
   }
 
+  if (!activeCharacter && isDM && activeCampaign) {
+    return (
+      <ErrorBoundary fallbackTitle="The DM Screen has collapsed">
+        <DMDashboard onExit={() => setActiveCampaignId(null)} />
+      </ErrorBoundary>
+    );
+  }
+
   return (
     <ErrorBoundary fallbackTitle="The Hall has collapsed">
       <CharacterSelection 
         characters={characters}
-        campaigns={campaigns}
-        onUpdateCampaigns={(newCamps) => setCampaigns(newCamps as any)}
         onSelect={(id) => setActiveCharacterId(id)}
         onCreate={(newChar) => createCharacter(newChar)}
         onDelete={(id) => deleteCharacter(id)}
@@ -82,7 +70,9 @@ const AppContent: React.FC = () => {
 const App: React.FC = () => (
   <AuthProvider>
     <CharacterProvider>
-      <AppContent />
+      <CampaignProvider>
+        <AppContent />
+      </CampaignProvider>
     </CharacterProvider>
   </AuthProvider>
 );

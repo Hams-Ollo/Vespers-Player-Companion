@@ -1,8 +1,9 @@
 
 import React, { useState, useMemo } from 'react';
 import { X, ChevronRight, ChevronLeft, Dices, User, BookOpen, Sparkles, Loader2, Plus, Minus, ShieldCheck, Zap, Star, Info } from 'lucide-react';
-import { CharacterData, StatKey, Campaign, Skill, Stat } from '../types';
+import { CharacterData, StatKey, Skill, Stat } from '../types';
 import TranscriptionButton from './TranscriptionButton';
+import { useCampaign } from '../contexts/CampaignContext';
 import {
   generateId,
   getAllRaceOptions,
@@ -109,7 +110,6 @@ const STEPS = [
 ];
 
 interface WizardProps {
-  campaigns: Campaign[];
   onCreate: (data: CharacterData) => void;
   onClose: () => void;
 }
@@ -144,10 +144,10 @@ const StepIndicator: React.FC<{ currentStep: number }> = ({ currentStep }) => (
 
 const StepIdentity: React.FC<{
   state: WizardState;
-  campaigns: Campaign[];
   onChange: (updates: Partial<WizardState>) => void;
-}> = ({ state, campaigns, onChange }) => {
+}> = ({ state, onChange }) => {
   const races = getAllRaceOptions();
+  const { campaigns } = useCampaign();
   
   return (
     <div className="p-4 sm:p-6 md:p-8 space-y-6">
@@ -891,7 +891,7 @@ const StepReview: React.FC<{
   );
 };
 
-const CharacterCreationWizard: React.FC<WizardProps> = ({ campaigns, onCreate, onClose }) => {
+const CharacterCreationWizard: React.FC<WizardProps> = ({ onCreate, onClose }) => {
   const [step, setStep] = useState(0);
   const [state, setState] = useState<WizardState>({ ...INITIAL_STATE });
   const [forging, setForging] = useState(false);
@@ -1071,7 +1071,7 @@ const CharacterCreationWizard: React.FC<WizardProps> = ({ campaigns, onCreate, o
         <StepIndicator currentStep={step} />
 
         <div className="flex-grow overflow-y-auto">
-          {step === 0 && <StepIdentity state={state} campaigns={campaigns} onChange={handleChange} />}
+          {step === 0 && <StepIdentity state={state} onChange={handleChange} />}
           {step === 1 && <StepAbilityScores state={state} onChange={handleChange} />}
           {step === 2 && <StepSkills state={state} onChange={handleChange} />}
           {step === 3 && <StepPowers state={state} onChange={handleChange} />}
