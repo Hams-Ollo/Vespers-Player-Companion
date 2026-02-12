@@ -169,10 +169,13 @@
 | 8.8 | Campaign deletion with subcollections | ✅ | Members deleted last |
 | 8.9 | DM fallback read permissions | ✅ | On members, encounters, rollRequests, whispers |
 | 8.10 | Character-to-campaign assignment | 🔲 | v0.4.0 |
-| 8.11 | Party roster component | 🔲 | v0.4.0 |
-| 8.12 | DM party overview | 🔲 | v0.4.0 |
+| 8.11 | Party roster component | ✅ | `PartyRoster.tsx` — card grid with character fetching |
+| 8.12 | DM party overview | ✅ | `DMPartyOverview.tsx` — vitals grid, passive scores |
 | 8.13 | Invite management (email + code) | 🔲 | v0.4.0 |
 | 8.14 | Campaign member migration | 🔲 | v0.4.0 |
+| 8.15 | Wire `CampaignProvider` into `App.tsx` | ✅ | Provider wraps `AppContent`, no localStorage |
+| 8.16 | Rewrite `CampaignManager` with `useCampaign()` | ✅ | Fully Firestore-backed |
+| 8.17 | `DMDashboard` layout | ✅ | Tabbed DM view (overview/combat/notes/settings) |
 
 ---
 

@@ -6,7 +6,7 @@
 >
 > Living document tracking planned features, enhancements, and community requests.
 >
-> **Scribed last:** 2026-02-12
+> **Scribed last:** 2026-02-12 (evening)
 
 ---
 
@@ -32,7 +32,7 @@
 Phase 0: Foundation Cleanup           ████████████████████████████████████████  ✅ CLEARED
 Phase 1: Firestore Campaign Foundation    ████████████████████████████████████████  ✅ CLEARED
 UI Overhaul & API Cleanup                ████████████████████████████████████████  ✅ CLEARED
-Phase 2: Campaign Context & Party UI          ██████████░░░░░░░░░░░░░░░░░░░░░░░░  ← WE ARE HERE
+Phase 2: Campaign Context & Party UI          ██████████████████░░░░░░░░░░░░░░░░  ← WE ARE HERE
 Phase 3: Combat & Initiative Tracker                  ░░░░░░░░████████░░░░░░░░░░
 Phase 4: DM Journal, NPCs & Items                    ░░░░░░░░████████░░░░░░░░░░
 Phase 4b: Custom Items & Loot                        ░░░░░░░░░░██████░░░░░░░░░░
@@ -105,16 +105,16 @@ Character Export (no deps) ─→ can ship independently at any time
 - [x] **Create `lib/campaigns.ts` service layer** — Full campaign CRUD with real-time subscriptions
 - [x] **Update Firestore security rules** — Campaign member reads, DM-only writes, invite rules
 - [x] **Create `CampaignContext` provider** — `useCampaign()` hook with campaigns, members, roles
-- [ ] **Wire `CampaignProvider` into `App.tsx`** — Remove localStorage campaign state, wrap with provider
-- [ ] **Rewrite `CampaignManager` component** — Replace localStorage with `useCampaign()`
+- [x] **Wire `CampaignProvider` into `App.tsx`** — Remove localStorage campaign state, wrap with provider
+- [x] **Rewrite `CampaignManager` component** — Replace localStorage with `useCampaign()`
 
 ### 🟠 Hard
 
 - [ ] **DM/Player role selection** — Role selector at campaign creation
 - [ ] **Character-to-campaign assignment** — Dropdown picker stored as `CampaignMember.characterId`
-- [ ] **Build `PartyRoster` component** — Grid of party member cards with portraits
-- [ ] **Build `DMPartyOverview` component** — Live vitals grid, passive scores panel
-- [ ] **Build `DMDashboard` layout** — DM-specific layout when `myRole === 'dm'`
+- [x] **Build `PartyRoster` component** — Grid of party member cards with portraits
+- [x] **Build `DMPartyOverview` component** — Live vitals grid, passive scores panel
+- [x] **Build `DMDashboard` layout** — DM-specific layout when `myRole === 'dm'`
 - [ ] **Invite management** — Join code sharing + direct email invites, accept/decline flow
 - [ ] **Migrate localStorage campaigns to Firestore** — Migration function
 
@@ -302,6 +302,8 @@ Character Export (no deps) ─→ can ship independently at any time
 - [x] **Firebase Auth** — Google sign-in + anonymous fallback _(v0.2.3 — 2026-02-11)_
 - [x] **Spellbook Support, Advanced Dice, Data-driven Spells, Slot Tables** _(v0.1.x–v0.2.x)_
 - [x] **Starter Equipment Shop, Racial Traits, Class Features, Campaign Manager** _(v0.1.0)_
+- [x] **Campaign Provider Integration** — `CampaignProvider` wired into `App.tsx`, `CampaignManager` rewritten with `useCampaign()` _(v0.4.0 — 2026-02-12)_
+- [x] **DM Dashboard & Party Views** — `DMDashboard`, `DMPartyOverview`, `PartyRoster` components built _(v0.4.0 — 2026-02-12)_
 - [x] **Accessibility Fixes, Error Boundaries, Tailwind Build Pipeline** _(v0.1.1–v0.2.0)_
 
 ---
