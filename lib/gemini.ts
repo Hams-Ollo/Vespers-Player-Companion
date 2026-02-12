@@ -8,13 +8,19 @@ export const TEXT_MODEL = 'gemini-2.5-flash';
 /** Image generation model — change here to update everywhere. */
 export const IMAGE_MODEL = 'gemini-2.5-flash-image';
 
+/** Force the SDK to use the correct API endpoint in every environment. */
+const GEMINI_BASE_URL = 'https://generativelanguage.googleapis.com';
+
 const getAI = () => {
   const apiKey = process.env.API_KEY || process.env.GEMINI_API_KEY;
   console.log('[Gemini] API key present:', !!apiKey, 'length:', apiKey?.length);
   if (!apiKey || apiKey === 'undefined') {
     throw new Error("Gemini API Key is missing. Ensure GEMINI_API_KEY is set in your .env file.");
   }
-  return new GoogleGenAI({ apiKey });
+  return new GoogleGenAI({
+    apiKey,
+    httpOptions: { baseUrl: GEMINI_BASE_URL },
+  });
 };
 
 /**

@@ -44,7 +44,10 @@ const TranscriptionButton: React.FC<TranscriptionButtonProps> = ({ onTranscripti
 
     try {
       // Create a fresh GoogleGenAI instance right before the connection
-      const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
+      const ai = new GoogleGenAI({
+        apiKey: process.env.API_KEY,
+        httpOptions: { baseUrl: 'https://generativelanguage.googleapis.com' },
+      });
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
       
       const inputAudioContext = new (window.AudioContext || (window as any).webkitAudioContext)({ sampleRate: 16000 });
