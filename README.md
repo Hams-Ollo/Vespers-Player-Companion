@@ -21,7 +21,7 @@
 
 ## Chapter 1: Introduction
 
-**Ollo's Player Companion** is a mobile-first web application for managing D&D 5th Edition characters. Create heroes with a guided wizard, track stats and inventory, roll dice, level up with AI assistance, and consult an AI Dungeon Master grounded in official rulebook text.
+**Ollo's Player Companion** is a mobile-first web application for managing D&D 5th Edition characters and campaigns. Create heroes with a guided wizard, track stats and inventory, roll dice, level up with AI assistance, and consult an AI Dungeon Master grounded in official rulebook text.
 
 Whether you are a battle-scarred veteran of a hundred campaigns or a wide-eyed newcomer stepping into your first tavern, this companion will serve you well.
 
