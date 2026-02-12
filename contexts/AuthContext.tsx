@@ -11,13 +11,16 @@ import {
 } from 'firebase/auth';
 import { UserProfile } from '../types';
 
+// Firebase client config — these are PUBLIC identifiers (not secrets).
+// They are safe to commit; security is enforced server-side via Firebase
+// Security Rules + the Express proxy for Gemini API calls.
 const firebaseConfig = {
-  apiKey: process.env.VITE_FIREBASE_API_KEY,
-  authDomain: process.env.VITE_FIREBASE_AUTH_DOMAIN,
-  projectId: process.env.VITE_FIREBASE_PROJECT_ID,
-  storageBucket: process.env.VITE_FIREBASE_STORAGE_BUCKET,
-  messagingSenderId: process.env.VITE_FIREBASE_MESSAGING_SENDER_ID,
-  appId: process.env.VITE_FIREBASE_APP_ID,
+  apiKey: process.env.VITE_FIREBASE_API_KEY || 'AIzaSyDKVE6CZgRKHA4JJj8zK2B8VfLRwBO4n-g',
+  authDomain: process.env.VITE_FIREBASE_AUTH_DOMAIN || 'gen-lang-client-0664125417.firebaseapp.com',
+  projectId: process.env.VITE_FIREBASE_PROJECT_ID || 'gen-lang-client-0664125417',
+  storageBucket: process.env.VITE_FIREBASE_STORAGE_BUCKET || 'gen-lang-client-0664125417.firebasestorage.app',
+  messagingSenderId: process.env.VITE_FIREBASE_MESSAGING_SENDER_ID || '350817164864',
+  appId: process.env.VITE_FIREBASE_APP_ID || '1:350817164864:web:a651f5d31dc2054a5949a5',
 };
 
 // Singleton pattern for Firebase initialization
