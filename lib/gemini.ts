@@ -2,7 +2,10 @@
 import { GoogleGenAI, ThinkingLevel } from "@google/genai";
 
 /** Primary text model — change here to update everywhere that uses this module. */
-const TEXT_MODEL = 'gemini-2.5-flash';
+export const TEXT_MODEL = 'gemini-2.5-flash';
+
+/** Image generation model — change here to update everywhere. */
+export const IMAGE_MODEL = 'gemini-2.5-flash-image';
 
 const getAI = () => {
   const apiKey = process.env.API_KEY || process.env.GEMINI_API_KEY;
@@ -42,4 +45,29 @@ export const generateWithContext = async (prompt: string, config: any = {}) => {
     },
   });
   return response.text;
+};
+
+/**
+ * Generate a portrait image using the image model.
+ * Returns a base64 data URI on success, or null if no image was produced.
+ */
+export const generatePortrait = async (prompt: string, parts?: any[]): Promise<string | null> => {
+  const ai = getAI();
+  const contentParts = parts || [{ text: prompt }];
+  const response = await ai.models.generateContent({
+    model: IMAGE_MODEL,
+    contents: { parts: contentParts },
+    config: {
+      responseModalities: ['Text', 'Image'],
+    },
+  });
+
+  if (response.candidates?.[0]?.content?.parts) {
+    for (const part of response.candidates[0].content.parts) {
+      if (part.inlineData) {
+        return `data:image/png;base64,${part.inlineData.data}`;
+      }
+    }
+  }
+  return null;
 };

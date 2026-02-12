@@ -35,6 +35,7 @@ import {
 } from '../constants';
 import { GoogleGenAI, ThinkingLevel } from "@google/genai";
 import { checkRateLimit, recalculateCharacterStats, calculateModifier } from '../utils';
+import { TEXT_MODEL, IMAGE_MODEL } from '../lib/gemini';
 
 // ==========================================
 // Types
@@ -944,7 +945,7 @@ const CharacterCreationWizard: React.FC<WizardProps> = ({ campaigns, onCreate, o
 
         const portraitPrompt = `High fantasy D&D Character Portrait: ${state.race} ${state.charClass}. Appearance: ${state.appearance || 'Mysterious adventurer'}. Cinematic lighting.`;
         const portraitResponse = await Promise.race([
-          ai.models.generateContent({ model: 'gemini-2.5-flash-image', contents: { parts: [{ text: portraitPrompt }] } }),
+          ai.models.generateContent({ model: IMAGE_MODEL, contents: { parts: [{ text: portraitPrompt }] }, config: { responseModalities: ['Text', 'Image'] } }),
           new Promise<never>((_, reject) => setTimeout(() => reject(new Error('Portrait generation timed out')), 60000))
         ]);
         if (portraitResponse.candidates?.[0]?.content?.parts) {
@@ -961,7 +962,7 @@ const CharacterCreationWizard: React.FC<WizardProps> = ({ campaigns, onCreate, o
           Format: { "features": [{ "name": "...", "source": "...", "description": "...", "fullText": "..." }], "spells": [{ "name": "...", "level": 0, "school": "...", "description": "...", "castingTime": "...", "range": "...", "duration": "...", "components": "..." }] }`;
 
           const rulesResponse = await Promise.race([
-            ai.models.generateContent({ model: 'gemini-2.5-flash', contents: rulesPrompt, config: { responseMimeType: 'application/json', thinkingConfig: { thinkingLevel: ThinkingLevel.LOW } } }),
+            ai.models.generateContent({ model: TEXT_MODEL, contents: rulesPrompt, config: { responseMimeType: 'application/json', thinkingConfig: { thinkingLevel: ThinkingLevel.LOW } } }),
             new Promise<never>((_, reject) => setTimeout(() => reject(new Error('Rules lookup timed out')), 30000))
           ]);
 

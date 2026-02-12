@@ -4,6 +4,7 @@ import { X, Dices, Sparkles, Wand2, Star, ChevronDown, Activity, AlertCircle } f
 import { CharacterData, StatKey, ProficiencyLevel } from '../types';
 import { GoogleGenAI, Type, ThinkingLevel } from "@google/genai";
 import { checkRateLimit, recalculateCharacterStats } from '../utils';
+import { TEXT_MODEL, IMAGE_MODEL } from '../lib/gemini';
 import { 
   generateId, 
   getAllRaceOptions, 
@@ -46,6 +47,19 @@ const QuickRollModal: React.FC<QuickRollModalProps> = ({ onCreate, onClose }) =>
 
   const parseApiError = (err: any): string => {
     const raw = err?.message || '';
+    const status = err?.status || err?.statusCode || '';
+    
+    // Log full error for debugging
+    console.error('[QuickRoll] Full API error:', { message: raw, status, name: err?.name, stack: err?.stack });
+
+    // Handle specific HTTP status codes
+    if (status === 405 || raw.includes('405')) {
+      return 'API endpoint rejected the request (405). This usually means the model name is invalid or the API version has changed. Please redeploy with an updated build.';
+    }
+    if (status === 401 || status === 403 || raw.includes('401') || raw.includes('403')) {
+      return 'API authentication failed. Please check that your GEMINI_API_KEY is valid and not expired.';
+    }
+
     // Try to extract a meaningful message from Google API JSON error responses
     try {
       const parsed = JSON.parse(raw);
@@ -53,14 +67,14 @@ const QuickRollModal: React.FC<QuickRollModalProps> = ({ onCreate, onClose }) =>
         // Strip HTML from the inner message
         const inner = parsed.error.message.replace(/<[^>]*>/g, '').trim();
         const code = parsed.error.code || '';
-        return `API Error ${code}: ${inner.substring(0, 120) || 'The AI service returned an error.'}`;
+        return `API Error ${code}: ${inner.substring(0, 150) || 'The AI service returned an error.'}`;
       }
     } catch { /* not JSON, use raw */ }
     // If it contains HTML, strip it
     if (raw.includes('<html>') || raw.includes('<HTML>')) {
-      return 'The AI service returned an unexpected error. Please check your API key and try again.';
+      return 'The AI service returned an unexpected HTML error page. This may indicate an invalid API key or a temporary service issue. Please try again.';
     }
-    return raw || 'An unknown error occurred during character creation.';
+    return raw.substring(0, 200) || 'An unknown error occurred during character creation.';
   };
 
   const handleRoll = async () => {
@@ -153,7 +167,7 @@ const QuickRollModal: React.FC<QuickRollModalProps> = ({ onCreate, onClose }) =>
 
         const dataResponse = await Promise.race([
             ai.models.generateContent({
-                model: 'gemini-2.5-flash',
+                model: TEXT_MODEL,
                 contents: `Generate a detailed Level ${quickLevel} D&D 5e character. 
                           Race: ${race}. Class: ${charClass}. Vibe: ${vibe || 'Traditional'}.
                           Instructions:
@@ -192,8 +206,11 @@ const QuickRollModal: React.FC<QuickRollModalProps> = ({ onCreate, onClose }) =>
             const portraitPrompt = `A stunning character portrait of a ${race} ${charClass}. ${charResult.appearance || ''}. High-fantasy digital art, cinematic lighting, 1:1 aspect ratio.`;
             const portraitResponse = await Promise.race([
                 ai.models.generateContent({
-                    model: 'gemini-2.5-flash-image',
+                    model: IMAGE_MODEL,
                     contents: { parts: [{ text: portraitPrompt }] },
+                    config: {
+                        responseModalities: ['Text', 'Image'],
+                    },
                 }),
                 new Promise<never>((_, reject) => setTimeout(() => reject(new Error('Portrait timed out')), 60000))
             ]);

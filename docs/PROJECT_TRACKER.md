@@ -167,12 +167,12 @@
 
 | Status | Type | Item | Owner | Notes |
 |--------|------|------|-------|-------|
-| 🟨 | Task | Extract dice rolling to `lib/dice.ts` | @Hams-Ollo | `parseDiceExpression`, `rollDice`, `rollBatch` — pulled from Dashboard/RestModal inline code |
-| 🟨 | Task | Add `CONDITIONS` reference map to constants | @Hams-Ollo | All 15 D&D 5e conditions with mechanical effects as structured data |
-| 🟨 | Task | Add encounter difficulty thresholds to constants | @Hams-Ollo | DMG XP budget tables: Easy/Medium/Hard/Deadly per player level 1-20 + encounter multipliers |
+| ✅ | Task | Extract dice rolling to `lib/dice.ts` | @Hams-Ollo | `parseDiceExpression`, `rollDice`, `rollBatch` — pulled from Dashboard/RestModal inline code |
+| ✅ | Task | Add `CONDITIONS` reference map to constants | @Hams-Ollo | All 15 D&D 5e conditions with mechanical effects as structured data |
+| ✅ | Task | Add encounter difficulty thresholds to constants | @Hams-Ollo | DMG XP budget tables: Easy/Medium/Hard/Deadly per player level 1-20 + encounter multipliers |
 | ⬜ | Task | Add SRD monster data (`lib/monsters.ts`) | — | ~300 SRD creatures: name, CR, HP, AC, initiative modifier, attacks, abilities |
-| 🟨 | Task | Refactor Dashboard to use `lib/dice.ts` | @Hams-Ollo | Replace inline `handleRoll` dice logic with shared module |
-| 🟨 | Task | Refactor RestModal to use `lib/dice.ts` | @Hams-Ollo | Replace inline `handleSpendHitDie` dice logic with shared module |
+| ✅ | Task | Refactor Dashboard to use `lib/dice.ts` | @Hams-Ollo | Replace inline `handleRoll` dice logic with shared module |
+| ✅ | Task | Refactor RestModal to use `lib/dice.ts` | @Hams-Ollo | Replace inline `handleSpendHitDie` dice logic with shared module |
 
 ---
 
@@ -182,11 +182,11 @@
 
 | Status | Type | Item | Owner | Notes |
 |--------|------|------|-------|-------|
-| 🟨 | Task | Expand data models in `types.ts` | @Hams-Ollo | `CampaignMember`, `CombatEncounter`, `Combatant`, `CombatLogEntry`, `DMNote`, `EncounterTemplate`, `Whisper`, `RollRequest`, `CampaignInvite` |
-| 🟨 | Task | Design Firestore subcollection structure | @Hams-Ollo | `campaigns/{id}/members`, `/encounters`, `/notes`, `/templates`, `/whispers`, `/rollRequests`; top-level `invites` |
-| 🟨 | Task | Create `lib/campaigns.ts` service layer | @Hams-Ollo | `createCampaign`, `subscribeToCampaign`, `subscribeToMembers`, `subscribeToMyInvites`, `leaveCampaign`, `archiveCampaign` |
-| 🟨 | Task | Update Firestore security rules | @Hams-Ollo | Campaign member reads, DM-only writes, encounter/note/whisper access, invite rules |
-| 🟨 | Task | Add Firestore composite indexes | @Hams-Ollo | `campaigns.joinCode`, `invites.email+status`, `encounters.active+createdAt`, `notes.type+createdAt` |
+| ✅ | Task | Expand data models in `types.ts` | @Hams-Ollo | `CampaignMember`, `CombatEncounter`, `Combatant`, `CombatLogEntry`, `DMNote`, `EncounterTemplate`, `Whisper`, `RollRequest`, `CampaignInvite` |
+| ✅ | Task | Design Firestore subcollection structure | @Hams-Ollo | `campaigns/{id}/members`, `/encounters`, `/notes`, `/templates`, `/whispers`, `/rollRequests`; top-level `invites` |
+| ✅ | Task | Create `lib/campaigns.ts` service layer | @Hams-Ollo | `createCampaign`, `subscribeToCampaign`, `subscribeToMembers`, `subscribeToMyInvites`, `leaveCampaign`, `archiveCampaign` |
+| ✅ | Task | Update Firestore security rules | @Hams-Ollo | Campaign member reads, DM-only writes, encounter/note/whisper access, invite rules |
+| ✅ | Task | Add Firestore composite indexes | @Hams-Ollo | `campaigns.joinCode`, `invites.email+status`, `encounters.active+createdAt`, `notes.type+createdAt` |
 | ⬜ | Task | Create Cloud Functions layer (`functions/`) | — | `joinByCode`, `fetchPartyCharacters`, `sendInvite`, `acceptInvite`, `geminiProxy` |
 | ⬜ | Task | Migrate localStorage campaigns to Firestore | — | Migration function following `migrateLocalCharacters` pattern |
 
@@ -198,7 +198,8 @@
 
 | Status | Type | Item | Owner | Notes |
 |--------|------|------|-------|-------|
-| 🟨 | Task | Create `CampaignContext` provider | @Hams-Ollo | `useCampaign()` hook: `activeCampaign`, `myCampaigns`, `members`, `partyCharacters`, `myRole`, `pendingInvites` |
+| ✅ | Task | Create `CampaignContext` provider | @Hams-Ollo | `useCampaign()` hook: `activeCampaign`, `myCampaigns`, `members`, `partyCharacters`, `myRole`, `pendingInvites` |
+| ⬜ | Task | Wire `CampaignProvider` into `App.tsx` | — | Remove localStorage campaign state, wrap app tree with provider, strip campaign props from CharacterSelection |
 | ⬜ | Feature | Rewrite `CampaignManager` component | — | Replace localStorage with `useCampaign()`, campaign creation, join flow, list with role badges |
 | ⬜ | Feature | Build `PartyRoster` component | — | Grid of party member cards, read-only character overlay, character diff badges |
 | ⬜ | Feature | Build `DMPartyOverview` component | — | Live vitals grid, passive scores panel, party inventory summary |
@@ -312,16 +313,16 @@
 | 5. Deployment & Infrastructure | 9 | 0 | 1 | 10 |
 | 5b. Developer Experience | 7 | 0 | 4 | 11 |
 | 6. Cloud Persistence (Phase 1) | 8 | 0 | 1 | 9 |
-| 7. Foundation Cleanup (Phase 0) | 0 | 6 | 1 | 7 |
-| 8. Firestore Campaign Foundation (Phase 1) | 0 | 5 | 2 | 7 |
-| 9. Campaign Context & Party UI (Phase 2) | 0 | 1 | 6 | 7 |
+| 7. Foundation Cleanup (Phase 0) | 5 | 0 | 1 | 6 |
+| 8. Firestore Campaign Foundation (Phase 1) | 5 | 0 | 2 | 7 |
+| 9. Campaign Context & Party UI (Phase 2) | 1 | 0 | 7 | 8 |
 | 10. Combat & Initiative Tracker (Phase 3) | 0 | 0 | 6 | 6 |
 | 11. DM Notes & Campaign Mgmt (Phase 4) | 0 | 0 | 6 | 6 |
 | 12. AI DM Co-Pilot (Phase 5) | 0 | 0 | 6 | 6 |
 | 13. Multiplayer Communication (Phase 6) | 0 | 0 | 4 | 4 |
 | 14. Higher-Level Char Creation (Phase 7) | 0 | 0 | 10 | 10 |
 | 15. Polish & Extras | 0 | 0 | 7 | 7 |
-| **Total** | **59** | **12** | **68** | **139** |
+| **Total** | **70** | **0** | **69** | **139** |
 
 ---
 

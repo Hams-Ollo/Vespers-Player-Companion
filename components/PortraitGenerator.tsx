@@ -2,6 +2,7 @@ import React, { useState, useRef } from 'react';
 import { X, Wand2, Camera, Upload, Loader2, Image as ImageIcon } from 'lucide-react';
 import { GoogleGenAI } from "@google/genai";
 import { checkRateLimit } from '../utils';
+import { IMAGE_MODEL } from '../lib/gemini';
 
 interface PortraitGeneratorProps {
   currentPortrait: string;
@@ -42,7 +43,7 @@ const PortraitGenerator: React.FC<PortraitGeneratorProps> = ({ currentPortrait, 
       checkRateLimit(); // Enforce rate limit
 
       const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
-      const model = 'gemini-2.5-flash-image';
+      const model = IMAGE_MODEL;
 
       const parts: any[] = [];
 
@@ -66,6 +67,9 @@ const PortraitGenerator: React.FC<PortraitGeneratorProps> = ({ currentPortrait, 
       const response = await ai.models.generateContent({
         model: model,
         contents: { parts: parts },
+        config: {
+          responseModalities: ['Text', 'Image'],
+        },
       });
 
       let foundImage = false;

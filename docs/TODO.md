@@ -21,9 +21,9 @@
 ## 📊 Gantt Chart — Development Roadmap
 
 ```
-Phase 0: Foundation Cleanup           ████████░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░  ← NOW
-Phase 1: Firestore Campaign Foundation    ░░░░████████░░░░░░░░░░░░░░░░░░░░░░░░░░
-Phase 2: Campaign Context & Party UI          ░░░░░░░░████████░░░░░░░░░░░░░░░░░░
+Phase 0: Foundation Cleanup           ████████████████████████████████████████  ✅ DONE
+Phase 1: Firestore Campaign Foundation    ████████████████████████████░░░░░░░░░░  ~70% DONE
+Phase 2: Campaign Context & Party UI          ████░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░  ← NOW
 Phase 3: Combat & Initiative Tracker                  ░░░░░░░░████████░░░░░░░░░░
 Phase 4: DM Notes & Campaign Mgmt                    ░░░░░░░░████████░░░░░░░░░░
 Phase 5: AI DM Co-Pilot                                      ░░░░░░░░████████░░
@@ -45,29 +45,29 @@ Phase 0 ─→ Phase 1 ─→ Phase 2 ─┬→ Phase 3 (Combat)
 
 | Version | Phase | Target | Status |
 |---------|-------|--------|--------|
-| v0.3.1 | Phase 0: Foundation Cleanup | Foundation utilities, dice extraction, conditions data | 🟨 In Progress |
-| v0.4.0 | Phase 1-2: Campaign Foundation + Party UI | Firestore campaigns, party roster, DM overview, join/invite flow | ⬜ Not Started |
+| v0.3.1 | Phase 0: Foundation Cleanup | Foundation utilities, dice extraction, conditions data | ✅ Done |
+| v0.4.0 | Phase 1-2: Campaign Foundation + Party UI | Firestore campaigns, party roster, DM overview, join/invite flow | 🟨 In Progress |
 | v0.5.0 | Phase 3-4: Combat + DM Tools | Initiative tracker, encounter builder, DM notes, NPC registry, quest tracker | ⬜ Not Started |
 | v0.6.0 | Phase 5-6: AI Co-Pilot + Communication | Context-aware DM assistant, whispers, roll requests, shared handouts | ⬜ Not Started |
 | v0.7.0 | Phase 7: Higher-Level Characters | Create characters at levels 1-20, multiclass support | ⬜ Not Started |
 
 ---
 
-## 🚀 v0.3.1 — Foundation Cleanup (Phase 0)
+## ✅ v0.3.1 — Foundation Cleanup (Phase 0) — COMPLETE
 
 > _Extract shared utilities, add reference data, unblock all multiplayer/DM features._
 
 ### 🔴 Critical
 
-- [ ] **Extract dice rolling to `lib/dice.ts`** — Pull inline dice logic from Dashboard (`handleRoll`) and RestModal (`handleSpendHitDie`) into a shared module: `parseDiceExpression()`, `rollDice()`, `rollBatch()`
-- [ ] **Refactor Dashboard to use `lib/dice.ts`** — Replace inline dice parsing with imported functions
-- [ ] **Refactor RestModal to use `lib/dice.ts`** — Replace inline hit die rolling with imported functions
+- [x] **Extract dice rolling to `lib/dice.ts`** — Pull inline dice logic from Dashboard (`handleRoll`) and RestModal (`handleSpendHitDie`) into a shared module: `parseDiceExpression()`, `rollDice()`, `rollBatch()`
+- [x] **Refactor Dashboard to use `lib/dice.ts`** — Replace inline dice parsing with imported functions
+- [x] **Refactor RestModal to use `lib/dice.ts`** — Replace inline hit die rolling with imported functions
 
 ### 🟠 High
 
-- [ ] **Add `CONDITIONS` reference map to constants** — All 15 D&D 5e conditions (Blinded, Charmed, Deafened, etc.) with mechanical effects as structured data
-- [ ] **Add encounter difficulty thresholds to constants** — DMG XP budget tables (Easy/Medium/Hard/Deadly per level 1-20) + encounter multiplier table
-- [ ] **Expand `types.ts` with multiplayer data models** — `CampaignMember`, `CombatEncounter`, `Combatant`, `CombatLogEntry`, `DMNote`, `EncounterTemplate`, `Whisper`, `RollRequest`, `CampaignInvite`
+- [x] **Add `CONDITIONS` reference map to constants** — All 15 D&D 5e conditions (Blinded, Charmed, Deafened, etc.) with mechanical effects as structured data
+- [x] **Add encounter difficulty thresholds to constants** — DMG XP budget tables (Easy/Medium/Hard/Deadly per level 1-20) + encounter multiplier table
+- [x] **Expand `types.ts` with multiplayer data models** — `CampaignMember`, `CombatEncounter`, `Combatant`, `CombatLogEntry`, `DMNote`, `EncounterTemplate`, `Whisper`, `RollRequest`, `CampaignInvite`
 - [ ] **Backend API proxy** — Move Gemini API key to a server-side proxy so it's not embedded in the client bundle
 
 ### 🟡 Medium
@@ -82,10 +82,11 @@ Phase 0 ─→ Phase 1 ─→ Phase 2 ─┬→ Phase 3 (Combat)
 
 ### 🔴 Critical
 
-- [ ] **Firestore campaign subcollection structure** — `campaigns/{id}/members`, `/encounters`, `/notes`, `/templates`, `/whispers`, `/rollRequests`; top-level `invites`
-- [ ] **Create `lib/campaigns.ts` service layer** — `createCampaign`, `subscribeToCampaign`, `subscribeToMembers`, `leaveCampaign`, `archiveCampaign`
-- [ ] **Update Firestore security rules** — Campaign member reads, DM-only writes, encounter/note/whisper access, invite rules
-- [ ] **Create `CampaignContext` provider** — `useCampaign()` hook with `activeCampaign`, `myCampaigns`, `members`, `myRole`, `pendingInvites`
+- [x] **Firestore campaign subcollection structure** — `campaigns/{id}/members`, `/encounters`, `/notes`, `/templates`, `/whispers`, `/rollRequests`; top-level `invites`
+- [x] **Create `lib/campaigns.ts` service layer** — `createCampaign`, `subscribeToCampaign`, `subscribeToMembers`, `leaveCampaign`, `archiveCampaign`
+- [x] **Update Firestore security rules** — Campaign member reads, DM-only writes, encounter/note/whisper access, invite rules
+- [x] **Create `CampaignContext` provider** — `useCampaign()` hook with `activeCampaign`, `myCampaigns`, `members`, `myRole`, `pendingInvites`
+- [ ] **Wire `CampaignProvider` into `App.tsx`** — Remove localStorage campaign state, wrap app tree with CampaignProvider, strip campaign props
 - [ ] **Rewrite `CampaignManager` component** — Replace localStorage with `useCampaign()`, real join flow with `joinCode` Firestore lookup
 
 ### 🟠 High
@@ -214,6 +215,8 @@ Phase 0 ─→ Phase 1 ─→ Phase 2 ─┬→ Phase 3 (Combat)
 
 > Move items here as they're finished. Include the version/date.
 
+- [x] **Foundation Cleanup (Phase 0)** — Extracted dice rolling to `lib/dice.ts` (`parseDiceExpression`, `rollDice`, `rollBatch`), refactored Dashboard + RestModal to use shared module, added 15 CONDITIONS to constants, added encounter difficulty thresholds (DMG XP budgets) _(v0.3.1 — 2026-02-11)_
+- [x] **Firestore Campaign Foundation** — Expanded `types.ts` with all campaign/combat/notes types, built `lib/campaigns.ts` (25+ Firestore functions), `CampaignContext` provider with real-time subscriptions, Firestore security rules for all campaign collections, 9 composite indexes _(v0.3.1 — 2026-02-11)_
 - [x] **Gemini 3 API compatibility** — Added `thinkingConfig: { thinkingLevel: 'LOW' }` to all Gemini calls, removed incompatible `temperature: 0.8`, added `parseApiError()` helper for user-friendly error messages _(v0.3.1 — 2026-02-13)_
 - [x] **Full PHB marketplace overhaul** — Expanded shop from 6 items to 160+ (37 weapons, 14 armor, 100+ gear, 9 consumables), added search bar, `formatCost()` for gp/sp/cp display, `useMemo` filtering _(v0.3.1 — 2026-02-13)_
 - [x] **Cloud Run deployment infrastructure** — Dockerfile (multi-stage), nginx.conf, .dockerignore, env var handling, deployment guide _(v0.2.3 — 2026-02-11)_
