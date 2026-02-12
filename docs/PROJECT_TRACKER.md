@@ -171,8 +171,8 @@
 | 8.10 | Character-to-campaign assignment | ✅ | Dropdown picker + bidirectional sync of `CharacterData.campaign`/`campaignId` |
 | 8.11 | Party roster component | ✅ | `PartyRoster.tsx` — card grid with character fetching |
 | 8.12 | DM party overview | ✅ | `DMPartyOverview.tsx` — vitals grid, passive scores |
-| 8.13 | Invite management (email + code) | ✅ | Join code sharing panel + email invites + accept/decline |
-| 8.14 | Campaign member migration | 🔲 | v0.4.0 |
+| 8.13 | Invite management (email + code) | ✅ | Join code sharing panel + email invites + accept/decline; 7-day expiry; duplicate prevention |
+| 8.14 | DM remove members | ✅ | `removeMember` in context + kick button on PartyRoster |
 | 8.15 | Wire `CampaignProvider` into `App.tsx` | ✅ | Provider wraps `AppContent`, no localStorage |
 | 8.16 | Rewrite `CampaignManager` with `useCampaign()` | ✅ | Fully Firestore-backed |
 | 8.17 | `DMDashboard` layout | ✅ | Tabbed DM view (overview/combat/notes/settings) |
@@ -180,6 +180,10 @@
 | 8.19 | `updateMemberCharacter` service fn | ✅ | Change character assignment after joining |
 | 8.20 | `sendInvite` context action | ✅ | Wired `createInvite` into `CampaignContext` |
 | 8.21 | Party card in player Dashboard | ✅ | Conditional card in `CardStack` when in campaign |
+| 8.22 | Player invite permission toggle | ✅ | `allowPlayerInvites` setting in DM Dashboard; CampaignManager honors it |
+| 8.23 | Regenerate join code | ✅ | `regenerateJoinCode` in context + button in DM Dashboard settings |
+| 8.24 | Invite expiry (7 days) | ✅ | `expiresAt` field on invites; client-side filter + accept-time guard |
+| 8.25 | Duplicate invite prevention | ✅ | Query check in `createInvite` — prevents re-inviting same email |
 
 ---
 
@@ -320,9 +324,9 @@
 | 17.3 | Firebase hosting config | ✅ | Auth domain setup |
 | 17.4 | Vite build pipeline | ✅ | TypeScript + Tailwind |
 | 17.5 | `tsconfig.json` strict mode | ✅ | Full type checking |
-| 17.6 | CI/CD pipeline | 🔲 | GitHub Actions |
+| 17.6 | CI/CD pipeline | ✅ | Cloud Build auto-deploys on push to main (app + functions + rules) |
 | 17.7 | Staging environment | 🔲 | Separate Firebase project |
-| 17.8 | Cloud Functions deployment | 🔲 | v0.4.0 |
+| 17.8 | Cloud Functions deployment | ✅ | `functions/src/index.ts` — `onMemberCreated` + `onMemberDeleted` triggers; auto-deployed via Cloud Build Step 4 |
 
 ---
 
@@ -363,7 +367,7 @@
 
 | # | Task | Status | Notes |
 |:--|:-----|:------:|:------|
-| 19.14 | Restrict invite `update` rule | 🔲 | Only `toEmail` owner or campaign DM can accept/decline |
+| 19.14 | Restrict invite `update` rule | ✅ | Fixed `toEmail` → `email` field reference in Firestore rules |
 | 19.15 | Add field-type validation rules | 🔲 | Enforce types on `ownerUid`, `name`, `level`, etc. |
 | 19.16 | Add document size limits | 🔲 | `request.resource.data.size() < X` on character writes |
 | 19.17 | Eliminate local guest UID bypass | 🔲 | Remove `guest-local-*` fallback or scope it to localStorage only |
@@ -426,7 +430,7 @@
 | Epic 5: Dashboard & UI | 12 | 0 | 0 | 12 |
 | Epic 6: Marketplace | 8 | 0 | 3 | 11 |
 | Epic 7: AI Integration | 11 | 0 | 3 | 14 |
-| Epic 8: Campaign System | 20 | 0 | 1 | 21 |
+| Epic 8: Campaign System | 25 | 0 | 0 | 25 |
 | Epic 9: Spells & Casting | 7 | 0 | 3 | 10 |
 | Epic 10: Journal | 4 | 0 | 3 | 7 |
 | Epic 11: Skills | 5 | 0 | 1 | 6 |
@@ -435,10 +439,10 @@
 | Epic 14: Data Export | 0 | 0 | 5 | 5 |
 | Epic 15: Combat Tracker | 0 | 0 | 7 | 7 |
 | Epic 16: Communication | 0 | 0 | 3 | 3 |
-| Epic 17: Infrastructure | 5 | 0 | 3 | 8 |
+| Epic 17: Infrastructure | 7 | 0 | 1 | 8 |
 | Epic 18: Polish & A11y | 4 | 0 | 6 | 10 |
-| Epic 19: Security Hardening | 10 | 0 | 16 | 26 |
-| **TOTALS** | **131** | **0** | **59** | **190** |
+| Epic 19: Security Hardening | 11 | 0 | 15 | 26 |
+| **TOTALS** | **139** | **0** | **55** | **194** |
 
 ---
 

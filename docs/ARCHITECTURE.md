@@ -18,10 +18,14 @@ flowchart TB
         FA["🔐 Firebase Auth"] <--> RA["⚛️ React App (Vite SPA)"]
         RA <--> LS["💽 localStorage"]
     end
-    RA -->|"REST API calls"| GEM["🤖 The Weave (Google Gemini API)"]
+    RA -->|"REST API calls"| EXP["🛡️ Express Proxy (Cloud Run)"]
+    EXP -->|"Proxied calls"| GEM["🤖 The Weave (Google Gemini API)"]
+    RA <-->|"Firebase SDK"| FS["🔥 Cloud Firestore"]
+    FS -->|"Document triggers"| CF["⚡ Cloud Functions v2"]
+    CF -->|"Updates memberUids"| FS
 ```
 
-The app is a **fully client-side SPA** — no backend server stands between the adventurer and their data. Character state persists in **Cloud Firestore** for signed-in users and `localStorage` for guest adventurers. AI calls travel directly from the browser to Google's Gemini API. Firebase guards the gates of authentication.
+The app is a **mobile-first SPA** served by an Express proxy server on Cloud Run. Character state persists in **Cloud Firestore** for signed-in users and `localStorage` for guest adventurers. AI calls route through the Express proxy (which holds the Gemini API key). **Firebase Cloud Functions v2** handle server-side data consistency — specifically, Firestore document triggers that keep `campaign.memberUids` in sync when members join or leave. Firebase guards the gates of authentication.
 
 ---
 
@@ -79,7 +83,7 @@ flowchart TD
 | `App` | `App.tsx` | Auth gate, routing between selection and dashboard |
 | `AuthProvider` | `contexts/AuthContext.tsx` | Firebase auth state, sign-in/out methods, React context |
 | `CharacterProvider` | `contexts/CharacterContext.tsx` | Character CRUD, Firestore/localStorage dual-mode, migration, `updateCharacterById` for cross-context syncing |
-| `CampaignProvider` | `contexts/CampaignContext.tsx` | Campaign CRUD, real-time subscriptions, invites, character–campaign membership sync |
+| `CampaignProvider` | `contexts/CampaignContext.tsx` | Campaign CRUD, real-time subscriptions, invites, member removal, join code regeneration, character–campaign membership sync |
 
 ### 📜 The Selection Layer
 
@@ -87,7 +91,7 @@ flowchart TD
 |:----------|:-----|:---------------|
 | `LoginScreen` | `components/LoginScreen.tsx` | Google sign-in button, guest adventurer mode |
 | `CharacterSelection` | `components/CharacterSelection.tsx` | Character list, create/delete, campaign management |
-| `CampaignManager` | `components/CampaignManager.tsx` | Create/join campaigns, DM role confirmation, character assignment, invite management (join code + email) |
+| `CampaignManager` | `components/CampaignManager.tsx` | Create/join campaigns, DM role confirmation, character assignment, invite management (join code + email); honors `allowPlayerInvites` setting |
 
 ### 🧙 The Creation Layer
 
@@ -107,9 +111,9 @@ flowchart TD
 
 | Component | File | Responsibility |
 |:----------|:-----|:---------------|
-| `DMDashboard` | `components/DMDashboard.tsx` | Tabbed DM view (overview, combat, notes, settings) |
+| `DMDashboard` | `components/DMDashboard.tsx` | Tabbed DM view (overview, combat, notes, settings); `allowPlayerInvites` toggle, regenerate join code button |
 | `DMPartyOverview` | `components/DMPartyOverview.tsx` | Live party vitals grid with HP bars, AC, passive scores |
-| `PartyRoster` | `components/PartyRoster.tsx` | Party member card grid, fetches characters from Firestore |
+| `PartyRoster` | `components/PartyRoster.tsx` | Party member card grid, DM kick button (remove members), fetches characters from Firestore |
 
 ### 🔍 The Detail Views (`components/details/`)
 
@@ -211,9 +215,14 @@ See `types.ts` for all interfaces (`Stat`, `Skill`, `Attack`, `Feature`, `Spell`
 - Collection: `invites` (top-level) — join code + email invite tracking
 - Members subcollection stores `uid`, `displayName`, `role` (`dm`/`player`), and optional `characterId`
 - Character–campaign membership is synced bidirectionally: `CharacterData.campaignId` \u2194 `campaigns/{id}/members/{uid}`
+- **Cloud Functions v2** automatically sync `campaign.memberUids[]` via Firestore document triggers (`onDocumentCreated` / `onDocumentDeleted` on `campaigns/{campaignId}/members/{memberId}`)
 - Security rules enforce campaign membership — only members can read/write subcollection data
 - Campaign creation automatically assigns the creator as DM
-- Invite flow: DM shares join code or sends email invite → player accepts → added to members subcollection
+- DM can remove members from the party via the `PartyRoster` kick button
+- DM can toggle `allowPlayerInvites` in campaign settings; when enabled, players can also send invites
+- DM can regenerate the join code to invalidate old links
+- Invites include a 7-day expiry (`expiresAt` timestamp); duplicate pending invites are prevented
+- Invite flow: DM (or player if allowed) shares join code or sends email invite → player accepts → added to members subcollection → Cloud Function syncs `memberUids`
 
 ---
 
@@ -251,6 +260,34 @@ All AI calls route through the **Express API proxy** at `/api/gemini/*`. The cli
 | `GET /*` | Serves static `dist/` files (production) |
 
 **Middleware pipeline:** Firebase token verification → per-user rate limiter (20/min) → global rate limiter (200/min) → Gemini proxy.
+
+---
+
+## Chapter 6: Cloud Functions
+
+> *"Invisible servants toil behind the scenes, keeping the realm's ledgers in perfect order."*
+
+Firebase Cloud Functions v2 (located in `functions/src/index.ts`) provide server-side data consistency that cannot be handled safely from the client.
+
+### Functions
+
+| Function | Trigger | Purpose |
+|:---------|:--------|:--------|
+| `onMemberCreated` | `onDocumentCreated('campaigns/{campaignId}/members/{memberId}')` | Adds the new member's UID to `campaign.memberUids[]` via `arrayUnion` |
+| `onMemberDeleted` | `onDocumentDeleted('campaigns/{campaignId}/members/{memberId}')` | Removes the member's UID from `campaign.memberUids[]` via `arrayRemove` (with campaign existence check) |
+
+### Why Cloud Functions?
+
+The `memberUids` array on the campaign document is used for `array-contains` queries (e.g., "find all campaigns this user belongs to"). Firestore security rules restrict campaign document updates to the DM — but when a non-DM player joins via invite code, they can't update the campaign doc. Cloud Functions run with admin privileges, bypassing security rules to keep `memberUids` in sync automatically.
+
+### Deployment
+
+Cloud Functions deploy automatically via the Cloud Build pipeline (Step 4 in `cloudbuild.yaml`). For manual deployment:
+
+```bash
+cd functions && npm install && npm run build
+firebase deploy --only functions --project YOUR_PROJECT_ID
+```
 
 ---
 

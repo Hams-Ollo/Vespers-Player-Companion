@@ -151,7 +151,11 @@ Cloud Build will:
 2. Build the container image (Stage 1: Vite build, Stage 2: Express server)
 3. Push to Artifact Registry
 4. Deploy to Cloud Run with the secret mounted
-5. Return a service URL
+5. Deploy Cloud Functions (memberUids sync triggers)
+6. Deploy Firestore security rules
+7. Return a service URL
+
+> 💡 **Note:** Steps 5–6 require a one-time IAM setup on the Cloud Build service account (see Chapter 4b below).
 
 ### Option B: Manual Docker Build
 
@@ -226,6 +230,10 @@ curl -s -o /dev/null -w "%{http_code}" https://YOUR_SERVICE_URL
 - [ ] DM can see DM Dashboard with party overview
 - [ ] Invite flow works (join code sharing + email invites)
 - [ ] Character assignment to campaigns works
+- [ ] DM can remove members from Party Roster
+- [ ] Player invites work when `allowPlayerInvites` is enabled
+- [ ] Join code regeneration works
+- [ ] Expired invites (>7 days) are filtered out
 
 ---
 
@@ -265,6 +273,13 @@ gcloud run services update the-players-companion --region us-west1
 
 ```bash
 firebase deploy --only firestore:rules --project YOUR_PROJECT_ID
+```
+
+### Update Cloud Functions Only
+
+```bash
+cd functions && npm install && npm run build
+firebase deploy --only functions --project YOUR_PROJECT_ID
 ```
 
 ### View Deployment Logs
@@ -401,6 +416,7 @@ gcloud run services describe ollos-player-companion \
 | Secret Manager | 6 active versions, 10K access ops | **$0** for hobby use |
 | Firebase Auth | 10K verifications/month | **$0** for hobby use |
 | Firestore | 1 GiB storage, 50K reads/day, 20K writes/day | **$0** for small parties |
+| Cloud Functions | 2M invocations/month, 400K GB-seconds | **$0** for hobby use |
 | Gemini API | Free tier with rate limits | **$0** with free API key |
 | **Total** | | **$0/month** for typical hobby use |
 

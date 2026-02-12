@@ -41,17 +41,18 @@ Whether you are a battle-scarred veteran of a hundred campaigns or a wide-eyed n
 | ⬆️ **Level Up Wizard** | AI-assisted ascension with HP rolls, ASI, new features, and spell slot updates |
 | 🤖 **Ask the DM** | Multi-turn AI chat grounded in uploaded PHB/DMG/MM/Basic Rules PDFs |
 | 🛏️ **Rest System** | Short & long rest with hit dice recovery, as the gods intended |
-| 🗺️ **Campaign Manager** | Create or join campaigns with shareable join codes, DM role confirmation, character assignment, email invites |
+| 🗂️ **Campaign Manager** | Create or join campaigns with shareable join codes, DM role confirmation, character assignment, email invites with 7-day expiry, player invite permissions |
 | 🔐 **Authentication** | Firebase Google sign-in + anonymous guest mode |
 | ☁️ **Cloud Sync** | Firestore character persistence — real-time sync across devices |
 | 🎨 **AI Portraits** | Gemini 2.5 Flash image model conjures character portraits from description |
 | 🎲 **Quick Roll** | One-click AI-generated character from a vibe prompt — stats, backstory, portrait |
 | 🎭 **Class Theming** | Dynamic color themes per D&D class — borders, gradients, and arcane glow effects |
 | 🎙️ **Voice Input** | Live audio transcription via Gemini Native Audio for hands-free DM chat |
-| 🛡️ **DM Dashboard** | Tabbed DM view with party overview, combat tracker, session notes, and campaign settings |
-| 👥 **Party Roster** | Live party member cards with HP bars, AC, level, and class info fetched from Firestore |
+| 🛡️ **DM Dashboard** | Tabbed DM view with party overview, combat tracker, session notes, campaign settings, player invite toggle, join code regeneration |
+| 👥 **Party Roster** | Live party member cards with HP bars, AC, level, class info; DM can kick members |
 | ⚔️ **Combat Strip** | At-a-glance initiative tracker and combat status bar |
 | 🎯 **Quick Action Bar** | Context-sensitive shortcut buttons for common actions |
+| ⚡ **Cloud Functions** | Server-side Firestore triggers auto-sync `memberUids` when players join/leave campaigns |
 
 ---
 
@@ -72,7 +73,8 @@ Whether you are a battle-scarred veteran of a hundred campaigns or a wide-eyed n
 | **Vault (Database)** | Cloud Firestore (character sync for authenticated users) |
 | **Scroll Case (Storage)** | localStorage (guest/offline fallback) |
 | **Shield (Secrets)** | Google Cloud Secret Manager (Gemini API key, never in browser) |
-| **Planar Gate (Deploy)** | Docker (multi-stage) → Google Cloud Run |
+| **Sentinels (Triggers)** | Firebase Cloud Functions v2 (Firestore document triggers for data consistency) |
+| **Planar Gate (Deploy)** | Docker (multi-stage) → Google Cloud Run + Cloud Build CI/CD (auto-deploys app, functions, and rules on push to main) |
 
 ---
 
@@ -179,6 +181,12 @@ npm run preview
 │       ├── auth.js               # 🔐 Token Verification — validates Firebase ID tokens
 │       └── rateLimit.js          # ⏱️ Rate Limiter — per-user & global request throttling
 │
+├── functions/
+│   ├── package.json              # ⚙️ Cloud Functions dependencies (Node 20)
+│   ├── tsconfig.json             # ⚙️ Cloud Functions TypeScript config
+│   └── src/
+│       └── index.ts              # ⚡ The Sentinels — Firestore triggers (onMemberCreated/Deleted)
+│
 ├── lib/
 │   ├── gemini.ts                 # 🤖 The Weave — proxy client (calls /api/gemini/*)
 │   ├── firestore.ts              # 🔥 The Vault — Firestore CRUD & real-time sync
@@ -241,9 +249,11 @@ Signed-in users (Google Auth) receive **automatic Firestore synchronization**:
 
 - Characters are stored in the `characters` collection, partitioned by `ownerUid`
 - Campaigns are stored in the `campaigns` collection with subcollections for `members`, `encounters`, `notes`, `templates`, `whispers`, and `rollRequests`
-- Invites are stored in a top-level `invites` collection with shareable 6-character join codes
+- Invites are stored in a top-level `invites` collection with shareable 6-character join codes and 7-day expiry
+- **Cloud Functions v2** automatically sync `campaign.memberUids[]` via Firestore document triggers when members join or leave
 - Real-time `onSnapshot` listeners keep multiple browser tabs and devices in sync
 - Writes are **debounced** (500ms) to avoid excessive Firestore operations during heated combat
+- DMs can remove members from campaigns; players can send invites when `allowPlayerInvites` is enabled
 - Guest adventurers continue using localStorage for characters with no cloud calls
 - Campaign features require Google authentication (no guest fallback)
 - First-time sign-in detects local characters and offers a one-click **migration** to the cloud

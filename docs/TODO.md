@@ -116,15 +116,15 @@ Character Export (no deps) ─→ can ship independently at any time
 
 - [x] **DM/Player role selection** — DM role confirmation badge at campaign creation
 - [x] **Character-to-campaign assignment** — Dropdown picker at join, invite accept, and post-join change
-- [x] **Build `PartyRoster` component** — Grid of party member cards with portraits
+- [x] **Build `PartyRoster` component** — Grid of party member cards with portraits; DM kick button for removing members
 - [x] **Build `DMPartyOverview` component** — Live vitals grid, passive scores panel
-- [x] **Build `DMDashboard` layout** — DM-specific layout when `myRole === 'dm'`
-- [x] **Invite management** — Join code sharing (prominent copy-paste) + email invites + accept/decline flow
+- [x] **Build `DMDashboard` layout** — DM-specific layout when `myRole === 'dm'`; `allowPlayerInvites` toggle; regenerate join code
+- [x] **Invite management** — Join code sharing (prominent copy-paste) + email invites + accept/decline flow + 7-day expiry + duplicate prevention
 - [ ] **Migrate localStorage campaigns to Firestore** — Migration function
 
 ### 🟡 Medium
 
-- [ ] **Cloud Functions layer** — `joinByCode`, `fetchPartyCharacters`, `sendInvite` _(geminiProxy moved to v0.4.1 Security)_
+- [x] **Cloud Functions layer** — `onMemberCreated` / `onMemberDeleted` Firestore triggers for `memberUids` sync; auto-deployed via Cloud Build
 - [x] **Add "Party" card to player Dashboard** — Party card in `CardStack` when in a campaign
 - [ ] **Character diff badges** — Notification dot when party members level up
 
@@ -163,7 +163,7 @@ Character Export (no deps) ─→ can ship independently at any time
 
 ### 🟠 Hard — Layer 4: Firestore Rules Tightening
 
-- [ ] **Restrict invite `update` rule** — Currently any signed-in user can accept any invite; restrict to `toEmail` owner or campaign DM only
+- [x] **Restrict invite `update` rule** — Fixed `toEmail` → `email` field reference; now only invite recipient or campaign DM can accept/decline
 - [ ] **Add field-type validation** — Enforce string/number types on `ownerUid`, `name`, `level`, etc. in security rules
 - [ ] **Add document size limits** — `request.resource.data.size() < N` on character writes to prevent abuse
 - [ ] **Scope local guest fallback** — Remove `guest-local-*` UID bypass or restrict it to localStorage-only path (no Firestore access)
@@ -371,6 +371,10 @@ Character Export (no deps) ─→ can ship independently at any time
 - [x] **DM Dashboard & Party Views** — `DMDashboard`, `DMPartyOverview`, `PartyRoster` components built _(v0.4.0 — 2026-02-12)_
 - [x] **Campaign Role & Character Assignment** — DM role confirmation, character picker at join/invite, `updateMemberCharacter` _(v0.4.0 — 2026-02-12)_
 - [x] **Invite Management** — Join code sharing panel, email invites via `createInvite`, `sendInvite` context action _(v0.4.0 — 2026-02-12)_
+- [x] **Campaign Invite System Overhaul** — DM remove members, player invite toggle, join code regeneration, 7-day invite expiry, duplicate prevention, Cloud Functions memberUids sync _(v0.4.1 — 2026-02-12)_
+- [x] **Cloud Functions v2** — `onMemberCreated` / `onMemberDeleted` Firestore triggers for server-side `memberUids` sync _(v0.4.1 — 2026-02-12)_
+- [x] **Cloud Build Pipeline** — Auto-deploys Cloud Functions (Step 4) and Firestore rules (Step 5) alongside Cloud Run app _(v0.4.1 — 2026-02-12)_
+- [x] **Firestore Rules Fix** — Fixed `toEmail` → `email` field mismatch in invite update rule _(v0.4.1 — 2026-02-12)_
 - [x] **Accessibility Fixes, Error Boundaries, Tailwind Build Pipeline** _(v0.1.1–v0.2.0)_
 
 ---

@@ -334,14 +334,30 @@ interface Campaign {
   name: string;
   dmId: string;
   description: string;
-  joinCode: string;           // shareable 6-char code
-  memberUids: string[];       // denormalized for array-contains queries
+  joinCode: string;           // shareable 6-char code (DM can regenerate)
+  memberUids: string[];       // denormalized for array-contains queries (synced by Cloud Functions)
   members: { uid: string; name: string }[];
   status: 'active' | 'archived';
   currentSessionNumber: number;
-  settings: CampaignSettings;
+  settings: CampaignSettings; // includes allowPlayerInvites
   createdAt: number;
   updatedAt: number;
+}
+```
+
+### `CampaignInvite`
+
+```typescript
+interface CampaignInvite {
+  id: string;
+  campaignId: string;
+  campaignName: string;
+  email: string;              // recipient email
+  fromUid: string;            // sender UID
+  fromName: string;           // sender display name
+  status: 'pending' | 'accepted' | 'declined';
+  expiresAt?: number;         // epoch ms — 7 days from creation
+  createdAt: number;
 }
 ```
 
@@ -505,15 +521,17 @@ const {
 | `createCampaign(data)` | `(Partial<Campaign>) → Promise<Campaign>` | Creates a new campaign, auto-generates a 6-char join code, adds creator as DM member |
 | `joinCampaignByCode(code, uid, displayName, characterId?)` | `(...) → Promise<Campaign>` | Joins an existing campaign via shareable code |
 | `leaveCampaign(campaignId, uid)` | `(string, string) → Promise<void>` | Removes the user from a campaign's members |
+| `removeMember(campaignId, uid, dmUid)` | `(string, string, string) → Promise<void>` | DM-only: kicks a member from the campaign |
 | `updateCampaign(campaignId, data)` | `(string, Partial<Campaign>) → Promise<void>` | Updates campaign fields (name, description, settings) |
 | `updateMemberCharacter(campaignId, uid, characterId)` | `(string, string, string) → Promise<void>` | Updates which character a player is using in a campaign |
+| `regenerateJoinCode(campaignId)` | `(string) → Promise<string>` | Generates a new 6-char join code, invalidating the old one |
 
 ### Invite Functions
 
 | Function | Signature | Description |
 |:---------|:----------|:------------|
-| `createInvite(invite)` | `(Partial<CampaignInvite>) → Promise<CampaignInvite>` | Creates an email-based invite for a campaign |
-| `acceptInvite(inviteId, uid, displayName, characterId?)` | `(...) → Promise<void>` | Accepts a pending invite, adds user to campaign |
+| `createInvite(invite)` | `(Partial<CampaignInvite>) → Promise<CampaignInvite>` | Creates an email-based invite with 7-day expiry; prevents duplicate pending invites to same email |
+| `acceptInvite(inviteId, uid, displayName, characterId?)` | `(...) → Promise<void>` | Accepts a pending invite (rejects expired), adds user to campaign |
 | `declineInvite(inviteId)` | `(string) → Promise<void>` | Declines and removes a pending invite |
 
 ### Real-time Subscriptions
@@ -553,7 +571,7 @@ const {
   members,                // CampaignMember[] — members of the active campaign
   myRole,                 // 'dm' | 'player' | null
   isDM,                   // boolean — true if current user is DM of active campaign
-  pendingInvites,         // CampaignInvite[] — invites awaiting user response
+  pendingInvites,         // CampaignInvite[] — invites awaiting user response (expired filtered out)
   createCampaign,         // (data: Partial<Campaign>) => Promise<Campaign>
   joinByCode,             // (code: string, characterId?: string) => Promise<void>
   acceptInvite,           // (inviteId: string, characterId?: string) => Promise<void>
@@ -561,6 +579,8 @@ const {
   sendInvite,             // (email: string) => Promise<void>
   updateMemberCharacter,  // (characterId: string) => Promise<void>
   leaveCampaign,          // () => Promise<void>
+  removeMember,           // (uid: string) => Promise<void> — DM-only: kicks a member
+  regenerateJoinCode,     // () => Promise<void> — DM-only: generates new 6-char code
   isLoading,              // boolean
 } = useCampaign();
 ```
@@ -569,11 +589,14 @@ const {
 - Subscribes to the user's campaigns on mount, updates in real-time
 - When `activeCampaignId` changes, subscribes to that campaign's `members` subcollection
 - `isDM` is derived from comparing `activeCampaign.dmId` to the current user's UID
-- `pendingInvites` listens on the user's email for incoming campaign invites
-- `sendInvite` creates an invite record addressed to the given email for the active campaign
+- `pendingInvites` listens on the user's email for incoming campaign invites; expired invites (>7 days) are filtered out client-side
+- `sendInvite` creates an invite record addressed to the given email for the active campaign; checks for duplicate pending invites
 - `joinByCode` syncs `CharacterData.campaign` and `campaignId` on the enrolled character
 - `leaveCampaign` clears `campaign`/`campaignId` on all of the user's characters in that campaign
+- `removeMember` (DM-only) kicks a member from the active campaign; requires DM role
+- `regenerateJoinCode` (DM-only) creates a new 6-char join code, invalidating the previous one
 - `updateMemberCharacter` updates the current user's character assignment in the active campaign
+- `memberUids` sync is handled server-side by Cloud Functions (not client-side)
 
 ---
 
