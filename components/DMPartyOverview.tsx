@@ -1,10 +1,10 @@
 import React from 'react';
-import { CharacterData, CampaignMember } from '../types';
-import { Heart, Shield, Eye, Crown, User, Loader2, Swords, Brain, Ear } from 'lucide-react';
+import { CampaignMember, CampaignMemberCharacterSummary } from '../types';
+import { Heart, Shield, Eye, User, Loader2, Swords, Brain, Ear } from 'lucide-react';
 
 interface DMPartyOverviewProps {
   members: CampaignMember[];
-  partyCharacters: Map<string, CharacterData>;
+  partyCharacters: Map<string, CampaignMemberCharacterSummary>;
   loadingChars: boolean;
 }
 
@@ -17,7 +17,7 @@ const DMPartyOverview: React.FC<DMPartyOverviewProps> = ({ members, partyCharact
     ? Math.round(characters.reduce((sum, c) => sum + (c.level || 1), 0) / characters.length)
     : 0;
   const lowestHP = characters.length > 0
-    ? Math.min(...characters.map(c => (c.hp?.current ?? 0) / (c.hp?.max ?? 1) * 100))
+    ? Math.min(...characters.map(c => (c.hpCurrent ?? 0) / (c.hpMax ?? 1) * 100))
     : 100;
 
   if (loadingChars) {
@@ -109,19 +109,19 @@ const DMPartyOverview: React.FC<DMPartyOverviewProps> = ({ members, partyCharact
                                 <Heart size={9} className="text-red-500" /> HP
                               </span>
                               <span className="font-mono font-bold text-zinc-400">
-                                {character.hp?.current ?? 0} / {character.hp?.max ?? 0}
+                                {character.hpCurrent} / {character.hpMax}
                               </span>
                             </div>
                             <div className="h-1.5 bg-zinc-800 rounded-full overflow-hidden">
                               <div
                                 className={`h-full rounded-full transition-all duration-500 ${
-                                  ((character.hp?.current ?? 0) / (character.hp?.max ?? 1)) > 0.5
+                                  (character.hpCurrent / (character.hpMax || 1)) > 0.5
                                     ? 'bg-green-500'
-                                    : ((character.hp?.current ?? 0) / (character.hp?.max ?? 1)) > 0.25
+                                    : (character.hpCurrent / (character.hpMax || 1)) > 0.25
                                     ? 'bg-yellow-500'
                                     : 'bg-red-500'
                                 }`}
-                                style={{ width: `${Math.max(0, Math.min(100, ((character.hp?.current ?? 0) / (character.hp?.max ?? 1)) * 100))}%` }}
+                                style={{ width: `${Math.max(0, Math.min(100, (character.hpCurrent / (character.hpMax || 1)) * 100))}%` }}
                               />
                             </div>
                           </div>
@@ -135,13 +135,13 @@ const DMPartyOverview: React.FC<DMPartyOverviewProps> = ({ members, partyCharact
                             <div className="flex items-center gap-1">
                               <Swords size={10} className="text-orange-500" />
                               <span className="text-[10px] font-mono font-bold text-zinc-400">
-                                Init {character.initiative >= 0 ? '+' : ''}{character.initiative ?? 0}
+                                Init {character.initiative >= 0 ? '+' : ''}{character.initiative}
                               </span>
                             </div>
                             <div className="flex items-center gap-1">
                               <Eye size={10} className="text-purple-500" />
                               <span className="text-[10px] font-mono font-bold text-zinc-400">
-                                PP {10 + (character.skills?.find(s => s.name === 'Perception')?.modifier ?? 0)}
+                                PP {character.passivePerception}
                               </span>
                             </div>
                           </div>
@@ -185,9 +185,9 @@ const DMPartyOverview: React.FC<DMPartyOverviewProps> = ({ members, partyCharact
                   const character = partyCharacters.get(member.uid);
                   if (!character) return null;
 
-                  const passivePerception = 10 + (character.skills?.find(s => s.name === 'Perception')?.modifier ?? 0);
-                  const passiveInvestigation = 10 + (character.skills?.find(s => s.name === 'Investigation')?.modifier ?? 0);
-                  const passiveInsight = 10 + (character.skills?.find(s => s.name === 'Insight')?.modifier ?? 0);
+                  const passivePerception = character.passivePerception;
+                  const passiveInvestigation = 10 + (character.keySkills.find(s => s.name === 'Investigation')?.modifier ?? 0);
+                  const passiveInsight = 10 + (character.keySkills.find(s => s.name === 'Insight')?.modifier ?? 0);
 
                   return (
                     <tr key={member.uid} className="border-b border-zinc-800/50 last:border-0">

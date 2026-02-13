@@ -9,7 +9,6 @@ import ErrorBoundary from './ErrorBoundary';
 import { useAuth } from '../contexts/AuthContext';
 import { useCharacters } from '../contexts/CharacterContext';
 import { useCampaign } from '../contexts/CampaignContext';
-import { updateMemberCharacter as addMemberToCampaign } from '../lib/campaigns';
 
 interface CharacterSelectionProps {
   characters: CharacterData[];
@@ -30,15 +29,14 @@ const CharacterSelection: React.FC<CharacterSelectionProps> = ({
   const [migrating, setMigrating] = useState(false);
   const { user, logout } = useAuth();
   const { isCloudUser, pendingMigration, acceptMigration, dismissMigration } = useCharacters();
-  const { campaigns } = useCampaign();
+  const { campaigns, activeCampaignId, updateMemberCharacter } = useCampaign();
 
   const handleCreate = (newChar: CharacterData) => {
     onCreate(newChar);
-    // Auto-add user to campaign members subcollection when character is created with a campaign
-    if (newChar.campaignId && user?.uid) {
-      addMemberToCampaign(newChar.campaignId, user.uid, newChar.id)
-        .then(() => console.log(`[CharacterSelection] Auto-added ${user.uid} to campaign ${newChar.campaignId} with character ${newChar.id}`))
-        .catch((err) => console.error('[CharacterSelection] Failed to auto-add to campaign:', err));
+    // If user is already in the active campaign, bind the newly created character.
+    if (newChar.campaignId && activeCampaignId && newChar.campaignId === activeCampaignId) {
+      updateMemberCharacter(newChar.id)
+        .catch((err) => console.error('[CharacterSelection] Failed to assign new character to member record:', err));
     }
     setShowWizard(false);
     setShowQuickRoll(false);

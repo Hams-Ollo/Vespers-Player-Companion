@@ -6,7 +6,7 @@
 >
 > Living document tracking planned features, enhancements, and community requests.
 >
-> **Scribed last:** 2026-02-12 (security hardening roadmap added)
+> **Scribed last:** 2026-02-13 (D&D Beyond-inspired character sheet parity + premade templates + SRD browser added)
 
 ---
 
@@ -34,14 +34,17 @@ Phase 1: Firestore Campaign Foundation    ████████████�
 UI Overhaul & API Cleanup                ████████████████████████████████████████  ✅ CLEARED
 Phase 2: Campaign Context & Party UI          ██████████████████████████████████  ✅ CLEARED
 🔒 Security Hardening (BLOCKS PUBLIC LAUNCH)   ██████████████████░░░░░░░░░░░░░░  ← WE ARE HERE
-Phase 3: Combat & Initiative Tracker                  ░░░░░░░░████████░░░░░░░░░░
-Phase 4: DM Journal, NPCs & Items                    ░░░░░░░░████████░░░░░░░░░░
-Phase 4b: Custom Items & Loot                        ░░░░░░░░░░██████░░░░░░░░░░
-Phase 5: AI DM Co-Pilot                                      ░░░░░░░░████████░░
-Phase 6: Multiplayer Communication                            ░░░░░░░░████████░░
-Phase 7: Higher-Level Char Creation                                   ░░████████
-Character Export (independent)         ░░░░░░░░░░░░░░ (can ship anytime)
-                                       v0.3.1   v0.4.0  v0.4.1  v0.5.0  v0.5.5  v0.6.0  v0.7.0
+Character Sheet Parity (D&D Beyond-Inspired)           ░░░░░░░░████████░░░░░░░░░░
+Character Export & Import                              ░░░░░░░░████████░░░░░░░░░░
+Phase 3: Combat & Initiative Tracker                          ░░░░░░░░████████░░
+Premade Character Templates                                   ░░░░░░░░████████░░
+Phase 4: DM Journal, NPCs & Items                            ░░░░░░░░████████░░
+Phase 4b: Custom Items & Loot                                ░░░░░░░░░░██████░░
+Phase 5: AI DM Co-Pilot                                              ░░░░░░████
+SRD Content Browser                                                  ░░░░░░████
+Phase 6: Multiplayer Communication                                   ░░░░░░████
+Phase 7: Higher-Level Char Creation                                       ░░████
+                                       v0.3.1   v0.4.0  v0.4.1  v0.4.x  v0.5.0  v0.5.5  v0.6.0  v0.7.0
 ```
 
 ### Phase Dependencies
@@ -51,12 +54,12 @@ Character Export (independent)         ░░░░░░░░░░░░░�
 ```
 Phase 0 ─→ Phase 1 ─→ Phase 2 ─┬→ 🔒 Security Hardening (MUST clear before public sharing)
                                 │      │
-                                │      └→ Phase 3 (Combat)
+                                │      ├→ v0.4.x Char Sheet Parity + Export
+                                │      └→ Phase 3 (Combat) + Premade Templates
                                 ├→ Phase 4 (Journal/NPCs) ─┬→ Phase 4b (Items & Loot)
                                 ├→ Phase 6 (Comms)         │
-                                │                           └→ Phase 5 (AI Co-Pilot)
+                                │                           └→ Phase 5 (AI Co-Pilot) + SRD Browser
                                 └→ Phase 7 (Char Creation)
-Character Export (no deps) ─→ can ship independently at any time
 ```
 
 ### Release Targets
@@ -67,10 +70,10 @@ Character Export (no deps) ─→ can ship independently at any time
 | v0.3.2 | UI Overhaul | Class theming, Dashboard rewrite, centralized AI | ✅ Cleared |
 | v0.4.0 | Phases 1–2 | Firestore campaigns, party roster, DM overview | ✅ Cleared |
 | v0.4.1 | 🔒 Security | API proxy, rate limiting, debug cleanup, Firestore hardening | 🟨 In Progress (Layers 1–2 ✅, Layers 3–7 remaining) |
-| v0.4.x | Character Export | JSON export/import, PDF sheet, FoundryVTT/D&D Beyond | ⬜ Not Started |
-| v0.5.0 | Phases 3–4 | Combat tracker, encounter builder, DM journal, NPC registry | ⬜ Not Started |
+| v0.4.x | Char Sheet Parity | Conditions, heroic inspiration, passives, XP, clone, export | ⬜ Not Started |
+| v0.5.0 | Phases 3–4 | Combat tracker, encounter builder, DM journal, NPC registry, premade templates | ⬜ Not Started |
 | v0.5.5 | Phase 4b | DM item builder, SRD magic items, loot sessions | ⬜ Not Started |
-| v0.6.0 | Phases 5–6 | AI DM Co-Pilot, whispers, roll requests, handouts | ⬜ Not Started |
+| v0.6.0 | Phases 5–6 | AI DM Co-Pilot, whispers, roll requests, handouts, SRD content browser | ⬜ Not Started |
 | v0.7.0 | Phase 7 | Create characters at levels 1–20, multiclass | ⬜ Not Started |
 
 ---
@@ -187,7 +190,40 @@ Character Export (no deps) ─→ can ship independently at any time
 - [ ] **Update `.env.example`** — Document which variables are build-time (Firebase config) vs runtime-only (Gemini key)
 
 ---
+## 📦 v0.4.x — Character Sheet Parity & Export (D&D Beyond-Inspired)
 
+> *"The hero's portrait grows clearer — every condition, every triumph,
+> every earned point of experience now visible at a glance."*
+
+### 🟠 Hard — Condition Tracking (pulled forward from v0.8.0+)
+
+- [ ] **Add `activeConditions`, `exhaustionLevel`, `heroicInspiration` to `CharacterData`** — New fields in `types.ts`; `activeConditions: string[]`, `exhaustionLevel: number (0-6)`, `heroicInspiration: boolean`
+- [ ] **Build `ConditionsModal.tsx`** — Checkbox list of all 15 conditions (reusing `CONDITIONS` from `constants.tsx`), exhaustion level picker (0-6), persisted to Firestore
+- [ ] **Wire "Conditions" button into `CombatStrip`** — Opens conditions modal, shows active condition count badge
+- [ ] **Display active conditions on Dashboard header** — Condition badges/chips visible at a glance, matching D&D Beyond's prominent placement
+
+### 🟡 Medium — Character Sheet Enhancements
+
+- [ ] **Heroic Inspiration toggle** — Boolean toggle icon near portrait in Dashboard header; one-tap on/off
+- [ ] **Passive Investigation & Passive Insight** — Compute `10 + skill modifier` for Investigation and Insight; display alongside Passive Perception in `SkillsDetail.tsx`
+- [ ] **XP tracking & progress display** — Add `xp: number` to `CharacterData`; show XP / XP-to-next-level progress bar in `SettingsModal` or Dashboard header
+
+### 🟡 Medium — Character Management
+
+- [ ] **Character cloning ("Duplicate")** — Deep-clone `CharacterData` with new ID, clear `campaignId`/`campaign`, append "(Copy)" to name; option in character card menu on `CharacterSelection.tsx`
+
+### 🟠 Hard — Character Export & Import
+
+- [ ] **Native JSON export/import** — Download/upload `CharacterData` as `.json`
+- [ ] **PDF character sheet export** — Standard 5e sheet via `jspdf`
+
+### 🟡 Medium — Export Formats
+
+- [ ] **FoundryVTT export** — Transform to FoundryVTT actor JSON schema
+- [ ] **D&D Beyond format export** — Transform to D&D Beyond-compatible JSON
+- [ ] **Export UI** — Format picker (JSON / PDF / FoundryVTT / D&D Beyond)
+
+---
 ## �📦 Epic Quest: v0.5.0 — Combat System & DM Campaign Tools (Phases 3–4)
 
 > *"Roll for initiative! The combat system and DM tools  
@@ -226,6 +262,21 @@ Character Export (no deps) ─→ can ship independently at any time
 
 - [ ] **Keyboard shortcuts for combat** — Space=next, N=add, D=damage, H=heal
 - [ ] **Audio/visual combat feedback** — Nat 20/1 animations, combat transitions
+
+### 🟠 Hard — Premade Character Templates (Epic 20)
+
+- [ ] **Define `PremadeTemplate` interface** — Maps to `CharacterData` + metadata (description, playstyle, difficulty rating)
+- [ ] **Create 12 premade template entries** — One per PHB class with curated race/stat/equipment/backstory combos in `constants.tsx`
+- [ ] **Build premade vs. custom selection dialog** — Modal on "Create New Character" with two paths (matching D&D Beyond pattern)
+- [ ] **Build premade gallery browser** — Card grid with class icon, playstyle description, difficulty badge
+- [ ] **Wire premade selection to `CharacterCreationWizard`** — Populates wizard state, skips to review/confirm step
+- [ ] **AI portrait pre-generation for premades** — Generate on first load or use static placeholder art
+
+### 🟡 Medium — UX Polish (D&D Beyond-Inspired)
+
+- [ ] **Rest dropdown UX refinement** — Contextual popover near campfire icon instead of full-screen modal
+- [ ] **Campaign badge on character cards** — Inline campaign name badge on `CharacterSelection` cards
+- [ ] **Saved dice presets ("My Dice")** — `savedDice` array on `CharacterData`, quick-access from `QuickRollModal`
 
 ---
 
@@ -271,22 +322,15 @@ Character Export (no deps) ─→ can ship independently at any time
 - [ ] **Shared handouts** — DM pushes read-only content to players
 - [ ] **AI conversation persistence** — Save chats to Firestore by session
 
----
+### 🟠 Hard — SRD Content Browser (Epic 21)
 
-## 📦 v0.4.x — Character Export & Interoperability
-
-> *"Take your hero with you — across planes, platforms, and file formats."*
-
-### 🟠 Hard
-
-- [ ] **Native JSON export/import** — Download/upload `CharacterData` as `.json`
-- [ ] **PDF character sheet export** — Standard 5e sheet via `jspdf`
-
-### 🟡 Medium
-
-- [ ] **FoundryVTT export** — Transform to FoundryVTT actor JSON schema
-- [ ] **D&D Beyond format export** — Transform to D&D Beyond-compatible JSON
-- [ ] **Export UI** — Format picker (JSON / PDF / FoundryVTT / D&D Beyond)
+- [ ] **Build unified search index** — Aggregate spells, items, conditions, and monster data into searchable index
+- [ ] **Create `ContentBrowser.tsx` component** — Search bar with category filters, result cards with type badges
+- [ ] **Spell reference cards** — Full spell details, school icons, level badges
+- [ ] **Item reference cards** — Weapon/armor/gear stats, rarity colors for magic items
+- [ ] **Condition reference cards** — Mechanical effects, icon display, exhaustion level table
+- [ ] **Monster reference cards** — Depends on `lib/monsters.ts`; stat blocks, CR, abilities
+- [ ] **Integrate as Dashboard card or bottom-nav tab** — Accessible from main navigation
 
 ---
 

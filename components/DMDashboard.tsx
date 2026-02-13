@@ -1,22 +1,17 @@
-import React, { useState, useEffect } from 'react';
+import React, { useMemo, useState } from 'react';
 import { useCampaign } from '../contexts/CampaignContext';
-import { useAuth } from '../contexts/AuthContext';
-import { CharacterData, CampaignMember } from '../types';
-import { Crown, Users, Eye, Swords, ScrollText, Settings, LogOut, Hash, Copy, Check, Loader2, RefreshCw } from 'lucide-react';
+import { CampaignMemberCharacterSummary } from '../types';
+import { Crown, Users, Eye, Swords, ScrollText, Settings, LogOut, Hash, Copy, Check, RefreshCw } from 'lucide-react';
 import DMPartyOverview from './DMPartyOverview';
-import { doc, getDoc } from 'firebase/firestore';
-import { db } from '../lib/firestore';
 
 interface DMDashboardProps {
   onExit: () => void;
 }
 
 const DMDashboard: React.FC<DMDashboardProps> = ({ onExit }) => {
-  const { user } = useAuth();
   const {
     activeCampaign,
     members,
-    isDM,
     activeEncounter,
     notes,
     updateCampaign,
@@ -26,47 +21,20 @@ const DMDashboard: React.FC<DMDashboardProps> = ({ onExit }) => {
   } = useCampaign();
 
   const [activeTab, setActiveTab] = useState<'overview' | 'combat' | 'notes' | 'settings'>('overview');
-  const [partyCharacters, setPartyCharacters] = useState<Map<string, CharacterData>>(new Map());
-  const [loadingChars, setLoadingChars] = useState(true);
   const [copiedCode, setCopiedCode] = useState(false);
   const [regeneratingCode, setRegeneratingCode] = useState(false);
 
-  // Fetch all party characters
-  useEffect(() => {
-    if (!members.length) {
-      setPartyCharacters(new Map());
-      setLoadingChars(false);
-      return;
-    }
-
-    setLoadingChars(true);
-    const charMap = new Map<string, CharacterData>();
-    let loaded = 0;
-    const total = members.filter(m => m.characterId).length;
-
-    if (total === 0) {
-      setLoadingChars(false);
-      return;
-    }
-
-    members.forEach(async (member) => {
-      if (!member.characterId) return;
-      try {
-        const charDoc = await getDoc(doc(db, 'characters', member.characterId));
-        if (charDoc.exists()) {
-          charMap.set(member.uid, { id: charDoc.id, ...charDoc.data() } as CharacterData);
-        }
-      } catch {
-        // skip
-      } finally {
-        loaded++;
-        if (loaded >= total) {
-          setPartyCharacters(new Map(charMap));
-          setLoadingChars(false);
-        }
+  const partyCharacters = useMemo(() => {
+    const map = new Map<string, CampaignMemberCharacterSummary>();
+    members.forEach((member) => {
+      if (member.characterSummary) {
+        map.set(member.uid, member.characterSummary);
       }
     });
+    return map;
   }, [members]);
+
+  const loadingChars = false;
 
   const handleCopyCode = () => {
     if (activeCampaign?.joinCode) {

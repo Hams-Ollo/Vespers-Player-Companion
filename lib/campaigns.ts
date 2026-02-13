@@ -38,12 +38,15 @@ import { firebaseApp } from '../contexts/AuthContext';
 import {
   Campaign,
   CampaignMember,
+  CampaignMemberCharacterSummary,
   CampaignInvite,
   CampaignSettings,
   CombatEncounter,
   DMNote,
   EncounterTemplate,
   Whisper,
+  CampaignChatChannel,
+  CampaignChatMessage,
   RollRequest,
   CampaignStatus,
 } from '../types';
@@ -63,6 +66,8 @@ const templatesCol = (campaignId: string) =>
   collection(db, 'campaigns', campaignId, 'templates');
 const whispersCol = (campaignId: string) =>
   collection(db, 'campaigns', campaignId, 'whispers');
+const messagesCol = (campaignId: string) =>
+  collection(db, 'campaigns', campaignId, 'messages');
 const rollRequestsCol = (campaignId: string) =>
   collection(db, 'campaigns', campaignId, 'rollRequests');
 const invitesCol = () => collection(db, 'invites');
@@ -310,6 +315,7 @@ export async function joinCampaignByCode(
   uid: string,
   displayName: string,
   characterId?: string,
+  characterSummary?: CampaignMemberCharacterSummary,
 ): Promise<Campaign | null> {
   const q = query(
     campaignsCol(),
@@ -334,6 +340,7 @@ export async function joinCampaignByCode(
     displayName,
     role: 'player',
     characterId,
+    characterSummary,
     joinedAt: Date.now(),
   };
 
@@ -407,11 +414,13 @@ export async function updateMemberCharacter(
   campaignId: string,
   uid: string,
   characterId: string | null,
+  characterSummary?: CampaignMemberCharacterSummary,
 ): Promise<void> {
   const memberRef = doc(db, 'campaigns', campaignId, 'members', uid);
   const update: Record<string, any> = {
     uid,
     characterId: characterId || '',
+    characterSummary: characterId ? (characterSummary || null) : null,
     lastSeen: Date.now(),
   };
   // Use merge so the doc is created if it doesn't exist yet (e.g. legacy campaigns)
@@ -496,7 +505,8 @@ export async function acceptInvite(
   uid: string,
   displayName: string,
   characterId?: string,
-): Promise<void> {
+  characterSummary?: CampaignMemberCharacterSummary,
+): Promise<{ campaignId: string; campaignName: string }> {
   const inviteSnap = await getDoc(doc(db, 'invites', inviteId));
   if (!inviteSnap.exists()) throw new Error('Invite not found');
 
@@ -519,11 +529,73 @@ export async function acceptInvite(
     displayName,
     role: 'player',
     characterId,
+    characterSummary,
     joinedAt: Date.now(),
   };
   batch.set(doc(db, 'campaigns', invite.campaignId, 'members', uid), member);
 
+  // Client-side fallback: campaign appears immediately for invite accepts too.
+  batch.update(doc(db, 'campaigns', invite.campaignId), {
+    memberUids: arrayUnion(uid),
+    updatedAt: Date.now(),
+  });
+
   await batch.commit();
+
+  return { campaignId: invite.campaignId, campaignName: invite.campaignName };
+}
+
+// ═══════════════════════════════════════════════════════════════════════
+// Campaign Chat
+// ═══════════════════════════════════════════════════════════════════════
+
+/** Send a channel chat message in a campaign. */
+export async function sendCampaignMessage(
+  campaignId: string,
+  channel: CampaignChatChannel,
+  fromUid: string,
+  fromDisplayName: string,
+  content: string,
+): Promise<void> {
+  const now = Date.now();
+  const payload: CampaignChatMessage = {
+    id: generateId(),
+    campaignId,
+    channel,
+    fromUid,
+    fromDisplayName,
+    content: content.trim(),
+    createdAt: now,
+  };
+
+  await setDoc(doc(db, 'campaigns', campaignId, 'messages', payload.id), payload);
+}
+
+/** Subscribe to campaign channel messages (ascending by createdAt). */
+export function subscribeToCampaignMessages(
+  campaignId: string,
+  channel: CampaignChatChannel,
+  onData: (messages: CampaignChatMessage[]) => void,
+  onError?: (err: Error) => void,
+): Unsubscribe {
+  const q = query(
+    messagesCol(campaignId),
+    where('channel', '==', channel),
+    orderBy('createdAt', 'asc'),
+    limit(200),
+  );
+
+  return onSnapshot(
+    q,
+    (snapshot) => {
+      const messages = snapshot.docs.map(d => ({ ...d.data(), id: d.id } as CampaignChatMessage));
+      onData(messages);
+    },
+    (err) => {
+      console.error('[Campaigns] messages subscription error:', err);
+      onError?.(err);
+    },
+  );
 }
 
 /** Decline a campaign invite. */
@@ -774,6 +846,67 @@ export function subscribeToWhispers(
       onError?.(err);
     },
   );
+}
+
+/** Subscribe to a two-way whisper thread between two users. */
+export function subscribeToWhisperThread(
+  campaignId: string,
+  userA: string,
+  userB: string,
+  onData: (whispers: Whisper[]) => void,
+  onError?: (err: Error) => void,
+): Unsubscribe {
+  let firstLeg: Whisper[] = [];
+  let secondLeg: Whisper[] = [];
+
+  const publish = () => {
+    const combined = [...firstLeg, ...secondLeg].sort((left, right) => left.createdAt - right.createdAt);
+    onData(combined);
+  };
+
+  const q1 = query(
+    whispersCol(campaignId),
+    where('fromUid', '==', userA),
+    where('toUid', '==', userB),
+    orderBy('createdAt', 'asc'),
+    limit(100),
+  );
+  const q2 = query(
+    whispersCol(campaignId),
+    where('fromUid', '==', userB),
+    where('toUid', '==', userA),
+    orderBy('createdAt', 'asc'),
+    limit(100),
+  );
+
+  const unsub1 = onSnapshot(
+    q1,
+    (snapshot) => {
+      firstLeg = snapshot.docs.map(d => ({ ...d.data(), id: d.id } as Whisper));
+      publish();
+    },
+    (err) => {
+      console.error('[Campaigns] whisper thread (a->b) subscription error:', err);
+      onError?.(err);
+    },
+  );
+
+  const unsub2 = onSnapshot(
+    q2,
+    (snapshot) => {
+      secondLeg = snapshot.docs.map(d => ({ ...d.data(), id: d.id } as Whisper));
+      publish();
+    },
+    (err) => {
+      console.error('[Campaigns] whisper thread (b->a) subscription error:', err);
+      onError?.(err);
+    },
+  );
+
+  return () => {
+    unsub1();
+    unsub2();
+  };
 }
 
 /** Mark a whisper as read. */

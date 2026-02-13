@@ -1045,7 +1045,19 @@ const CharacterCreationWizard: React.FC<WizardProps> = ({ onCreate, onClose }) =
         spells: detailedResult.spells || [],
         spellSlots: getSpellSlotsForLevel(state.charClass, level).map(s => ({ level: s.level, current: s.max, max: s.max })),
         inventory: { gold: STARTING_GOLD_BY_LEVEL[level] || 150, items: [], load: "Light" },
-        journal: [{ id: 'creation', timestamp: Date.now(), type: 'note', content: `Created ${state.name}, the Level ${level} ${state.race} ${state.charClass}${state.subclass ? ` (${state.subclass})` : ''}. Background: ${state.background}.` }]
+        motivations: state.motivations || undefined,
+        keyNPCs: state.keyNPCs || undefined,
+        journal: [{
+          id: 'creation',
+          timestamp: Date.now(),
+          type: 'note',
+          content: [
+            `Created ${state.name}, the Level ${level} ${state.race} ${state.charClass}${state.subclass ? ` (${state.subclass})` : ''}. Background: ${state.background}.`,
+            state.backstory?.trim() ? `Backstory: ${state.backstory.trim()}` : null,
+            state.motivations?.trim() ? `Motivations: ${state.motivations.trim()}` : null,
+            state.keyNPCs?.trim() ? `Key NPCs: ${state.keyNPCs.trim()}` : null,
+          ].filter(Boolean).join('\n\n'),
+        }]
       };
 
       onCreate(recalculateCharacterStats(character));

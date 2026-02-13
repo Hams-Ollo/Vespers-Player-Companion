@@ -2,6 +2,7 @@ import React, { createContext, useContext, useState, useEffect, useCallback, use
 import {
   Campaign,
   CampaignMember,
+  CampaignMemberCharacterSummary,
   CampaignInvite,
   CombatEncounter,
   DMNote,
@@ -240,6 +241,38 @@ export const CampaignProvider: React.FC<{ children: React.ReactNode }> = ({ chil
   const myRole = myMembership?.role ?? null;
   const isDM = myRole === 'dm';
 
+  const buildCharacterSummary = useCallback(
+    (characterId?: string): CampaignMemberCharacterSummary | undefined => {
+      if (!characterId) return undefined;
+      const character = characters.find(c => c.id === characterId);
+      if (!character) return undefined;
+
+      const sortedSkills = [...(character.skills || [])]
+        .sort((left, right) => right.modifier - left.modifier)
+        .slice(0, 3)
+        .map(skill => ({ name: skill.name, modifier: skill.modifier }));
+
+      return {
+        id: character.id,
+        name: character.name,
+        race: character.race,
+        class: character.class,
+        level: character.level,
+        portraitUrl: character.portraitUrl,
+        hpCurrent: character.hp?.current ?? 0,
+        hpMax: character.hp?.max ?? 0,
+        ac: character.ac ?? 10,
+        initiative: character.initiative ?? 0,
+        passivePerception: character.passivePerception ?? 10,
+        keySkills: sortedSkills,
+        topFeatures: (character.features || []).slice(0, 3).map(feature => feature.name),
+        primaryAttack: character.attacks?.[0]?.name,
+        journalPreview: character.journal?.[0]?.content,
+      };
+    },
+    [characters],
+  );
+
   // ── Actions ───────────────────────────────────────────────────────
   const createCampaignAction = useCallback(
     async (name: string, description?: string) => {
@@ -286,7 +319,14 @@ export const CampaignProvider: React.FC<{ children: React.ReactNode }> = ({ chil
       if (!user?.uid || !user.displayName) {
         throw new Error('Must be signed in to join a campaign');
       }
-      const campaign = await joinCampaignByCode(code, user.uid, user.displayName, characterId);
+      const characterSummary = buildCharacterSummary(characterId);
+      const campaign = await joinCampaignByCode(
+        code,
+        user.uid,
+        user.displayName,
+        characterId,
+        characterSummary,
+      );
       if (campaign) {
         setActiveCampaignId(campaign.id);
         // Sync CharacterData.campaign/campaignId for the character being enrolled
@@ -296,7 +336,7 @@ export const CampaignProvider: React.FC<{ children: React.ReactNode }> = ({ chil
       }
       return campaign;
     },
-    [user?.uid, user?.displayName, setActiveCampaignId, updateCharacterById],
+    [user?.uid, user?.displayName, setActiveCampaignId, updateCharacterById, buildCharacterSummary],
   );
 
   const leaveCampaignAction = useCallback(async () => {
@@ -312,9 +352,23 @@ export const CampaignProvider: React.FC<{ children: React.ReactNode }> = ({ chil
   const acceptInviteAction = useCallback(
     async (inviteId: string, characterId?: string) => {
       if (!user?.uid || !user.displayName) throw new Error('Must be signed in');
-      await firestoreAcceptInvite(inviteId, user.uid, user.displayName, characterId);
+      const characterSummary = buildCharacterSummary(characterId);
+      const accepted = await firestoreAcceptInvite(
+        inviteId,
+        user.uid,
+        user.displayName,
+        characterId,
+        characterSummary,
+      );
+      setActiveCampaignId(accepted.campaignId);
+      if (characterId) {
+        updateCharacterById(characterId, {
+          campaign: accepted.campaignName,
+          campaignId: accepted.campaignId,
+        });
+      }
     },
-    [user?.uid, user?.displayName],
+    [user?.uid, user?.displayName, buildCharacterSummary, setActiveCampaignId, updateCharacterById],
   );
 
   const declineInviteAction = useCallback(
@@ -342,9 +396,14 @@ export const CampaignProvider: React.FC<{ children: React.ReactNode }> = ({ chil
   const updateMemberCharacterAction = useCallback(
     async (characterId: string | null) => {
       if (!activeCampaignId || !user?.uid) throw new Error('No active campaign or not signed in');
-      await firestoreUpdateMemberCharacter(activeCampaignId, user.uid, characterId);
+      await firestoreUpdateMemberCharacter(
+        activeCampaignId,
+        user.uid,
+        characterId,
+        buildCharacterSummary(characterId || undefined),
+      );
     },
-    [activeCampaignId, user?.uid],
+    [activeCampaignId, user?.uid, buildCharacterSummary],
   );
 
   const removeMemberAction = useCallback(

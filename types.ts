@@ -153,8 +153,27 @@ export interface CampaignMember {
   displayName: string;
   role: CampaignRole;
   characterId?: string;
+  characterSummary?: CampaignMemberCharacterSummary;
   joinedAt: number;
   lastSeen?: number;
+}
+
+export interface CampaignMemberCharacterSummary {
+  id: string;
+  name: string;
+  race: string;
+  class: string;
+  level: number;
+  portraitUrl: string;
+  hpCurrent: number;
+  hpMax: number;
+  ac: number;
+  initiative: number;
+  passivePerception: number;
+  keySkills: { name: string; modifier: number }[];
+  topFeatures: string[];
+  primaryAttack?: string;
+  journalPreview?: string;
 }
 
 export interface CampaignSettings {
@@ -264,6 +283,18 @@ export interface Whisper {
   toUid: string;
   content: string;
   read: boolean;
+  createdAt: number;
+}
+
+export type CampaignChatChannel = 'round_table' | 'party_private';
+
+export interface CampaignChatMessage {
+  id: string;
+  campaignId: string;
+  channel: CampaignChatChannel;
+  fromUid: string;
+  fromDisplayName: string;
+  content: string;
   createdAt: number;
 }
 

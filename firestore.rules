@@ -8,10 +8,6 @@ service cloud.firestore {
       return request.auth != null;
     }
 
-    function isOwner(uid) {
-      return isSignedIn() && request.auth.uid == uid;
-    }
-
     // Check if user is a member of a campaign (reads the members subcollection)
     function isCampaignMember(campaignId) {
       return isSignedIn()
@@ -126,6 +122,29 @@ service cloud.firestore {
 
         // Only the DM can delete whispers (campaign cleanup)
         allow delete: if isCampaignDM(campaignId);
+      }
+
+      // ── Channel Messages subcollection ───────────────────────
+      match /messages/{messageId} {
+        // Round table is visible to all campaign members.
+        // Party private is visible only to non-DM members.
+        allow read: if isCampaignMember(campaignId)
+                    && (
+                      resource.data.channel == 'round_table'
+                      || (resource.data.channel == 'party_private' && !isCampaignDM(campaignId))
+                    );
+
+        // Members can post as themselves.
+        // DM may post only in round_table.
+        allow create: if isCampaignMember(campaignId)
+                      && request.resource.data.fromUid == request.auth.uid
+                      && (
+                        request.resource.data.channel == 'round_table'
+                        || (request.resource.data.channel == 'party_private' && !isCampaignDM(campaignId))
+                      );
+
+        // Messages are immutable (prevents silent edits/deletes in chat history).
+        allow update, delete: if false;
       }
 
       // ── Roll Requests subcollection ──────────────────────────

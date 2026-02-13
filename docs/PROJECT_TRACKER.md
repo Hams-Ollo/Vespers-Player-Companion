@@ -106,6 +106,8 @@
 | 5.10 | Error boundary | ✅ | `ErrorBoundary.tsx` |
 | 5.11 | Responsive mobile layout | ✅ | Touch-friendly |
 | 5.12 | Portrait regeneration | ✅ | `PortraitGenerator.tsx` |
+| 5.13 | Heroic Inspiration toggle | 🔲 | v0.4.x — boolean toggle near portrait in Dashboard header |
+| 5.14 | Rest dropdown UX refinement | 🔲 | v0.5.0 — contextual popover instead of full-screen modal |
 
 ---
 
@@ -184,6 +186,7 @@
 | 8.23 | Regenerate join code | ✅ | `regenerateJoinCode` in context + button in DM Dashboard settings |
 | 8.24 | Invite expiry (7 days) | ✅ | `expiresAt` field on invites; client-side filter + accept-time guard |
 | 8.25 | Duplicate invite prevention | ✅ | Query check in `createInvite` — prevents re-inviting same email |
+| 8.26 | Campaign badge on character cards | 🔲 | v0.5.0 — inline campaign name badge on `CharacterSelection` cards |
 
 ---
 
@@ -234,6 +237,8 @@
 | 11.4 | Passive Perception calculation | ✅ | 10 + Perception modifier |
 | 11.5 | Expertise from Rogue/Bard levels | ✅ | `isExpertiseLevel()` |
 | 11.6 | Jack of All Trades | 🔲 | Bard half-proficiency |
+| 11.7 | Passive Investigation calculation | 🔲 | v0.4.x — 10 + Investigation modifier; display in `SkillsDetail.tsx` |
+| 11.8 | Passive Insight calculation | 🔲 | v0.4.x — 10 + Insight modifier; display in `SkillsDetail.tsx` |
 
 ---
 
@@ -252,6 +257,7 @@
 | 12.7 | Proficiency bonus update | ✅ | Auto-recalculated |
 | 12.8 | Expertise selection at appropriate levels | ✅ | Rogue 1/6, Bard 3/10 |
 | 12.9 | Target level display (not off-by-one) | ✅ | `targetLevel` state |
+| 12.10 | XP tracking & display | 🔲 | v0.4.x — `xp` field on `CharacterData`, progress bar in Dashboard/Settings |
 
 ---
 
@@ -266,8 +272,11 @@
 | 13.3 | Initiative calculation | ✅ | DEX modifier |
 | 13.4 | Speed display | ✅ | Racial base speed |
 | 13.5 | Combat detail panel | ✅ | `CombatDetail.tsx` |
-| 13.6 | Condition tracking | 🔲 | v0.8.0+ |
-| 13.7 | Death saves | 🔲 | v0.8.0+ |
+| 13.6 | Add `activeConditions` & `exhaustionLevel` to `CharacterData` | 🔲 | v0.4.x — pulled forward from v0.8.0+; `types.ts` |
+| 13.7 | Build `ConditionsModal.tsx` | 🔲 | v0.4.x — checkbox list (15 conditions) + exhaustion level picker (0-6) |
+| 13.8 | Wire Conditions button into `CombatStrip` | 🔲 | v0.4.x — opens modal, active count badge |
+| 13.9 | Condition effects display on Dashboard | 🔲 | v0.4.x — active conditions shown as badges/chips on character header |
+| 13.10 | Death saves tracker | 🔲 | v0.8.0+ — 3 successes / 3 failures, auto-reset |
 
 ---
 
@@ -282,6 +291,7 @@
 | 14.3 | PDF character sheet export | 🔲 | v0.4.x |
 | 14.4 | FoundryVTT export | 🔲 | v0.4.x |
 | 14.5 | D&D Beyond export | 🔲 | v0.4.x |
+| 14.6 | Character cloning ("Duplicate") | 🔲 | v0.4.x — deep-clone `CharacterData`, new ID, clear campaign binding, append "(Copy)" |
 
 ---
 
@@ -414,6 +424,40 @@
 | 18.8 | i18n / localization | 🔲 | v0.8.0+ |
 | 18.9 | Print-friendly sheet | 🔲 | CSS print media |
 | 18.10 | Dice roll history panel | 🔲 | Last 50 rolls |
+| 18.11 | Saved dice presets ("My Dice") | 🔲 | v0.5.0 — `savedDice` on `CharacterData`, quick-access from `QuickRollModal` |
+
+---
+
+## Epic 20: The Hero's Gallery — Premade Character Templates
+
+> *"Not every adventurer begins with a blank page. Some step forth fully formed,
+> ready for the call to arms."*
+
+| # | Task | Status | Notes |
+|:--|:-----|:------:|:------|
+| 20.1 | Define `PremadeTemplate` interface | 🔲 | v0.5.0 — maps to `CharacterData` + metadata (description, playstyle, difficulty) |
+| 20.2 | Create 12 premade template entries (1 per PHB class) | 🔲 | v0.5.0 — curated race/stat/equipment/backstory combos in `constants.tsx` |
+| 20.3 | Build premade vs. custom selection dialog | 🔲 | v0.5.0 — modal on "Create New Character" with two paths |
+| 20.4 | Build premade gallery browser | 🔲 | v0.5.0 — card grid with class icon, description, difficulty badge |
+| 20.5 | Wire premade selection to `CharacterCreationWizard` | 🔲 | v0.5.0 — populates wizard state, skips to review/confirm step |
+| 20.6 | AI portrait pre-generation for premades | 🔲 | v0.5.0 — generate on first load or use static placeholder art |
+
+---
+
+## Epic 21: The Grand Archive — SRD Content Browser
+
+> *"The archive holds the accumulated lore of the realm — every spell, every blade,
+> every beast catalogued and searchable."*
+
+| # | Task | Status | Notes |
+|:--|:-----|:------:|:------|
+| 21.1 | Build unified search index across spells, items, conditions | 🔲 | v0.6.0+ — aggregate existing data + future monster data |
+| 21.2 | Create `ContentBrowser.tsx` component | 🔲 | v0.6.0+ — search bar, category filters, result cards with type badges |
+| 21.3 | Spell reference cards | 🔲 | v0.6.0+ — full spell details, school icons, level badges |
+| 21.4 | Item reference cards | 🔲 | v0.6.0+ — weapon/armor/gear stats, rarity colors for magic items |
+| 21.5 | Condition reference cards | 🔲 | v0.6.0+ — mechanical effects, icon display, exhaustion level table |
+| 21.6 | Monster reference cards | 🔲 | v0.6.0+ — depends on Epic 1.7 (`lib/monsters.ts`); stat blocks, CR, abilities |
+| 21.7 | Integrate as Dashboard card or bottom-nav tab | 🔲 | v0.6.0+ — accessible from main navigation |
 
 ---
 
@@ -427,22 +471,24 @@
 | Epic 2: Auth & Cloud | 6 | 0 | 0 | 6 |
 | Epic 3: Character Persistence | 8 | 0 | 0 | 8 |
 | Epic 4: Character Creation | 10 | 0 | 2 | 12 |
-| Epic 5: Dashboard & UI | 12 | 0 | 0 | 12 |
+| Epic 5: Dashboard & UI | 12 | 0 | 2 | 14 |
 | Epic 6: Marketplace | 8 | 0 | 3 | 11 |
 | Epic 7: AI Integration | 11 | 0 | 3 | 14 |
-| Epic 8: Campaign System | 25 | 0 | 0 | 25 |
+| Epic 8: Campaign System | 25 | 0 | 1 | 26 |
 | Epic 9: Spells & Casting | 7 | 0 | 3 | 10 |
 | Epic 10: Journal | 4 | 0 | 3 | 7 |
-| Epic 11: Skills | 5 | 0 | 1 | 6 |
-| Epic 12: Level-Up | 9 | 0 | 0 | 9 |
-| Epic 13: Combat Stats | 5 | 0 | 2 | 7 |
-| Epic 14: Data Export | 0 | 0 | 5 | 5 |
+| Epic 11: Skills | 5 | 0 | 3 | 8 |
+| Epic 12: Level-Up | 9 | 0 | 1 | 10 |
+| Epic 13: Combat Stats | 5 | 0 | 5 | 10 |
+| Epic 14: Data Export | 0 | 0 | 6 | 6 |
 | Epic 15: Combat Tracker | 0 | 0 | 7 | 7 |
 | Epic 16: Communication | 0 | 0 | 3 | 3 |
 | Epic 17: Infrastructure | 7 | 0 | 1 | 8 |
-| Epic 18: Polish & A11y | 4 | 0 | 6 | 10 |
+| Epic 18: Polish & A11y | 4 | 0 | 7 | 11 |
 | Epic 19: Security Hardening | 11 | 0 | 15 | 26 |
-| **TOTALS** | **139** | **0** | **55** | **194** |
+| Epic 20: Premade Templates | 0 | 0 | 6 | 6 |
+| Epic 21: SRD Content Browser | 0 | 0 | 7 | 7 |
+| **TOTALS** | **139** | **0** | **78** | **217** |
 
 ---
 
