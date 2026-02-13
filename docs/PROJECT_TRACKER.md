@@ -83,7 +83,7 @@
 | 4.8 | AI portrait generation | ✅ | `generatePortrait()` |
 | 4.9 | Racial ability bonuses applied | ✅ | Auto-calculated |
 | 4.10 | Level 1 features & proficiencies | ✅ | From PHB tables |
-| 4.11 | Higher-level creation (1–20) | 🔲 | Planned for v0.7.0 |
+| 4.11 | Higher-level creation (1–20) | ✅ | `CharacterCreationWizard.tsx` supports starting level 1–20 with level-scaled calculations |
 | 4.12 | Multiclass support | 🔲 | v0.7.0 |
 
 ---
@@ -186,7 +186,7 @@
 | 8.23 | Regenerate join code | ✅ | `regenerateJoinCode` in context + button in DM Dashboard settings |
 | 8.24 | Invite expiry (7 days) | ✅ | `expiresAt` field on invites; client-side filter + accept-time guard |
 | 8.25 | Duplicate invite prevention | ✅ | Query check in `createInvite` — prevents re-inviting same email |
-| 8.26 | Campaign badge on character cards | 🔲 | v0.5.0 — inline campaign name badge on `CharacterSelection` cards |
+| 8.26 | Campaign badge on character cards | ✅ | Inline campaign label shown on `CharacterSelection` cards |
 
 ---
 
@@ -317,8 +317,8 @@
 
 | # | Task | Status | Notes |
 |:--|:-----|:------:|:------|
-| 16.1 | Whisper system (DM ↔ player) | 🔲 | v0.6.0 |
-| 16.2 | Roll request system | 🔲 | v0.6.0 |
+| 16.1 | Whisper system (DM ↔ player) | ✅ | `PartyRoster.tsx` + `lib/campaigns.ts` (thread subscriptions, send, mark read) |
+| 16.2 | Roll request system | 🚧 | Backend service implemented in `lib/campaigns.ts`; DM/player UI still pending |
 | 16.3 | Shared handouts | 🔲 | v0.6.0 |
 
 ---
@@ -369,8 +369,8 @@
 
 | # | Task | Status | Notes |
 |:--|:-----|:------:|:------|
-| 19.11 | Strip API key `console.log` from `gemini.ts` | 🔲 | Lines 16-18, 28 — leak key metadata to browser console |
-| 19.12 | Strip key prefix logging from `vite.config.ts` | 🔲 | Lines 18-22 — leak first 8 chars to CI build logs |
+| 19.11 | Strip API key `console.log` from `gemini.ts` | ✅ | `lib/gemini.ts` contains no API key debug logging |
+| 19.12 | Strip key prefix logging from `vite.config.ts` | ✅ | `vite.config.ts` no longer logs key prefixes |
 | 19.13 | Production-only logging guard | 🔲 | Wrap debug logs in `if (import.meta.env.DEV)` |
 
 ### Layer 4: Firestore Rules Tightening (MEDIUM)
@@ -396,7 +396,7 @@
 |:--|:-----|:------:|:------|
 | 19.21 | Content Security Policy header | 🔲 | `default-src 'self'; connect-src 'self' *.googleapis.com *.firebaseio.com` |
 | 19.22 | HSTS header | 🔲 | `Strict-Transport-Security: max-age=31536000; includeSubDomains` |
-| 19.23 | Permissions-Policy header | 🔲 | Restrict camera/mic/geolocation to what's actually needed |
+| 19.23 | Permissions-Policy header | ✅ | Set in Express middleware: `microphone=(self), camera=(), geolocation=()` |
 
 ### Layer 7: Dependency & Supply Chain (LOW)
 
@@ -470,11 +470,11 @@
 | Epic 1: Foundation | 7 | 0 | 1 | 8 |
 | Epic 2: Auth & Cloud | 6 | 0 | 0 | 6 |
 | Epic 3: Character Persistence | 8 | 0 | 0 | 8 |
-| Epic 4: Character Creation | 10 | 0 | 2 | 12 |
+| Epic 4: Character Creation | 11 | 0 | 1 | 12 |
 | Epic 5: Dashboard & UI | 12 | 0 | 2 | 14 |
 | Epic 6: Marketplace | 8 | 0 | 3 | 11 |
 | Epic 7: AI Integration | 11 | 0 | 3 | 14 |
-| Epic 8: Campaign System | 25 | 0 | 1 | 26 |
+| Epic 8: Campaign System | 26 | 0 | 0 | 26 |
 | Epic 9: Spells & Casting | 7 | 0 | 3 | 10 |
 | Epic 10: Journal | 4 | 0 | 3 | 7 |
 | Epic 11: Skills | 5 | 0 | 3 | 8 |
@@ -482,13 +482,13 @@
 | Epic 13: Combat Stats | 5 | 0 | 5 | 10 |
 | Epic 14: Data Export | 0 | 0 | 6 | 6 |
 | Epic 15: Combat Tracker | 0 | 0 | 7 | 7 |
-| Epic 16: Communication | 0 | 0 | 3 | 3 |
+| Epic 16: Communication | 1 | 1 | 1 | 3 |
 | Epic 17: Infrastructure | 7 | 0 | 1 | 8 |
 | Epic 18: Polish & A11y | 4 | 0 | 7 | 11 |
-| Epic 19: Security Hardening | 11 | 0 | 15 | 26 |
+| Epic 19: Security Hardening | 14 | 0 | 12 | 26 |
 | Epic 20: Premade Templates | 0 | 0 | 6 | 6 |
 | Epic 21: SRD Content Browser | 0 | 0 | 7 | 7 |
-| **TOTALS** | **139** | **0** | **78** | **217** |
+| **TOTALS** | **145** | **1** | **71** | **217** |
 
 ---
 

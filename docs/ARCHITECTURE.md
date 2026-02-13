@@ -111,9 +111,9 @@ flowchart TD
 
 | Component | File | Responsibility |
 |:----------|:-----|:---------------|
-| `DMDashboard` | `components/DMDashboard.tsx` | Tabbed DM view (overview, combat, notes, settings); `allowPlayerInvites` toggle, regenerate join code button |
+| `DMDashboard` | `components/DMDashboard.tsx` | Tabbed DM view; overview + settings are live, combat/notes tabs are scaffolded placeholders; includes `allowPlayerInvites` toggle and join-code regeneration |
 | `DMPartyOverview` | `components/DMPartyOverview.tsx` | Live party vitals grid with HP bars, AC, passive scores |
-| `PartyRoster` | `components/PartyRoster.tsx` | Party member card grid, DM kick button (remove members), fetches characters from Firestore |
+| `PartyRoster` | `components/PartyRoster.tsx` | Party member card grid, DM kick button, campaign chat channels, and live DM↔player whispers |
 
 ### 🔍 The Detail Views (`components/details/`)
 
@@ -141,7 +141,7 @@ flowchart TD
 | `PortraitGenerator` | `components/PortraitGenerator.tsx` | Tap portrait on dashboard |
 | `TranscriptionButton` | `components/TranscriptionButton.tsx` | Mic icon on text fields |
 | `QuickActionBar` | `components/QuickActionBar.tsx` | Context-sensitive shortcut action buttons |
-| `CombatStrip` | `components/CombatStrip.tsx` | At-a-glance combat status bar |
+| `CombatStrip` | `components/CombatStrip.tsx` | At-a-glance combat status bar with initiative display + roll action hook |
 | `AbilityScoreBar` | `components/AbilityScoreBar.tsx` | Ability score display component |
 
 ---
@@ -255,7 +255,7 @@ All AI calls route through the **Express API proxy** at `/api/gemini/*`. The cli
 | `POST /api/gemini/generate` | Single-shot text generation |
 | `POST /api/gemini/chat` | Multi-turn chat |
 | `POST /api/gemini/portrait` | Image generation |
-| `POST /api/gemini/live-token` | Ephemeral token for live audio transcription |
+| `POST /api/gemini/live-token` | Returns authenticated Live Audio session credential payload (currently proxy-issued API key) |
 | `GET /api/health` | Health check |
 | `GET /*` | Serves static `dist/` files (production) |
 

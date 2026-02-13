@@ -6,7 +6,7 @@
 >
 > Living document tracking planned features, enhancements, and community requests.
 >
-> **Scribed last:** 2026-02-13 (D&D Beyond-inspired character sheet parity + premade templates + SRD browser added)
+> **Scribed last:** 2026-02-13 (roadmap audit: security + communication + high-level creation status corrected to match code)
 
 ---
 
@@ -33,7 +33,7 @@ Phase 0: Foundation Cleanup           ██████████████
 Phase 1: Firestore Campaign Foundation    ████████████████████████████████████████  ✅ CLEARED
 UI Overhaul & API Cleanup                ████████████████████████████████████████  ✅ CLEARED
 Phase 2: Campaign Context & Party UI          ██████████████████████████████████  ✅ CLEARED
-🔒 Security Hardening (BLOCKS PUBLIC LAUNCH)   ██████████████████░░░░░░░░░░░░░░  ← WE ARE HERE
+🔒 Security Hardening (BLOCKS PUBLIC LAUNCH)   ██████████████████░░░░░░░░░░░░░░  ← PRIMARY FOCUS
 Character Sheet Parity (D&D Beyond-Inspired)           ░░░░░░░░████████░░░░░░░░░░
 Character Export & Import                              ░░░░░░░░████████░░░░░░░░░░
 Phase 3: Combat & Initiative Tracker                          ░░░░░░░░████████░░
@@ -42,8 +42,8 @@ Phase 4: DM Journal, NPCs & Items                            ░░░░░░�
 Phase 4b: Custom Items & Loot                                ░░░░░░░░░░██████░░
 Phase 5: AI DM Co-Pilot                                              ░░░░░░████
 SRD Content Browser                                                  ░░░░░░████
-Phase 6: Multiplayer Communication                                   ░░░░░░████
-Phase 7: Higher-Level Char Creation                                       ░░████
+Phase 6: Multiplayer Communication                                   ████░░████  (whispers live; roll requests backend)
+Phase 7: Higher-Level Char Creation                                  ████████████░░  (1–20 flow live; multiclass pending)
                                        v0.3.1   v0.4.0  v0.4.1  v0.4.x  v0.5.0  v0.5.5  v0.6.0  v0.7.0
 ```
 
@@ -69,12 +69,12 @@ Phase 0 ─→ Phase 1 ─→ Phase 2 ─┬→ 🔒 Security Hardening (MUST cl
 | v0.3.1 | Phase 0 | Foundation — utilities, dice, conditions | ✅ Cleared |
 | v0.3.2 | UI Overhaul | Class theming, Dashboard rewrite, centralized AI | ✅ Cleared |
 | v0.4.0 | Phases 1–2 | Firestore campaigns, party roster, DM overview | ✅ Cleared |
-| v0.4.1 | 🔒 Security | API proxy, rate limiting, debug cleanup, Firestore hardening | 🟨 In Progress (Layers 1–2 ✅, Layers 3–7 remaining) |
+| v0.4.1 | 🔒 Security | API proxy, rate limiting, debug cleanup, Firestore hardening | 🟨 In Progress (Layers 1–2 ✅, Layer 3 mostly ✅, Layers 4–7 remaining) |
 | v0.4.x | Char Sheet Parity | Conditions, heroic inspiration, passives, XP, clone, export | ⬜ Not Started |
-| v0.5.0 | Phases 3–4 | Combat tracker, encounter builder, DM journal, NPC registry, premade templates | ⬜ Not Started |
+| v0.5.0 | Phases 3–4 | Combat tracker, encounter builder, DM journal, NPC registry, premade templates | 🟨 In Progress (UX polish started; core combat/DM systems pending) |
 | v0.5.5 | Phase 4b | DM item builder, SRD magic items, loot sessions | ⬜ Not Started |
-| v0.6.0 | Phases 5–6 | AI DM Co-Pilot, whispers, roll requests, handouts, SRD content browser | ⬜ Not Started |
-| v0.7.0 | Phase 7 | Create characters at levels 1–20, multiclass | ⬜ Not Started |
+| v0.6.0 | Phases 5–6 | AI DM Co-Pilot, whispers, roll requests, handouts, SRD content browser | 🟨 In Progress (whispers shipped; roll requests backend present; handouts/browser pending) |
+| v0.7.0 | Phase 7 | Create characters at levels 1–20, multiclass | 🟨 In Progress (1–20 flow shipped; multiclass + advanced feature aggregation pending) |
 
 ---
 
@@ -138,9 +138,9 @@ Phase 0 ─→ Phase 1 ─→ Phase 2 ─┬→ 🔒 Security Hardening (MUST cl
 > *"The strongest keep falls to a single unguarded gate. Before the realm is opened  
 > to visitors, every ward must be inscribed, every seal tested, every secret hidden."*
 >
-> **⚠️ CRITICAL: Complete Layers 1–3 before sharing on Reddit/Discord.**  
-> The Gemini API key is currently baked into the browser JS bundle. Anyone can extract  
-> it in 30 seconds with DevTools and abuse your quota. This phase eliminates that risk.
+> **⚠️ CRITICAL: Layers 1–2 are complete and removed client-side key exposure.**  
+> Remaining work focuses on hardening (rules, cloud restrictions, headers, dependency hygiene)  
+> before broad public sharing.
 
 ### 🔴 Deadly — Layer 1: Backend API Proxy (eliminates root cause)
 
@@ -160,8 +160,8 @@ Phase 0 ─→ Phase 1 ─→ Phase 2 ─┬→ 🔒 Security Hardening (MUST cl
 
 ### 🟠 Hard — Layer 3: Debug & Logging Cleanup
 
-- [ ] **Strip API key `console.log` from `gemini.ts`** — Lines 16-18, 28 currently leak key length + first 8 chars to every user's browser console
-- [ ] **Strip key prefix logging from `vite.config.ts`** — Lines 18-22 print first 8 chars of API key to CI build logs
+- [x] **Strip API key `console.log` from `gemini.ts`** — No API key debug logging remains in the client helper
+- [x] **Strip key prefix logging from `vite.config.ts`** — Vite config no longer logs key prefixes
 - [ ] **Add production logging guard** — Wrap remaining debug logs in `if (import.meta.env.DEV)` checks
 
 ### 🟠 Hard — Layer 4: Firestore Rules Tightening
@@ -181,7 +181,7 @@ Phase 0 ─→ Phase 1 ─→ Phase 2 ─┬→ 🔒 Security Hardening (MUST cl
 
 - [ ] **Content Security Policy** — `default-src 'self'; script-src 'self'; connect-src 'self' *.googleapis.com *.firebaseio.com`
 - [ ] **HSTS header** — `Strict-Transport-Security: max-age=31536000; includeSubDomains`
-- [ ] **Permissions-Policy** — Restrict camera/microphone/geolocation to what's actually needed (voice input uses mic)
+- [x] **Permissions-Policy** — Server now sets `microphone=(self), camera=(), geolocation=()`
 
 ### 🟢 Easy — Layer 7: Dependency & Supply Chain
 
@@ -275,7 +275,7 @@ Phase 0 ─→ Phase 1 ─→ Phase 2 ─┬→ 🔒 Security Hardening (MUST cl
 ### 🟡 Medium — UX Polish (D&D Beyond-Inspired)
 
 - [ ] **Rest dropdown UX refinement** — Contextual popover near campfire icon instead of full-screen modal
-- [ ] **Campaign badge on character cards** — Inline campaign name badge on `CharacterSelection` cards
+- [x] **Campaign badge on character cards** — Campaign label is displayed on `CharacterSelection` cards
 - [ ] **Saved dice presets ("My Dice")** — `savedDice` array on `CharacterData`, quick-access from `QuickRollModal`
 
 ---
@@ -317,8 +317,8 @@ Phase 0 ─→ Phase 1 ─→ Phase 2 ─┬→ 🔒 Security Hardening (MUST cl
 
 ### 🟡 Medium
 
-- [ ] **Whisper system** — DM-to-player private messages
-- [ ] **Roll request system** — DM-initiated group rolls
+- [x] **Whisper system** — DM-to-player private messages (service + PartyRoster UI)
+- [ ] **Roll request system** — DM-initiated group rolls _(backend service implemented; player/DM UI pending)_
 - [ ] **Shared handouts** — DM pushes read-only content to players
 - [ ] **AI conversation persistence** — Save chats to Firestore by session
 
@@ -340,18 +340,18 @@ Phase 0 ─→ Phase 1 ─→ Phase 2 ─┬→ 🔒 Security Hardening (MUST cl
 
 ### 🟠 Hard
 
-- [ ] **Level selection (1–20)** in Character Creation Wizard
-- [ ] **Cumulative HP calculation** — Sum of HD averages + CON per level
-- [ ] **ASI / Feat application per level** — Class-specific ASI levels
-- [ ] **Subclass selection at appropriate level**
-- [ ] **Spell slots & spells known by level** — Use existing progression tables
+- [x] **Level selection (1–20)** in Character Creation Wizard
+- [x] **Cumulative HP calculation** — Sum of HD averages + CON per level
+- [x] **ASI / Feat application per level** — Class-specific ASI levels
+- [x] **Subclass selection at appropriate level**
+- [x] **Spell slots & spells known by level** — Use existing progression tables
 - [ ] **Class features accumulated through levels** — Compact multi-level UI
 
 ### 🟡 Medium
 
-- [ ] **Level-appropriate starting equipment & gold**
+- [x] **Level-appropriate starting equipment & gold**
 - [ ] **"Recommended Build" quick button** — AI-suggested standard choices
-- [ ] **Deterministic logic from constants.tsx** — PHB tables for core math
+- [x] **Deterministic logic from constants.tsx** — PHB tables for core math
 - [ ] **Multiclass support** — Multiple classes, split hit dice, merged spell slots
 
 ---
@@ -385,7 +385,7 @@ Phase 0 ─→ Phase 1 ─→ Phase 2 ─┬→ 🔒 Security Hardening (MUST cl
 
 > *"The people speak! Add your voice to the chorus."*
 
-- [ ] **Create characters at any level (1–20)** — Much requested. Tracked in v0.7.0.
+- [x] **Create characters at any level (1–20)** — Shipped in `CharacterCreationWizard`.
 - [ ] _[Post on the Quest Board](https://github.com/Hams-Ollo/Ollos-Player-Companion/issues) to suggest a feature!_
 
 ---

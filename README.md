@@ -48,9 +48,9 @@ Whether you are a battle-scarred veteran of a hundred campaigns or a wide-eyed n
 | 🎲 **Quick Roll** | One-click AI-generated character from a vibe prompt — stats, backstory, portrait |
 | 🎭 **Class Theming** | Dynamic color themes per D&D class — borders, gradients, and arcane glow effects |
 | 🎙️ **Voice Input** | Live audio transcription via Gemini Native Audio for hands-free DM chat |
-| 🛡️ **DM Dashboard** | Tabbed DM view with party overview, combat tracker, session notes, campaign settings, player invite toggle, join code regeneration |
+| 🛡️ **DM Dashboard** | Tabbed DM view with live party overview + campaign settings; combat tracker and DM notes tabs are scaffolded for upcoming phases |
 | 👥 **Party Roster** | Live party member cards with HP bars, AC, level, class info; DM can kick members |
-| ⚔️ **Combat Strip** | At-a-glance initiative tracker and combat status bar |
+| ⚔️ **Combat Strip** | At-a-glance combat status bar with initiative display and roll hook |
 | 🎯 **Quick Action Bar** | Context-sensitive shortcut buttons for common actions |
 | ⚡ **Cloud Functions** | Server-side Firestore triggers auto-sync `memberUids` when players join/leave campaigns |
 
@@ -65,7 +65,7 @@ Whether you are a battle-scarred veteran of a hundred campaigns or a wide-eyed n
 |:------|:----------|
 | **Framework** | React 19.2 + TypeScript 5.8 |
 | **Forge** | Vite 6 |
-| **Styling** | Tailwind CSS (CDN) |
+| **Styling** | Tailwind CSS via Vite plugin (`@tailwindcss/vite`) |
 | **Iconography** | Lucide React |
 | **The Weave (AI)** | Google Gemini (`@google/genai` v1.41+) — `gemini-2.5-flash` (text), `gemini-2.5-flash-image` (portraits) |
 | **The Gate (Proxy)** | Express.js server — API proxy with auth middleware + rate limiting |
@@ -291,6 +291,19 @@ The Companion employs a **defense-in-depth** strategy to protect the Gemini API 
 | [📋 Roadmap & TODO](docs/TODO.md) | *The Quest Board* — planned features, enhancements, community requests |
 | [📊 Project Tracker](docs/PROJECT_TRACKER.md) | *The War Council's Ledger* — epics, features, user stories with status |
 | [☁️ Cloud Deployment](docs/CLOUD_RUN_DEPLOY.md) | *The Planar Gate Manual* — Docker → Cloud Run deployment guide |
+
+---
+
+## Chapter 9: Current Roadmap Snapshot
+
+> *"A quick report from the war council, for those who need present-tense status at a glance."*
+
+- **v0.4.1 Security Hardening:** In progress — proxy/auth/rate-limiting complete; rules tightening, cloud key restrictions, and dependency hygiene remain.
+- **v0.5.0 Combat + DM Tooling:** In progress — UI polish has begun, while core combat tracker and DM journal/NPC systems are still pending.
+- **v0.6.0 Communication:** In progress — whispers are live in `PartyRoster`; roll-request backend exists, UI still pending.
+- **v0.7.0 Higher-Level Creation:** In progress — level 1–20 creation flow is live; multiclass support remains pending.
+
+For the authoritative live status, see [📋 Roadmap & TODO](docs/TODO.md) and [📊 Project Tracker](docs/PROJECT_TRACKER.md).
 
 ---
 
