@@ -57,9 +57,12 @@ steps:
         if [ -f package-lock.json ]; then npm ci; else npm install; fi
         npm run build
         cd ..
+        if ! firebase functions:artifacts:setpolicy --project=$PROJECT_ID --location=us-central1 --days=30 --non-interactive --force; then
+          echo "Warning: Unable to set functions artifacts cleanup policy in us-central1; continuing with deploy fallback."
+        fi
         max_attempts=3
         attempt=1
-        until firebase deploy --only functions --project=$PROJECT_ID --non-interactive; do
+        until firebase deploy --only functions --project=$PROJECT_ID --non-interactive --force; do
           if [ "$attempt" -ge "$max_attempts" ]; then
             echo "Functions deploy failed after $attempt attempts."
             exit 1
