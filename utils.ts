@@ -75,8 +75,8 @@ export const recalculateCharacterStats = (data: CharacterData): CharacterData =>
     };
   });
 
-  // 3. Skills - Ensure skills array exists
-  const skills: Skill[] = (Array.isArray(data.skills) ? data.skills : []).map(skill => {
+  // 3. Skills - Ensure skills array exists and ALL 18 canonical skills are present
+  const mappedSkills: Skill[] = (Array.isArray(data.skills) ? data.skills : []).map(skill => {
     const standardSkill = DND_SKILLS.find(s => s.name.toLowerCase() === skill.name.toLowerCase());
     const ability = standardSkill ? standardSkill.ability : (skill.ability || 'STR');
     const baseMod = stats[ability]?.modifier || 0;
@@ -90,6 +90,19 @@ export const recalculateCharacterStats = (data: CharacterData): CharacterData =>
       ability,
       proficiency: skill.proficiency || 'none',
       modifier: totalMod
+    };
+  });
+
+  // Merge-pass: ensure every canonical skill is present (fills gaps for legacy characters)
+  const skills: Skill[] = DND_SKILLS.map(canonSkill => {
+    const existing = mappedSkills.find(s => s.name.toLowerCase() === canonSkill.name.toLowerCase());
+    if (existing) return existing;
+    const baseMod = stats[canonSkill.ability]?.modifier || 0;
+    return {
+      name: canonSkill.name,
+      ability: canonSkill.ability,
+      proficiency: 'none' as ProficiencyLevel,
+      modifier: baseMod,
     };
   });
 

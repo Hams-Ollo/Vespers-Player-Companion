@@ -33,6 +33,7 @@ import {
   calculateMultiLevelHP,
   getASILevelsUpTo,
   STARTING_GOLD_BY_LEVEL,
+  CLASS_STARTING_EQUIPMENT,
 } from '../constants';
 import { checkRateLimit, recalculateCharacterStats, calculateModifier } from '../utils';
 import { generateWithContext, generatePortrait } from '../lib/gemini';
@@ -66,7 +67,9 @@ interface WizardState {
   // Step 4: Initial Spells & Powers
   selectedPowers: string[];
   higherLevelSpells: Record<number, string[]>;
-  // Step 5: Character Concept
+  // Step 5: Starting Equipment
+  selectedEquipmentPackIndex: number;
+  // Step 6: Character Concept
   appearance: string;
   backstory: string;
   motivations: string;
@@ -92,6 +95,7 @@ const INITIAL_STATE: WizardState = {
   selectedTools: [],
   selectedPowers: [],
   higherLevelSpells: {},
+  selectedEquipmentPackIndex: 0,
   appearance: '',
   backstory: '',
   motivations: '',
@@ -106,6 +110,7 @@ const STEPS = [
   { label: 'Ability Scores', icon: Dices },
   { label: 'Proficiencies', icon: ShieldCheck },
   { label: 'Spells & Powers', icon: Zap },
+  { label: 'Equipment', icon: ShieldCheck },
   { label: 'Concept', icon: BookOpen },
   { label: 'Review', icon: Sparkles },
 ];
@@ -796,6 +801,92 @@ const StepPowers: React.FC<{
   );
 };
 
+// ──────────────────────────────────────────────────────────────────────────────
+// Step 5: Starting Equipment
+// ──────────────────────────────────────────────────────────────────────────────
+const StepEquipment: React.FC<{
+  state: WizardState;
+  onChange: (updates: Partial<WizardState>) => void;
+}> = ({ state, onChange }) => {
+  const packs = CLASS_STARTING_EQUIPMENT[state.charClass] || [];
+  const baseGold = STARTING_GOLD_BY_LEVEL[state.startingLevel] || 200;
+
+  if (packs.length === 0) {
+    return (
+      <div className="p-4 sm:p-6 md:p-8 space-y-4">
+        <div className="text-center">
+          <h2 className="text-xl font-display font-bold text-white mb-1">Starting Equipment</h2>
+          <p className="text-zinc-500 text-sm">No preset packs for this class — you'll start with {baseGold} gp to spend at the market.</p>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="p-4 sm:p-6 md:p-8 space-y-5">
+      <div className="text-center">
+        <h2 className="text-xl font-display font-bold text-white mb-1">Starting Equipment</h2>
+        <p className="text-zinc-500 text-sm">Choose your starting gear pack. Gold cost is deducted from your starting gold ({baseGold} gp).</p>
+      </div>
+
+      <div className="space-y-3">
+        {packs.map((pack, idx) => {
+          const isSelected = state.selectedEquipmentPackIndex === idx;
+          const remaining = Math.max(0, baseGold - pack.goldCost);
+          return (
+            <button
+              key={idx}
+              onClick={() => onChange({ selectedEquipmentPackIndex: idx })}
+              className={`w-full text-left p-4 rounded-xl border-2 transition-all ${
+                isSelected
+                  ? 'border-amber-500 bg-amber-500/10'
+                  : 'border-zinc-700 bg-zinc-900/50 hover:border-zinc-600'
+              }`}
+            >
+              <div className="flex items-start justify-between gap-3">
+                <div className="flex-1">
+                  <div className="flex items-center gap-2 mb-1">
+                    <div className={`w-4 h-4 rounded-full border-2 flex items-center justify-center shrink-0 ${
+                      isSelected ? 'border-amber-500 bg-amber-500' : 'border-zinc-600'
+                    }`}>
+                      {isSelected && <div className="w-2 h-2 rounded-full bg-white" />}
+                    </div>
+                    <span className={`font-bold text-sm ${isSelected ? 'text-amber-400' : 'text-white'}`}>{pack.label}</span>
+                  </div>
+                  <p className="text-zinc-500 text-xs ml-6 mb-2">{pack.description}</p>
+                  <div className="ml-6 flex flex-wrap gap-1">
+                    {pack.items.map((item, i) => (
+                      <span key={i} className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-xs font-medium ${
+                        item.equipped
+                          ? 'bg-blue-900/40 text-blue-300 border border-blue-700/30'
+                          : 'bg-zinc-800 text-zinc-400'
+                      }`}>
+                        {item.name}{item.quantity > 1 ? ` ×${item.quantity}` : ''}
+                        {item.equipped && <span className="text-blue-400 text-[9px]">EQUIPPED</span>}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+                <div className="text-right shrink-0">
+                  <div className="text-amber-400 font-bold text-sm">{pack.goldCost} gp</div>
+                  <div className="text-zinc-500 text-xs">{remaining} gp left</div>
+                </div>
+              </div>
+            </button>
+          );
+        })}
+      </div>
+
+      <div className="p-3 bg-zinc-900/50 border border-zinc-800 rounded-lg">
+        <p className="text-zinc-500 text-xs text-center">
+          💡 You can buy additional gear from the marketplace after your character is created.
+          Equipped items automatically compute your AC and attacks.
+        </p>
+      </div>
+    </div>
+  );
+};
+
 const StepConcept: React.FC<{
   state: WizardState;
   onChange: (updates: Partial<WizardState>) => void;
@@ -928,8 +1019,9 @@ const CharacterCreationWizard: React.FC<WizardProps> = ({ onCreate, onClose }) =
         return true;
       case 2: return state.selectedSkills.length >= (classData?.skillsToPick || 2);
       case 3: return true;
-      case 4: return true;
-      case 5: return !forging;
+      case 4: return true; // equipment — always can advance
+      case 5: return true;
+      case 6: return !forging;
       default: return false;
     }
   }, [step, state, forging, classData]);
@@ -1044,7 +1136,16 @@ const CharacterCreationWizard: React.FC<WizardProps> = ({ onCreate, onClose }) =
         features: detailedResult.features || [],
         spells: detailedResult.spells || [],
         spellSlots: getSpellSlotsForLevel(state.charClass, level).map(s => ({ level: s.level, current: s.max, max: s.max })),
-        inventory: { gold: STARTING_GOLD_BY_LEVEL[level] || 200, items: [], load: "Light" },
+        inventory: (() => {
+          const packs = CLASS_STARTING_EQUIPMENT[state.charClass];
+          const pack = packs ? packs[state.selectedEquipmentPackIndex] ?? packs[0] : null;
+          const baseGold = STARTING_GOLD_BY_LEVEL[level] || 200;
+          if (pack) {
+            const remaining = Math.max(0, baseGold - pack.goldCost);
+            return { gold: remaining, items: pack.items, load: 'Light' };
+          }
+          return { gold: baseGold, items: [], load: 'Light' };
+        })(),
         motivations: state.motivations || undefined,
         keyNPCs: state.keyNPCs || undefined,
         journal: [{
@@ -1087,8 +1188,9 @@ const CharacterCreationWizard: React.FC<WizardProps> = ({ onCreate, onClose }) =
           {step === 1 && <StepAbilityScores state={state} onChange={handleChange} />}
           {step === 2 && <StepSkills state={state} onChange={handleChange} />}
           {step === 3 && <StepPowers state={state} onChange={handleChange} />}
-          {step === 4 && <StepConcept state={state} onChange={handleChange} />}
-          {step === 5 && <StepReview state={state} forging={forging} forgeError={forgeError} />}
+          {step === 4 && <StepEquipment state={state} onChange={handleChange} />}
+          {step === 5 && <StepConcept state={state} onChange={handleChange} />}
+          {step === 6 && <StepReview state={state} forging={forging} forgeError={forgeError} />}
         </div>
 
         <div className="p-4 sm:p-5 border-t border-zinc-800 bg-zinc-950/50 flex gap-3 shrink-0">
@@ -1098,7 +1200,7 @@ const CharacterCreationWizard: React.FC<WizardProps> = ({ onCreate, onClose }) =
             </button>
           )}
           <div className="flex-grow" />
-          {step < 5 && (
+          {step < 6 && (
             <button 
                 onClick={() => setStep(s => s + 1)} 
                 disabled={!canAdvance} 
@@ -1107,7 +1209,7 @@ const CharacterCreationWizard: React.FC<WizardProps> = ({ onCreate, onClose }) =
               Next <ChevronRight size={18} />
             </button>
           )}
-          {step === 5 && !forging && (
+          {step === 6 && !forging && (
             <button onClick={handleForge} className="px-6 py-3 bg-gradient-to-r from-amber-600 to-orange-600 text-white font-bold rounded-xl flex items-center gap-2 transition-all shadow-xl shadow-orange-900/40 active:scale-95">
               <Sparkles size={18} /> Forge Character
             </button>

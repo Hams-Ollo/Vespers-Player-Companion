@@ -1,6 +1,7 @@
 
 import { getAuth } from 'firebase/auth';
 import { compressPortrait } from "../utils";
+import type { EncounterGenerationRequest, GeneratedEncounterResponse } from '../types';
 
 /** Primary text model — change here to update everywhere that uses this module. */
 export const TEXT_MODEL = 'gemini-2.5-flash';
@@ -94,4 +95,14 @@ export const generatePortrait = async (prompt: string, parts?: any[]): Promise<s
     return compressPortrait(data.imageDataUri);
   }
   return null;
+};
+
+/**
+ * Generate a combat encounter from a scenario description.
+ * Grounds the request in the Monster Manual via the server-side PDF file URI.
+ */
+export const generateEncounter = async (
+  req: EncounterGenerationRequest,
+): Promise<GeneratedEncounterResponse> => {
+  return proxyFetch('encounter', req as unknown as Record<string, unknown>);
 };

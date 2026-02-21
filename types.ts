@@ -193,9 +193,54 @@ export interface CampaignInvite {
   status: 'pending' | 'accepted' | 'declined';
 }
 
+// ─── Equipment Pack Types ─────────────────────────────────────────────────────
+
+export interface EquipmentPack {
+  label: string;
+  description: string;
+  items: Item[];
+  goldCost: number;
+}
+
 // ─── Combat & Encounter Types ────────────────────────────────────────────────
 
 export type CombatantType = 'pc' | 'npc' | 'monster';
+
+/** A single attack action for an NPC or monster stat block */
+export interface NPCAttack {
+  name: string;
+  attackBonus: number;
+  reach?: string;
+  range?: string;
+  targets: string;
+  damageExpression: string;   // e.g. "2d6+4"
+  damageType: string;         // e.g. "Slashing"
+  additionalEffects?: string;
+  requiresWeapon?: string;
+  requiresSpell?: string;
+}
+
+/** Full structured stat block for an NPC or monster */
+export interface NPCStatBlock {
+  cr?: string;
+  size?: string;
+  creatureType?: string;
+  alignment?: string;
+  hp?: number;
+  ac?: number;
+  speed?: string;
+  abilityScores?: Record<StatKey, number>;
+  savingThrows?: Partial<Record<StatKey, number>>;
+  skillBonuses?: { name: string; modifier: number }[];
+  damageImmunities?: string[];
+  conditionImmunities?: string[];
+  senses?: string;
+  languages?: string;
+  traits?: { name: string; description: string }[];
+  attacks: NPCAttack[];
+  legendaryActionsDesc?: string;
+  xp?: number;
+}
 
 export interface Combatant {
   id: string;
@@ -208,6 +253,8 @@ export interface Combatant {
   /** Reference to CharacterData.id for PCs */
   characterId?: string;
   conditions: string[];
+  /** Structured stat block (monsters / NPCs) */
+  statBlock?: NPCStatBlock;
   /** Fixed-initiative event entry (e.g. lair actions at initiative 20) */
   isLairAction?: boolean;
   /** Legendary action uses remaining (resets on creature's turn) */
@@ -296,6 +343,33 @@ export interface CampaignChatMessage {
   fromDisplayName: string;
   content: string;
   createdAt: number;
+}
+
+// ─── AI Encounter Generation Types ──────────────────────────────────────────
+
+export interface EncounterGenerationRequest {
+  scenarioDescription: string;
+  partyLevels: number[];
+  partyClasses: string[];
+  difficulty: 'easy' | 'medium' | 'hard' | 'deadly';
+  environment?: string;
+}
+
+export interface GeneratedCreature {
+  name: string;
+  count: number;
+  statBlock: NPCStatBlock;
+  tacticsNotes?: string;
+}
+
+export interface GeneratedEncounterResponse {
+  name: string;
+  narrativeHook: string;
+  creatures: GeneratedCreature[];
+  terrainFeatures: string[];
+  difficultyRating: 'trivial' | 'easy' | 'medium' | 'hard' | 'deadly';
+  totalXP: number;
+  adjustedXP: number;
 }
 
 export interface RollRequestResponse {

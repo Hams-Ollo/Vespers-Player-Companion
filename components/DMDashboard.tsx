@@ -3,6 +3,8 @@ import { useCampaign } from '../contexts/CampaignContext';
 import { CampaignMemberCharacterSummary } from '../types';
 import { Crown, Users, Eye, Swords, ScrollText, Settings, LogOut, Hash, Copy, Check, RefreshCw } from 'lucide-react';
 import DMPartyOverview from './DMPartyOverview';
+import EncounterGenerator from './EncounterGenerator';
+import CombatTracker from './CombatTracker';
 
 interface DMDashboardProps {
   onExit: () => void;
@@ -146,10 +148,10 @@ const DMDashboard: React.FC<DMDashboardProps> = ({ onExit }) => {
           )}
 
           {activeTab === 'combat' && (
-            <div className="text-center py-20 border border-dashed border-zinc-800 rounded-2xl bg-zinc-900/30">
-              <Swords size={40} className="text-zinc-700 mx-auto mb-4" />
-              <h3 className="text-white font-bold text-lg mb-2">Initiative Tracker</h3>
-              <p className="text-zinc-600 text-sm">Coming in Phase 2 — Combat & Initiative Tracker</p>
+            <div>
+              {activeEncounter
+                ? <CombatTracker />
+                : <EncounterGenerator partyCharacters={partyCharacters} />}
             </div>
           )}
 

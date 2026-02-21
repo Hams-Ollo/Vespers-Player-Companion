@@ -5,6 +5,8 @@ import {
   CampaignMemberCharacterSummary,
   CampaignInvite,
   CombatEncounter,
+  Combatant,
+  CombatLogEntry,
   DMNote,
   CampaignRole,
 } from '../types';
@@ -30,6 +32,9 @@ import {
   createInvite as firestoreCreateInvite,
   updateMemberCharacter as firestoreUpdateMemberCharacter,
   regenerateJoinCode as firestoreRegenerateJoinCode,
+  createEncounter as firestoreCreateEncounter,
+  updateEncounter as firestoreUpdateEncounter,
+  endEncounter as firestoreEndEncounter,
 } from '../lib/campaigns';
 
 // ─── Types ──────────────────────────────────────────────────────────
@@ -74,6 +79,13 @@ interface CampaignContextType {
   updateMemberCharacter: (characterId: string | null) => Promise<void>;
   removeMember: (targetUid: string) => Promise<void>;
   regenerateJoinCode: () => Promise<string>;
+
+  // ── Combat Actions ────────────────────────────────────────────────
+  startEncounter: (name: string, combatants: Combatant[]) => Promise<string>;
+  updateCombatant: (combatantId: string, patch: Partial<Combatant>) => Promise<void>;
+  nextTurn: () => Promise<void>;
+  endCombat: () => Promise<void>;
+  addCombatLogEntry: (entry: CombatLogEntry) => Promise<void>;
 }
 
 const CampaignContext = createContext<CampaignContextType | undefined>(undefined);
@@ -424,6 +436,83 @@ export const CampaignProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     [activeCampaignId, isDM],
   );
 
+  // ── Combat Actions ─────────────────────────────────────────────────
+
+  const startEncounterAction = useCallback(
+    async (name: string, combatants: Combatant[]): Promise<string> => {
+      if (!activeCampaignId) throw new Error('No active campaign');
+      if (!isDM) throw new Error('Only the DM can start encounters');
+      const id = await firestoreCreateEncounter(activeCampaignId, {
+        campaignId: activeCampaignId,
+        name,
+        active: true,
+        round: 1,
+        currentTurnIndex: 0,
+        combatants,
+        log: [{
+          timestamp: Date.now(),
+          type: 'encounter_start',
+          description: `Encounter "${name}" has begun! Round 1 starts.`,
+        }],
+      });
+      return id;
+    },
+    [activeCampaignId, isDM],
+  );
+
+  const updateCombatantAction = useCallback(
+    async (combatantId: string, patch: Partial<Combatant>): Promise<void> => {
+      if (!activeCampaignId || !activeEncounter) throw new Error('No active encounter');
+      const combatants = activeEncounter.combatants.map(c =>
+        c.id === combatantId ? { ...c, ...patch } : c,
+      );
+      await firestoreUpdateEncounter(activeCampaignId, activeEncounter.id, { combatants });
+    },
+    [activeCampaignId, activeEncounter],
+  );
+
+  const nextTurnAction = useCallback(
+    async (): Promise<void> => {
+      if (!activeCampaignId || !activeEncounter) throw new Error('No active encounter');
+      const { combatants, currentTurnIndex, round } = activeEncounter;
+      const nextIndex = (currentTurnIndex + 1) % combatants.length;
+      const nextRound = nextIndex === 0 ? round + 1 : round;
+      const nextCombatant = combatants[nextIndex];
+      const logEntry: CombatLogEntry = {
+        timestamp: Date.now(),
+        type: 'turn_change',
+        actorName: nextCombatant?.name,
+        description: nextIndex === 0
+          ? `⚔ Round ${nextRound} begins — ${nextCombatant?.name}'s turn`
+          : `${nextCombatant?.name}'s turn`,
+      };
+      await firestoreUpdateEncounter(activeCampaignId, activeEncounter.id, {
+        currentTurnIndex: nextIndex,
+        round: nextRound,
+        log: [...activeEncounter.log, logEntry],
+      });
+    },
+    [activeCampaignId, activeEncounter],
+  );
+
+  const endCombatAction = useCallback(
+    async (): Promise<void> => {
+      if (!activeCampaignId || !activeEncounter) throw new Error('No active encounter');
+      await firestoreEndEncounter(activeCampaignId, activeEncounter.id);
+    },
+    [activeCampaignId, activeEncounter],
+  );
+
+  const addCombatLogEntryAction = useCallback(
+    async (entry: CombatLogEntry): Promise<void> => {
+      if (!activeCampaignId || !activeEncounter) throw new Error('No active encounter');
+      await firestoreUpdateEncounter(activeCampaignId, activeEncounter.id, {
+        log: [...activeEncounter.log, entry],
+      });
+    },
+    [activeCampaignId, activeEncounter],
+  );
+
   return (
     <CampaignContext.Provider
       value={{
@@ -450,6 +539,11 @@ export const CampaignProvider: React.FC<{ children: React.ReactNode }> = ({ chil
         updateMemberCharacter: updateMemberCharacterAction,
         removeMember: removeMemberAction,
         regenerateJoinCode: regenerateJoinCodeAction,
+        startEncounter: startEncounterAction,
+        updateCombatant: updateCombatantAction,
+        nextTurn: nextTurnAction,
+        endCombat: endCombatAction,
+        addCombatLogEntry: addCombatLogEntryAction,
       }}
     >
       {children}

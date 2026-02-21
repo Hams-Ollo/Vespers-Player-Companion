@@ -1,4 +1,4 @@
-import { CharacterData, StatKey, Item } from './types';
+import { CharacterData, StatKey, Item, EquipmentPack } from './types';
 
 export const generateId = () => Math.random().toString(36).substring(2, 11);
 
@@ -1230,6 +1230,329 @@ export const STARTING_GOLD_BY_LEVEL: Record<number, number> = {
 };
 
 // ==========================================
+// PHB Starting Equipment Packs by Class
+// ==========================================
+export const CLASS_STARTING_EQUIPMENT: Record<string, EquipmentPack[]> = {
+  Barbarian: [
+    {
+      label: 'Greataxe & Javelins',
+      description: 'A greataxe, 4 javelins, and an explorer\'s pack.',
+      goldCost: 36,
+      items: [
+        { name: 'Greataxe', cost: 30, weight: 7, type: 'Weapon', quantity: 1, notes: '1d12 slashing, Heavy, Two-handed', equipped: true },
+        { name: 'Javelin', cost: 0.5, weight: 2, type: 'Weapon', quantity: 4, notes: '1d6 piercing, Thrown (30/120)', equipped: false },
+        { name: "Explorer's Pack", cost: 10, weight: 59, type: 'Gear', quantity: 1, notes: 'Backpack, bedroll, mess kit, tinderbox, torches, rations, waterskin, rope', equipped: false },
+      ],
+    },
+    {
+      label: 'Two Handaxes & Javelins',
+      description: 'Two handaxes, 4 javelins, and an explorer\'s pack.',
+      goldCost: 21,
+      items: [
+        { name: 'Handaxe', cost: 5, weight: 2, type: 'Weapon', quantity: 2, notes: '1d6 slashing, Light, Thrown (20/60)', equipped: true },
+        { name: 'Javelin', cost: 0.5, weight: 2, type: 'Weapon', quantity: 4, notes: '1d6 piercing, Thrown (30/120)', equipped: false },
+        { name: "Explorer's Pack", cost: 10, weight: 59, type: 'Gear', quantity: 1, notes: 'Backpack, bedroll, mess kit, tinderbox, torches, rations, waterskin, rope', equipped: false },
+      ],
+    },
+  ],
+  Bard: [
+    {
+      label: 'Rapier & Diplomat\'s Pack',
+      description: 'A rapier, diplomat\'s pack, lute, and leather armor.',
+      goldCost: 75,
+      items: [
+        { name: 'Rapier', cost: 25, weight: 2, type: 'Weapon', quantity: 1, notes: '1d8 piercing, Finesse', equipped: true },
+        { name: 'Leather Armor', cost: 10, weight: 10, type: 'Armor', quantity: 1, notes: 'AC 11 + Dex', equipped: true },
+        { name: "Diplomat's Pack", cost: 39, weight: 36, type: 'Gear', quantity: 1, notes: 'Chest, fine clothes, ink, pen, lamp, oil, paper, perfume, sealing wax, soap', equipped: false },
+      ],
+    },
+    {
+      label: 'Longsword & Entertainer\'s Pack',
+      description: 'A longsword, entertainer\'s pack, and leather armor.',
+      goldCost: 65,
+      items: [
+        { name: 'Longsword', cost: 15, weight: 3, type: 'Weapon', quantity: 1, notes: '1d8 slashing, Versatile (1d10)', equipped: true },
+        { name: 'Leather Armor', cost: 10, weight: 10, type: 'Armor', quantity: 1, notes: 'AC 11 + Dex', equipped: true },
+        { name: "Entertainer's Pack", cost: 40, weight: 38, type: 'Gear', quantity: 1, notes: 'Backpack, bedroll, costumes, candles, rations, waterskin, disguise kit', equipped: false },
+      ],
+    },
+    {
+      label: 'Dagger & Scholar\'s Pack',
+      description: 'A dagger, scholar\'s pack, and leather armor.',
+      goldCost: 62,
+      items: [
+        { name: 'Dagger', cost: 2, weight: 1, type: 'Weapon', quantity: 1, notes: '1d4 piercing, Finesse, Light, Thrown (20/60)', equipped: true },
+        { name: 'Leather Armor', cost: 10, weight: 10, type: 'Armor', quantity: 1, notes: 'AC 11 + Dex', equipped: true },
+        { name: "Scholar's Pack", cost: 40, weight: 10, type: 'Gear', quantity: 1, notes: 'Backpack, book of lore, ink, pen, parchment, sand, small knife', equipped: false },
+      ],
+    },
+  ],
+  Cleric: [
+    {
+      label: 'Mace, Chain Mail & Shield',
+      description: 'A mace, chain mail, shield, and holy symbol.',
+      goldCost: 100,
+      items: [
+        { name: 'Mace', cost: 5, weight: 4, type: 'Weapon', quantity: 1, notes: '1d6 bludgeoning', equipped: true },
+        { name: 'Chain Mail', cost: 75, weight: 55, type: 'Armor', quantity: 1, notes: 'AC 16, Str 13 required, Disadvantage on Stealth', equipped: true },
+        { name: 'Shield', cost: 10, weight: 6, type: 'Armor', quantity: 1, notes: '+2 AC', equipped: true },
+        { name: 'Holy Symbol (Amulet)', cost: 5, weight: 1, type: 'Gear', quantity: 1, notes: 'Spellcasting focus (divine)', equipped: false },
+        { name: "Priest's Pack", cost: 19, weight: 24, type: 'Gear', quantity: 1, notes: 'Backpack, blanket, candles, tinderbox, alms box, incense, censer, vestments, rations, waterskin', equipped: false },
+      ],
+    },
+    {
+      label: 'Warhammer, Scale Mail & Shield',
+      description: 'A warhammer, scale mail, shield, and holy symbol.',
+      goldCost: 90,
+      items: [
+        { name: 'Warhammer', cost: 15, weight: 2, type: 'Weapon', quantity: 1, notes: '1d8 bludgeoning, Versatile (1d10)', equipped: true },
+        { name: 'Scale Mail', cost: 50, weight: 45, type: 'Armor', quantity: 1, notes: 'AC 14 + Dex (max 2), Disadvantage on Stealth', equipped: true },
+        { name: 'Shield', cost: 10, weight: 6, type: 'Armor', quantity: 1, notes: '+2 AC', equipped: true },
+        { name: 'Holy Symbol (Amulet)', cost: 5, weight: 1, type: 'Gear', quantity: 1, notes: 'Spellcasting focus (divine)', equipped: false },
+        { name: "Explorer's Pack", cost: 10, weight: 59, type: 'Gear', quantity: 1, notes: 'Backpack, bedroll, mess kit, tinderbox, torches, rations, waterskin, rope', equipped: false },
+      ],
+    },
+  ],
+  Druid: [
+    {
+      label: 'Wooden Shield & Scimitar',
+      description: 'A wooden shield, scimitar, leather armor, and explorer\'s pack.',
+      goldCost: 45,
+      items: [
+        { name: 'Scimitar', cost: 25, weight: 3, type: 'Weapon', quantity: 1, notes: '1d6 slashing, Finesse, Light', equipped: true },
+        { name: 'Leather Armor', cost: 10, weight: 10, type: 'Armor', quantity: 1, notes: 'AC 11 + Dex', equipped: true },
+        { name: 'Shield', cost: 10, weight: 6, type: 'Armor', quantity: 1, notes: '+2 AC', equipped: true },
+        { name: "Explorer's Pack", cost: 10, weight: 59, type: 'Gear', quantity: 1, notes: 'Backpack, bedroll, mess kit, tinderbox, torches, rations, waterskin, rope', equipped: false },
+      ],
+    },
+    {
+      label: 'Quarterstaff & Leather Armor',
+      description: 'A quarterstaff, leather armor, and dungeoneer\'s pack.',
+      goldCost: 22,
+      items: [
+        { name: 'Quarterstaff', cost: 0.2, weight: 4, type: 'Weapon', quantity: 1, notes: '1d6 bludgeoning, Versatile (1d8)', equipped: true },
+        { name: 'Leather Armor', cost: 10, weight: 10, type: 'Armor', quantity: 1, notes: 'AC 11 + Dex', equipped: true },
+        { name: "Dungeoneer's Pack", cost: 12, weight: 61.5, type: 'Gear', quantity: 1, notes: 'Backpack, crowbar, hammer, pitons, torches, tinderbox, rations, waterskin, rope', equipped: false },
+      ],
+    },
+  ],
+  Fighter: [
+    {
+      label: 'Chain Mail, Longsword & Shield',
+      description: 'Chain mail, a longsword, a shield, and a dungeoneer\'s pack.',
+      goldCost: 112,
+      items: [
+        { name: 'Chain Mail', cost: 75, weight: 55, type: 'Armor', quantity: 1, notes: 'AC 16, Str 13 required, Disadvantage on Stealth', equipped: true },
+        { name: 'Longsword', cost: 15, weight: 3, type: 'Weapon', quantity: 1, notes: '1d8 slashing, Versatile (1d10)', equipped: true },
+        { name: 'Shield', cost: 10, weight: 6, type: 'Armor', quantity: 1, notes: '+2 AC', equipped: true },
+        { name: "Dungeoneer's Pack", cost: 12, weight: 61.5, type: 'Gear', quantity: 1, notes: 'Backpack, crowbar, hammer, pitons, torches, tinderbox, rations, waterskin, rope', equipped: false },
+      ],
+    },
+    {
+      label: 'Leather Armor, Two Handaxes & Longbow',
+      description: 'Leather armor, two handaxes, a longbow (20 arrows), and explorer\'s pack.',
+      goldCost: 81,
+      items: [
+        { name: 'Leather Armor', cost: 10, weight: 10, type: 'Armor', quantity: 1, notes: 'AC 11 + Dex', equipped: true },
+        { name: 'Handaxe', cost: 5, weight: 2, type: 'Weapon', quantity: 2, notes: '1d6 slashing, Light, Thrown (20/60)', equipped: true },
+        { name: 'Longbow', cost: 50, weight: 2, type: 'Weapon', quantity: 1, notes: '1d8 piercing, Ammunition, Heavy, Range 150/600, Two-handed', equipped: false },
+        { name: 'Arrows (20)', cost: 1, weight: 1, type: 'Gear', quantity: 1, notes: 'Ammunition for bows', equipped: false },
+        { name: "Explorer's Pack", cost: 10, weight: 59, type: 'Gear', quantity: 1, notes: 'Backpack, bedroll, mess kit, tinderbox, torches, rations, waterskin, rope', equipped: false },
+      ],
+    },
+    {
+      label: 'Chain Mail, Greatsword & Pack',
+      description: 'Chain mail, a greatsword, and a dungeoneer\'s pack.',
+      goldCost: 137,
+      items: [
+        { name: 'Chain Mail', cost: 75, weight: 55, type: 'Armor', quantity: 1, notes: 'AC 16, Str 13 required, Disadvantage on Stealth', equipped: true },
+        { name: 'Greatsword', cost: 50, weight: 6, type: 'Weapon', quantity: 1, notes: '2d6 slashing, Heavy, Two-handed', equipped: true },
+        { name: "Dungeoneer's Pack", cost: 12, weight: 61.5, type: 'Gear', quantity: 1, notes: 'Backpack, crowbar, hammer, pitons, torches, tinderbox, rations, waterskin, rope', equipped: false },
+      ],
+    },
+  ],
+  Monk: [
+    {
+      label: 'Shortsword & Dungeoneer\'s Pack',
+      description: 'A shortsword and a dungeoneer\'s pack.',
+      goldCost: 22,
+      items: [
+        { name: 'Shortsword', cost: 10, weight: 2, type: 'Weapon', quantity: 1, notes: '1d6 piercing, Finesse, Light', equipped: true },
+        { name: "Dungeoneer's Pack", cost: 12, weight: 61.5, type: 'Gear', quantity: 1, notes: 'Backpack, crowbar, hammer, pitons, torches, tinderbox, rations, waterskin, rope', equipped: false },
+      ],
+    },
+    {
+      label: 'Spear & Explorer\'s Pack',
+      description: 'A spear and an explorer\'s pack.',
+      goldCost: 11,
+      items: [
+        { name: 'Spear', cost: 1, weight: 3, type: 'Weapon', quantity: 1, notes: '1d6 piercing, Thrown (20/60), Versatile (1d8)', equipped: true },
+        { name: "Explorer's Pack", cost: 10, weight: 59, type: 'Gear', quantity: 1, notes: 'Backpack, bedroll, mess kit, tinderbox, torches, rations, waterskin, rope', equipped: false },
+      ],
+    },
+  ],
+  Paladin: [
+    {
+      label: 'Longsword, Shield & Chain Mail',
+      description: 'A longsword, shield, chain mail, and holy symbol.',
+      goldCost: 105,
+      items: [
+        { name: 'Longsword', cost: 15, weight: 3, type: 'Weapon', quantity: 1, notes: '1d8 slashing, Versatile (1d10)', equipped: true },
+        { name: 'Shield', cost: 10, weight: 6, type: 'Armor', quantity: 1, notes: '+2 AC', equipped: true },
+        { name: 'Chain Mail', cost: 75, weight: 55, type: 'Armor', quantity: 1, notes: 'AC 16, Str 13 required, Disadvantage on Stealth', equipped: true },
+        { name: 'Holy Symbol (Amulet)', cost: 5, weight: 1, type: 'Gear', quantity: 1, notes: 'Spellcasting focus (divine)', equipped: false },
+        { name: "Priest's Pack", cost: 19, weight: 24, type: 'Gear', quantity: 1, notes: 'Backpack, blanket, candles, tinderbox, alms box, incense, censer, vestments, rations, waterskin', equipped: false },
+      ],
+    },
+    {
+      label: 'Two Handaxes & Scale Mail',
+      description: 'Two handaxes, scale mail, and a holy symbol.',
+      goldCost: 65,
+      items: [
+        { name: 'Handaxe', cost: 5, weight: 2, type: 'Weapon', quantity: 2, notes: '1d6 slashing, Light, Thrown (20/60)', equipped: true },
+        { name: 'Scale Mail', cost: 50, weight: 45, type: 'Armor', quantity: 1, notes: 'AC 14 + Dex (max 2), Disadvantage on Stealth', equipped: true },
+        { name: 'Holy Symbol (Amulet)', cost: 5, weight: 1, type: 'Gear', quantity: 1, notes: 'Spellcasting focus (divine)', equipped: false },
+        { name: "Explorer's Pack", cost: 10, weight: 59, type: 'Gear', quantity: 1, notes: 'Backpack, bedroll, mess kit, tinderbox, torches, rations, waterskin, rope', equipped: false },
+      ],
+    },
+  ],
+  Ranger: [
+    {
+      label: 'Scale Mail, Two Shortswords & Longbow',
+      description: 'Scale mail, two shortswords, a longbow (20 arrows), and a dungeoneer\'s pack.',
+      goldCost: 123,
+      items: [
+        { name: 'Scale Mail', cost: 50, weight: 45, type: 'Armor', quantity: 1, notes: 'AC 14 + Dex (max 2), Disadvantage on Stealth', equipped: true },
+        { name: 'Shortsword', cost: 10, weight: 2, type: 'Weapon', quantity: 2, notes: '1d6 piercing, Finesse, Light', equipped: true },
+        { name: 'Longbow', cost: 50, weight: 2, type: 'Weapon', quantity: 1, notes: '1d8 piercing, Ammunition, Heavy, Range 150/600, Two-handed', equipped: false },
+        { name: 'Arrows (20)', cost: 1, weight: 1, type: 'Gear', quantity: 1, notes: 'Ammunition for bows', equipped: false },
+        { name: "Dungeoneer's Pack", cost: 12, weight: 61.5, type: 'Gear', quantity: 1, notes: 'Backpack, crowbar, hammer, pitons, torches, tinderbox, rations, waterskin, rope', equipped: false },
+      ],
+    },
+    {
+      label: 'Leather Armor, Two Shortswords & Longbow',
+      description: 'Leather armor, two shortswords, a longbow (20 arrows), and an explorer\'s pack.',
+      goldCost: 81,
+      items: [
+        { name: 'Leather Armor', cost: 10, weight: 10, type: 'Armor', quantity: 1, notes: 'AC 11 + Dex', equipped: true },
+        { name: 'Shortsword', cost: 10, weight: 2, type: 'Weapon', quantity: 2, notes: '1d6 piercing, Finesse, Light', equipped: true },
+        { name: 'Longbow', cost: 50, weight: 2, type: 'Weapon', quantity: 1, notes: '1d8 piercing, Ammunition, Heavy, Range 150/600, Two-handed', equipped: false },
+        { name: 'Arrows (20)', cost: 1, weight: 1, type: 'Gear', quantity: 1, notes: 'Ammunition for bows', equipped: false },
+        { name: "Explorer's Pack", cost: 10, weight: 59, type: 'Gear', quantity: 1, notes: 'Backpack, bedroll, mess kit, tinderbox, torches, rations, waterskin, rope', equipped: false },
+      ],
+    },
+  ],
+  Rogue: [
+    {
+      label: 'Rapier, Shortbow & Leather Armor',
+      description: 'A rapier, shortbow (20 arrows), leather armor, and a burglar\'s pack.',
+      goldCost: 82,
+      items: [
+        { name: 'Rapier', cost: 25, weight: 2, type: 'Weapon', quantity: 1, notes: '1d8 piercing, Finesse', equipped: true },
+        { name: 'Shortbow', cost: 25, weight: 2, type: 'Weapon', quantity: 1, notes: '1d6 piercing, Ammunition, Range 80/320, Two-handed', equipped: false },
+        { name: 'Arrows (20)', cost: 1, weight: 1, type: 'Gear', quantity: 1, notes: 'Ammunition for bows', equipped: false },
+        { name: 'Leather Armor', cost: 10, weight: 10, type: 'Armor', quantity: 1, notes: 'AC 11 + Dex', equipped: true },
+        { name: "Burglar's Pack", cost: 16, weight: 44.5, type: 'Gear', quantity: 1, notes: 'Backpack, ball bearings, string, bell, candles, crowbar, hammer, pitons, lantern, oil, rations, waterskin, rope', equipped: false },
+      ],
+    },
+    {
+      label: 'Shortsword x2 & Leather Armor',
+      description: 'Two shortswords, leather armor, and a dungeoneer\'s pack.',
+      goldCost: 42,
+      items: [
+        { name: 'Shortsword', cost: 10, weight: 2, type: 'Weapon', quantity: 2, notes: '1d6 piercing, Finesse, Light', equipped: true },
+        { name: 'Leather Armor', cost: 10, weight: 10, type: 'Armor', quantity: 1, notes: 'AC 11 + Dex', equipped: true },
+        { name: "Dungeoneer's Pack", cost: 12, weight: 61.5, type: 'Gear', quantity: 1, notes: 'Backpack, crowbar, hammer, pitons, torches, tinderbox, rations, waterskin, rope', equipped: false },
+      ],
+    },
+  ],
+  Sorcerer: [
+    {
+      label: 'Light Crossbow & Component Pouch',
+      description: 'A light crossbow (20 bolts), two daggers, and a dungeoneer\'s pack.',
+      goldCost: 51,
+      items: [
+        { name: 'Crossbow, Light', cost: 25, weight: 5, type: 'Weapon', quantity: 1, notes: '1d8 piercing, Ammunition, Loading, Range 80/320, Two-handed', equipped: true },
+        { name: 'Crossbow Bolts (20)', cost: 1, weight: 1.5, type: 'Gear', quantity: 1, notes: 'Ammunition for crossbows', equipped: false },
+        { name: 'Dagger', cost: 2, weight: 1, type: 'Weapon', quantity: 2, notes: '1d4 piercing, Finesse, Light, Thrown (20/60)', equipped: false },
+        { name: 'Component Pouch', cost: 25, weight: 2, type: 'Gear', quantity: 1, notes: 'Spellcasting focus (material components)', equipped: false },
+        { name: "Dungeoneer's Pack", cost: 12, weight: 61.5, type: 'Gear', quantity: 1, notes: 'Backpack, crowbar, hammer, pitons, torches, tinderbox, rations, waterskin, rope', equipped: false },
+      ],
+    },
+    {
+      label: 'Two Daggers & Explorer\'s Pack',
+      description: 'Two daggers, an arcane focus, and an explorer\'s pack.',
+      goldCost: 49,
+      items: [
+        { name: 'Dagger', cost: 2, weight: 1, type: 'Weapon', quantity: 2, notes: '1d4 piercing, Finesse, Light, Thrown (20/60)', equipped: true },
+        { name: 'Component Pouch', cost: 25, weight: 2, type: 'Gear', quantity: 1, notes: 'Spellcasting focus (material components)', equipped: false },
+        { name: "Explorer's Pack", cost: 10, weight: 59, type: 'Gear', quantity: 1, notes: 'Backpack, bedroll, mess kit, tinderbox, torches, rations, waterskin, rope', equipped: false },
+      ],
+    },
+  ],
+  Warlock: [
+    {
+      label: 'Light Crossbow & Arcane Focus',
+      description: 'A light crossbow (20 bolts), leather armor, and a dungeoneer\'s pack.',
+      goldCost: 48,
+      items: [
+        { name: 'Crossbow, Light', cost: 25, weight: 5, type: 'Weapon', quantity: 1, notes: '1d8 piercing, Ammunition, Loading, Range 80/320, Two-handed', equipped: true },
+        { name: 'Crossbow Bolts (20)', cost: 1, weight: 1.5, type: 'Gear', quantity: 1, notes: 'Ammunition for crossbows', equipped: false },
+        { name: 'Leather Armor', cost: 10, weight: 10, type: 'Armor', quantity: 1, notes: 'AC 11 + Dex', equipped: true },
+        { name: 'Component Pouch', cost: 25, weight: 2, type: 'Gear', quantity: 1, notes: 'Spellcasting focus (material components)', equipped: false },
+        { name: "Dungeoneer's Pack", cost: 12, weight: 61.5, type: 'Gear', quantity: 1, notes: 'Backpack, crowbar, hammer, pitons, torches, tinderbox, rations, waterskin, rope', equipped: false },
+      ],
+    },
+    {
+      label: 'Simple Weapon & Scholar\'s Pack',
+      description: 'A dagger, leather armor, an arcane focus, and a scholar\'s pack.',
+      goldCost: 52,
+      items: [
+        { name: 'Dagger', cost: 2, weight: 1, type: 'Weapon', quantity: 1, notes: '1d4 piercing, Finesse, Light, Thrown (20/60)', equipped: true },
+        { name: 'Leather Armor', cost: 10, weight: 10, type: 'Armor', quantity: 1, notes: 'AC 11 + Dex', equipped: true },
+        { name: 'Component Pouch', cost: 25, weight: 2, type: 'Gear', quantity: 1, notes: 'Spellcasting focus (material components)', equipped: false },
+        { name: "Scholar's Pack", cost: 40, weight: 10, type: 'Gear', quantity: 1, notes: 'Backpack, book of lore, ink, pen, parchment, sand, small knife', equipped: false },
+      ],
+    },
+  ],
+  Wizard: [
+    {
+      label: 'Quarterstaff & Spellbook',
+      description: 'A quarterstaff, a spellbook, a component pouch, and a scholar\'s pack.',
+      goldCost: 90,
+      items: [
+        { name: 'Quarterstaff', cost: 0.2, weight: 4, type: 'Weapon', quantity: 1, notes: '1d6 bludgeoning, Versatile (1d8)', equipped: true },
+        { name: 'Spellbook', cost: 50, weight: 3, type: 'Gear', quantity: 1, notes: '100-page book for wizard spells', equipped: false },
+        { name: 'Component Pouch', cost: 25, weight: 2, type: 'Gear', quantity: 1, notes: 'Spellcasting focus (material components)', equipped: false },
+        { name: "Scholar's Pack", cost: 40, weight: 10, type: 'Gear', quantity: 1, notes: 'Backpack, book of lore, ink, pen, parchment, sand, small knife', equipped: false },
+      ],
+    },
+    {
+      label: 'Dagger & Arcane Focus',
+      description: 'A dagger, a spellbook, a component pouch, and a dungeoneer\'s pack.',
+      goldCost: 64,
+      items: [
+        { name: 'Dagger', cost: 2, weight: 1, type: 'Weapon', quantity: 1, notes: '1d4 piercing, Finesse, Light, Thrown (20/60)', equipped: true },
+        { name: 'Spellbook', cost: 50, weight: 3, type: 'Gear', quantity: 1, notes: '100-page book for wizard spells', equipped: false },
+        { name: 'Component Pouch', cost: 25, weight: 2, type: 'Gear', quantity: 1, notes: 'Spellcasting focus (material components)', equipped: false },
+        { name: "Dungeoneer's Pack", cost: 12, weight: 61.5, type: 'Gear', quantity: 1, notes: 'Backpack, crowbar, hammer, pitons, torches, tinderbox, rations, waterskin, rope', equipped: false },
+      ],
+    },
+  ],
+};
+
+// D&D 5e Official Conditions
+export const DND_CONDITIONS = [
+  'Blinded', 'Charmed', 'Deafened', 'Exhaustion (1)', 'Exhaustion (2)',
+  'Exhaustion (3)', 'Exhaustion (4)', 'Exhaustion (5)', 'Exhaustion (6)',
+  'Frightened', 'Grappled', 'Incapacitated', 'Invisible',
+  'Paralyzed', 'Petrified', 'Poisoned', 'Prone', 'Restrained',
+  'Stunned', 'Unconscious', 'Concentrating',
+] as const;
+
+export type DnDCondition = typeof DND_CONDITIONS[number];
+
+// ==========================================
 // Multi-Level Character Creation Helpers
 // ==========================================
 export const getAllFeaturesUpToLevel = (className: string, level: number): ClassFeatureEntry[] => {
@@ -1556,6 +1879,19 @@ export const ENCOUNTER_MULTIPLIERS: { maxMonsters: number; multiplier: number }[
   { maxMonsters: 14, multiplier: 3 },
   { maxMonsters: Infinity, multiplier: 4 },
 ];
+
+// ─── CR → XP Table (DMG p.274) ──────────────────────────────────────────────
+export const CR_XP_TABLE: Record<string, number> = {
+  '0':    10,  '1/8':  25,  '1/4':  50,  '1/2': 100,
+  '1':   200,  '2':   450,  '3':   700,  '4':  1100,
+  '5':  1800,  '6':  2300,  '7':  2900,  '8':  3900,
+  '9':  5000, '10':  5900, '11':  7200, '12':  8400,
+  '13': 10000, '14': 11500, '15': 13000, '16': 15000,
+  '17': 18000, '18': 20000, '19': 22000, '20': 25000,
+  '21': 33000, '22': 41000, '23': 50000, '24': 62000,
+  '25': 75000, '26': 90000, '27': 105000,'28': 120000,
+  '29': 135000,'30': 155000,
+};
 
 /** Get the encounter multiplier for a given number of monsters */
 export function getEncounterMultiplier(monsterCount: number): number {
