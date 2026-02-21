@@ -18,7 +18,7 @@ const HPBar: React.FC<{ hp: number; maxHp: number }> = ({ hp, maxHp }) => {
 
   return (
     <div className="w-full h-1.5 bg-zinc-700 rounded-full overflow-hidden">
-      <div className={`h-full rounded-full transition-all duration-300 ${color}`} style={{ width: `${pct * 100}%` }} />
+      <div className={`h-full rounded-full transition-all duration-300 ${color}`} style={{ width: `${pct * 100}%` }} title={`${Math.round(pct * 100)}% HP`} />
     </div>
   );
 };
@@ -80,8 +80,8 @@ const HPEditor: React.FC<HPEditorProps> = ({ combatant, onApply }) => {
           className="w-14 bg-zinc-800 border border-zinc-600 rounded-lg px-2 py-0.5 text-xs text-white text-center focus:outline-none focus:border-amber-500"
           placeholder={mode === 'dmg' ? 'dmg' : 'heal'}
         />
-        <button type="submit" className="text-xs text-zinc-500 hover:text-white">✓</button>
-        <button type="button" onClick={() => setMode(null)} className="text-xs text-zinc-600 hover:text-white">✕</button>
+        <button type="submit" title="Apply" className="text-xs text-zinc-500 hover:text-white">✓</button>
+        <button type="button" onClick={() => setMode(null)} title="Cancel" className="text-xs text-zinc-600 hover:text-white">✕</button>
       </form>
     );
   }
@@ -134,7 +134,7 @@ const ConditionEditor: React.FC<ConditionEditorProps> = ({ conditions, onAdd, on
           className="inline-flex items-center gap-1 text-xs bg-purple-900/30 text-purple-300 border border-purple-500/30 px-2 py-0.5 rounded-full"
         >
           {c}
-          <button onClick={() => onRemove(c)} className="hover:text-white transition-colors">
+          <button onClick={() => onRemove(c)} title={`Remove ${c}`} className="hover:text-white transition-colors">
             <X size={10} />
           </button>
         </span>

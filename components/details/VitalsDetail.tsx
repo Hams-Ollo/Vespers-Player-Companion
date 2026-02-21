@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
-import { Heart, Shield, Zap, Eye, Wind, Minus, Plus, ArrowUpCircle, Moon, X } from 'lucide-react';
+import { Heart, Shield, Zap, Eye, Wind, Minus, Plus, ArrowUpCircle, Moon, X, Star } from 'lucide-react';
 import { CharacterData } from '../../types';
+import { XP_TO_LEVEL, getXpProgress } from '../../constants';
 
 interface VitalsDetailProps {
   data: CharacterData;
@@ -40,9 +41,29 @@ const VitalsDetail: React.FC<VitalsDetailProps> = ({ data, onUpdate, onLevelUp, 
              <div className="w-10 h-10 bg-zinc-900 rounded-full flex items-center justify-center font-display font-bold text-white border border-zinc-600">
                  {data.level}
              </div>
-             <div>
-                 <span className="block text-xs font-bold text-zinc-500 uppercase tracking-widest">Level</span>
-                 <span className="text-zinc-300 text-sm font-medium">{data.class}</span>
+             <div className="flex-1 min-w-0">
+                 <span className="block text-xs font-bold text-zinc-500 uppercase tracking-widest">Level {data.level} {data.class}</span>
+                 {data.level < 20 && (() => {
+                   const xp = data.xp ?? 0;
+                   const { current, needed, pct } = getXpProgress(xp, data.level);
+                   return (
+                     <div className="mt-1.5 space-y-0.5">
+                       <div className="w-full bg-zinc-900 rounded-full h-1.5 overflow-hidden border border-zinc-800">
+                         <div className="h-full bg-amber-500 transition-all duration-500 rounded-full" style={{ width: `${pct}%` }} />
+                       </div>
+                       <div className="flex justify-between items-center">
+                         <span className="text-[10px] text-zinc-600 font-bold">{xp.toLocaleString()} XP</span>
+                         <span className="text-[10px] text-zinc-600">{current.toLocaleString()} / {needed.toLocaleString()} to lvl {data.level + 1}</span>
+                       </div>
+                     </div>
+                   );
+                 })()}
+                 {data.level >= 20 && (
+                   <div className="flex items-center gap-1 mt-1">
+                     <Star size={10} className="text-amber-400 fill-current" />
+                     <span className="text-[10px] text-amber-400 font-bold uppercase tracking-wider">Max Level</span>
+                   </div>
+                 )}
              </div>
          </div>
          <div className="flex gap-2">
@@ -105,7 +126,7 @@ const VitalsDetail: React.FC<VitalsDetailProps> = ({ data, onUpdate, onLevelUp, 
             >
               Apply
             </button>
-            <button onClick={() => setHpInput(null)} className="p-2 text-zinc-500 hover:text-white transition-colors">
+            <button onClick={() => setHpInput(null)} title="Cancel" aria-label="Cancel" className="p-2 text-zinc-500 hover:text-white transition-colors">
               <X size={16} />
             </button>
           </div>

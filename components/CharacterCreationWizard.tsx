@@ -182,6 +182,8 @@ const StepIdentity: React.FC<{
               id="wizard-race"
               value={state.race}
               onChange={e => onChange({ race: e.target.value })}
+              title="Select Race"
+              aria-label="Select Race"
               className="w-full bg-zinc-950 border border-zinc-700 rounded-lg p-3 text-white focus:outline-none focus:border-amber-500"
             >
               <option value="">Select Race...</option>
@@ -194,6 +196,8 @@ const StepIdentity: React.FC<{
               id="wizard-class"
               value={state.charClass}
               onChange={e => onChange({ charClass: e.target.value })}
+              title="Select Class"
+              aria-label="Select Class"
               className="w-full bg-zinc-950 border border-zinc-700 rounded-lg p-3 text-white focus:outline-none focus:border-amber-500"
             >
               <option value="">Select Class...</option>
@@ -353,7 +357,10 @@ const StepAbilityScores: React.FC<{
           {(['standard', 'pointbuy', 'manual'] as StatMethod[]).map(m => (
             <button
               key={m}
+              type="button"
               onClick={() => onChange({ statMethod: m })}
+              aria-label={`Select ${m} ability score method`}
+              title={`Select ${m} ability score method`}
               className={`px-3 py-1.5 text-[10px] font-bold rounded-full border uppercase tracking-widest transition-all ${
                 state.statMethod === m 
                 ? 'bg-amber-600 border-amber-500 text-white shadow-lg shadow-amber-900/20' 
@@ -403,11 +410,13 @@ const StepAbilityScores: React.FC<{
                 {state.statMethod === 'standard' ? (
                   <select
                     aria-label={`Select score for ${key}`}
+                    title={`Select ability score for ${key}`}
+                    id={`standard-score-${key}`}
                     value={state.standardAssignment[key] ?? ''}
                     onChange={e => handleStandardAssignment(key, e.target.value ? parseInt(e.target.value) : null)}
                     className="w-full bg-zinc-950 border border-zinc-700 rounded-xl p-2 text-sm font-bold text-white focus:outline-none focus:border-amber-500 text-center"
                   >
-                    <option value="">--</option>
+                    <option value="" aria-label={`No score selected for ${key}`}>--</option>
                     {STANDARD_ARRAY.map(val => {
                       const isUsedByOther = Object.entries(state.standardAssignment).some(([k, v]) => v === val && k !== key);
                       return (
@@ -423,19 +432,24 @@ const StepAbilityScores: React.FC<{
                       onClick={() => handlePointBuyChange(key, false)}
                       className="p-1.5 rounded-lg bg-zinc-900 text-zinc-500 hover:text-white hover:bg-zinc-700 transition-colors"
                       disabled={baseScore <= POINT_BUY_MIN}
+                      aria-label={`Decrease ${key} score`}
+                      title={`Decrease ${key} score`}
                     >
-                      <Minus size={14} />
+                      <Minus size={14} aria-hidden="true" />
                     </button>
                     <div className="text-center">
                         <span className="text-2xl font-display font-bold text-white">{baseScore}</span>
                         <div className="text-[9px] text-zinc-500 font-bold uppercase">Cost: {POINT_BUY_COSTS[baseScore]}</div>
                     </div>
                     <button 
+                      type="button"
                       onClick={() => handlePointBuyChange(key, true)}
                       className="p-1.5 rounded-lg bg-zinc-900 text-zinc-500 hover:text-white hover:bg-zinc-700 transition-colors"
                       disabled={baseScore >= POINT_BUY_MAX || pointsRemaining < (POINT_BUY_COSTS[baseScore + 1] - POINT_BUY_COSTS[baseScore])}
+                      aria-label={`Increase ${key} score`}
+                      title={`Increase ${key} score`}
                     >
-                      <Plus size={14} />
+                      <Plus size={14} aria-hidden="true" />
                     </button>
                   </div>
                 ) : (
@@ -443,6 +457,9 @@ const StepAbilityScores: React.FC<{
                       type="number"
                       value={baseScore}
                       onChange={(e) => handleManualStatChange(key, e.target.value)}
+                      aria-label={`${key} ability score`}
+                      title={`${key} ability score`}
+                      placeholder={`${key}`}
                       className="w-full bg-zinc-950 border border-zinc-700 rounded-xl p-2 text-xl font-display font-bold text-white focus:outline-none focus:border-amber-500 text-center"
                    />
                 )}
@@ -491,6 +508,8 @@ const StepAbilityScores: React.FC<{
                         key={idx}
                         value={alloc?.[idx] || 'STR'}
                         onChange={e => handleAsiChange(lvl, idx, e.target.value as StatKey)}
+                        aria-label={`Level ${lvl} ASI bonus ${idx + 1}`}
+                        title={`Level ${lvl} ASI bonus ${idx + 1}`}
                         className="flex-1 bg-zinc-950 border border-zinc-700 rounded-lg p-2 text-xs font-bold text-white focus:outline-none focus:border-amber-500"
                       >
                         {STAT_KEYS.map(s => <option key={s} value={s}>{s} +1</option>)}
@@ -675,11 +694,17 @@ const StepPowers: React.FC<{
       </div>
 
       {maxSpellLevel > 1 && (
+        <label className="sr-only" htmlFor="spell-search">Search spells</label>
+      )}
+      {maxSpellLevel > 1 && (
         <input
+          id="spell-search"
           type="text"
           value={spellSearch}
           onChange={e => setSpellSearch(e.target.value)}
           placeholder="Search spells..."
+          aria-label="Search spells"
+          title="Search spells"
           className="w-full bg-zinc-950 border border-zinc-700 rounded-lg p-2.5 text-sm text-white focus:outline-none focus:border-amber-500"
         />
       )}

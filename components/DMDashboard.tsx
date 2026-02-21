@@ -5,6 +5,8 @@ import { Crown, Users, Eye, Swords, ScrollText, Settings, LogOut, Hash, Copy, Ch
 import DMPartyOverview from './DMPartyOverview';
 import EncounterGenerator from './EncounterGenerator';
 import CombatTracker from './CombatTracker';
+import DMNotesPanel from './DMNotesPanel';
+import RollRequestPanel from './RollRequestPanel';
 
 interface DMDashboardProps {
   onExit: () => void;
@@ -15,7 +17,6 @@ const DMDashboard: React.FC<DMDashboardProps> = ({ onExit }) => {
     activeCampaign,
     members,
     activeEncounter,
-    notes,
     updateCampaign,
     archiveCampaign,
     setActiveCampaignId,
@@ -140,11 +141,14 @@ const DMDashboard: React.FC<DMDashboardProps> = ({ onExit }) => {
         {/* Tab Content */}
         <div className="pb-20">
           {activeTab === 'overview' && (
-            <DMPartyOverview
-              members={members}
-              partyCharacters={partyCharacters}
-              loadingChars={loadingChars}
-            />
+            <div className="space-y-6">
+              <DMPartyOverview
+                members={members}
+                partyCharacters={partyCharacters}
+                loadingChars={loadingChars}
+              />
+              <RollRequestPanel members={members} />
+            </div>
           )}
 
           {activeTab === 'combat' && (
@@ -156,14 +160,7 @@ const DMDashboard: React.FC<DMDashboardProps> = ({ onExit }) => {
           )}
 
           {activeTab === 'notes' && (
-            <div className="text-center py-20 border border-dashed border-zinc-800 rounded-2xl bg-zinc-900/30">
-              <ScrollText size={40} className="text-zinc-700 mx-auto mb-4" />
-              <h3 className="text-white font-bold text-lg mb-2">DM Notes</h3>
-              <p className="text-zinc-600 text-sm">Coming in Phase 3 — DM Notes & Campaign Management</p>
-              {notes.length > 0 && (
-                <p className="text-zinc-500 text-xs mt-2">{notes.length} note{notes.length !== 1 ? 's' : ''} synced</p>
-              )}
-            </div>
+            <DMNotesPanel />
           )}
 
           {activeTab === 'settings' && (

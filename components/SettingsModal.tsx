@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { X, Save, Settings, Wifi, WifiOff, ShieldCheck, ShieldAlert, Activity } from 'lucide-react';
+import { X, Save, Settings, Wifi, WifiOff, ShieldCheck, ShieldAlert, Activity, Download } from 'lucide-react';
 import { CharacterData, StatKey } from '../types';
 import { recalculateCharacterStats } from '../utils';
 
@@ -16,8 +16,19 @@ const SettingsModal: React.FC<SettingsModalProps> = ({ data, onSave, onClose }) 
     class: data.class,
     level: data.level,
     campaign: data.campaign || '',
+    xp: data.xp ?? 0,
     stats: { ...data.stats }
   });
+
+  const handleExport = () => {
+    const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `${data.name.replace(/\s+/g, '_')}_lvl${data.level}.json`;
+    a.click();
+    URL.revokeObjectURL(url);
+  };
 
   const hasApiKey = true; // AI features are always available via server proxy
 
@@ -26,6 +37,7 @@ const SettingsModal: React.FC<SettingsModalProps> = ({ data, onSave, onClose }) 
     const merged: CharacterData = {
       ...data,
       ...formData,
+      xp: formData.xp,
       skills: data.skills.map(skill => {
         const abilityMod = formData.stats[skill.ability].modifier;
         const profMod = skill.proficiency === 'expertise' ? profBonus * 2 : skill.proficiency === 'proficient' ? profBonus : 0;
@@ -132,17 +144,31 @@ const SettingsModal: React.FC<SettingsModalProps> = ({ data, onSave, onClose }) 
                 </div>
              </div>
 
-             <div className="space-y-2">
-                <label htmlFor="settings-level" className="text-sm text-zinc-400">Level</label>
-                <input 
-                  id="settings-level"
-                  type="number" 
-                  min="1"
-                  max="20"
-                  value={formData.level}
-                  onChange={(e) => setFormData({...formData, level: parseInt(e.target.value) || 1})}
-                  className="w-full bg-zinc-950 border border-zinc-700 rounded-lg p-2.5 text-white focus:outline-none focus:border-zinc-500"
-                />
+             <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <label htmlFor="settings-level" className="text-sm text-zinc-400">Level</label>
+                  <input
+                    id="settings-level"
+                    type="number"
+                    min="1"
+                    max="20"
+                    value={formData.level}
+                    onChange={(e) => setFormData({...formData, level: parseInt(e.target.value) || 1})}
+                    className="w-full bg-zinc-950 border border-zinc-700 rounded-lg p-2.5 text-white focus:outline-none focus:border-zinc-500"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <label htmlFor="settings-xp" className="text-sm text-zinc-400">Experience Points</label>
+                  <input
+                    id="settings-xp"
+                    type="number"
+                    min="0"
+                    value={formData.xp}
+                    onChange={(e) => setFormData({...formData, xp: parseInt(e.target.value) || 0})}
+                    className="w-full bg-zinc-950 border border-zinc-700 rounded-lg p-2.5 text-white focus:outline-none focus:border-zinc-500"
+                    placeholder="0"
+                  />
+                </div>
              </div>
           </div>
 
@@ -173,13 +199,20 @@ const SettingsModal: React.FC<SettingsModalProps> = ({ data, onSave, onClose }) 
           </div>
         </div>
 
-        <div className="p-4 border-t border-zinc-800 bg-zinc-950/50">
+        <div className="p-4 border-t border-zinc-800 bg-zinc-950/50 space-y-2">
           <button
             onClick={handleSave}
             className="w-full py-3 bg-zinc-100 hover:bg-white text-black font-bold rounded-xl flex items-center justify-center gap-2 transition-colors"
           >
             <Save size={18} />
             Save Changes
+          </button>
+          <button
+            onClick={handleExport}
+            className="w-full py-2.5 bg-zinc-900 hover:bg-zinc-800 text-zinc-400 hover:text-zinc-200 border border-zinc-700 font-bold rounded-xl flex items-center justify-center gap-2 transition-colors text-sm"
+          >
+            <Download size={15} />
+            Export as JSON
           </button>
         </div>
       </div>

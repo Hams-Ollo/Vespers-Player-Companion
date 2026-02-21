@@ -1,6 +1,6 @@
 import React from 'react';
 import { CharacterData, StatKey } from '../../types';
-import { Check, CheckCheck } from 'lucide-react';
+import { Check, CheckCheck, Eye } from 'lucide-react';
 
 interface SkillsDetailProps {
   data: CharacterData;
@@ -96,6 +96,33 @@ const SkillsDetail: React.FC<SkillsDetailProps> = ({ data, onRoll }) => {
            })}
          </div>
       </div>
+      {/* Passive Scores */}
+      {(() => {
+        const investigationSkill = data.skills.find(s => s.name === 'Investigation');
+        const insightSkill = data.skills.find(s => s.name === 'Insight');
+        const passiveInvestigation = 10 + (investigationSkill?.modifier ?? 0);
+        const passiveInsight = 10 + (insightSkill?.modifier ?? 0);
+        return (
+          <div className="bg-zinc-800 rounded-xl border border-zinc-700 overflow-hidden">
+            <div className="bg-zinc-900/50 px-4 py-2 border-b border-zinc-700 flex items-center gap-2">
+              <Eye size={12} className="text-zinc-500" />
+              <span className="text-xs font-bold text-zinc-500 uppercase tracking-widest">Passive Scores</span>
+            </div>
+            <div className="p-3 grid grid-cols-3 gap-2">
+              {[
+                { label: 'Perception', value: data.passivePerception },
+                { label: 'Investigation', value: passiveInvestigation },
+                { label: 'Insight', value: passiveInsight },
+              ].map(({ label, value }) => (
+                <div key={label} className="bg-zinc-900/60 rounded-lg p-2.5 text-center">
+                  <div className="text-2xl font-mono font-black text-blue-300">{value}</div>
+                  <div className="text-[10px] text-zinc-600 uppercase tracking-wider font-bold mt-0.5 leading-tight">{label}</div>
+                </div>
+              ))}
+            </div>
+          </div>
+        );
+      })()}
     </div>
   );
 };

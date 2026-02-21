@@ -8,6 +8,9 @@ import {
   Combatant,
   CombatLogEntry,
   DMNote,
+  DMNoteType,
+  RollRequest,
+  RollRequestResponse,
   CampaignRole,
 } from '../types';
 import { useAuth } from './AuthContext';
@@ -35,6 +38,12 @@ import {
   createEncounter as firestoreCreateEncounter,
   updateEncounter as firestoreUpdateEncounter,
   endEncounter as firestoreEndEncounter,
+  createNote as firestoreCreateNote,
+  updateNote as firestoreUpdateNote,
+  deleteNote as firestoreDeleteNote,
+  createRollRequest as firestoreCreateRollRequest,
+  submitRollResponse as firestoreSubmitRollResponse,
+  subscribeToRollRequests,
 } from '../lib/campaigns';
 
 // ─── Types ──────────────────────────────────────────────────────────
@@ -86,6 +95,16 @@ interface CampaignContextType {
   nextTurn: () => Promise<void>;
   endCombat: () => Promise<void>;
   addCombatLogEntry: (entry: CombatLogEntry) => Promise<void>;
+
+  // ── Notes Actions ─────────────────────────────────────────────────
+  createNote: (note: Omit<DMNote, 'id' | 'createdAt' | 'updatedAt' | 'campaignId' | 'authorUid'>) => Promise<string>;
+  updateNote: (noteId: string, updates: Partial<DMNote>) => Promise<void>;
+  deleteNote: (noteId: string) => Promise<void>;
+
+  // ── Roll Request Actions ───────────────────────────────────────────
+  rollRequests: RollRequest[];
+  sendRollRequest: (type: string, targetUids: string[], dc?: number) => Promise<string>;
+  submitRollResponse: (requestId: string, response: RollRequestResponse) => Promise<void>;
 }
 
 const CampaignContext = createContext<CampaignContextType | undefined>(undefined);
@@ -106,6 +125,7 @@ export const CampaignProvider: React.FC<{ children: React.ReactNode }> = ({ chil
   const [members, setMembers] = useState<CampaignMember[]>([]);
   const [activeEncounter, setActiveEncounter] = useState<CombatEncounter | null>(null);
   const [notes, setNotes] = useState<DMNote[]>([]);
+  const [rollRequests, setRollRequests] = useState<RollRequest[]>([]);
   const [pendingInvites, setPendingInvites] = useState<CampaignInvite[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
@@ -115,6 +135,7 @@ export const CampaignProvider: React.FC<{ children: React.ReactNode }> = ({ chil
   const unsubMembersRef = useRef<(() => void) | null>(null);
   const unsubEncounterRef = useRef<(() => void) | null>(null);
   const unsubNotesRef = useRef<(() => void) | null>(null);
+  const unsubRollRequestsRef = useRef<(() => void) | null>(null);
   const unsubInvitesRef = useRef<(() => void) | null>(null);
 
   // Persist active campaign selection
@@ -182,6 +203,7 @@ export const CampaignProvider: React.FC<{ children: React.ReactNode }> = ({ chil
       setMembers([]);
       setActiveEncounter(null);
       setNotes([]);
+      setRollRequests([]);
       return;
     }
 
@@ -217,8 +239,15 @@ export const CampaignProvider: React.FC<{ children: React.ReactNode }> = ({ chil
       setNotes,
     );
 
+    // Subscribe to roll requests (DM sends, players respond)
+    if (unsubRollRequestsRef.current) unsubRollRequestsRef.current();
+    unsubRollRequestsRef.current = subscribeToRollRequests(
+      activeCampaignId,
+      setRollRequests,
+    );
+
     return () => {
-      [unsubCampaignRef, unsubMembersRef, unsubEncounterRef, unsubNotesRef].forEach(ref => {
+      [unsubCampaignRef, unsubMembersRef, unsubEncounterRef, unsubNotesRef, unsubRollRequestsRef, unsubRollRequestsRef].forEach(ref => {
         if (ref.current) {
           ref.current();
           ref.current = null;
@@ -513,6 +542,58 @@ export const CampaignProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     [activeCampaignId, activeEncounter],
   );
 
+  // ── Notes Actions ─────────────────────────────────────────────────
+
+  const createNoteAction = useCallback(
+    async (note: Omit<DMNote, 'id' | 'createdAt' | 'updatedAt' | 'campaignId' | 'authorUid'>): Promise<string> => {
+      if (!activeCampaignId || !user?.uid) throw new Error('No active campaign or not signed in');
+      if (!isDM) throw new Error('Only DMs can create notes');
+      return firestoreCreateNote(activeCampaignId, {
+        ...note,
+        campaignId: activeCampaignId,
+        authorUid: user.uid,
+      });
+    },
+    [activeCampaignId, user?.uid, isDM],
+  );
+
+  const updateNoteAction = useCallback(
+    async (noteId: string, updates: Partial<DMNote>): Promise<void> => {
+      if (!activeCampaignId) throw new Error('No active campaign');
+      if (!isDM) throw new Error('Only DMs can update notes');
+      await firestoreUpdateNote(activeCampaignId, noteId, updates);
+    },
+    [activeCampaignId, isDM],
+  );
+
+  const deleteNoteAction = useCallback(
+    async (noteId: string): Promise<void> => {
+      if (!activeCampaignId) throw new Error('No active campaign');
+      if (!isDM) throw new Error('Only DMs can delete notes');
+      await firestoreDeleteNote(activeCampaignId, noteId);
+    },
+    [activeCampaignId, isDM],
+  );
+
+  // ── Roll Request Actions ───────────────────────────────────────────
+
+  const sendRollRequestAction = useCallback(
+    async (type: string, targetUids: string[], dc?: number): Promise<string> => {
+      if (!activeCampaignId || !user?.uid) throw new Error('No active campaign or not signed in');
+      if (!isDM) throw new Error('Only the DM can send roll requests');
+      return firestoreCreateRollRequest(activeCampaignId, user.uid, type, targetUids, dc);
+    },
+    [activeCampaignId, user?.uid, isDM],
+  );
+
+  const submitRollResponseAction = useCallback(
+    async (requestId: string, response: RollRequestResponse): Promise<void> => {
+      if (!activeCampaignId) throw new Error('No active campaign');
+      await firestoreSubmitRollResponse(activeCampaignId, requestId, response);
+    },
+    [activeCampaignId],
+  );
+
   return (
     <CampaignContext.Provider
       value={{
@@ -544,6 +625,12 @@ export const CampaignProvider: React.FC<{ children: React.ReactNode }> = ({ chil
         nextTurn: nextTurnAction,
         endCombat: endCombatAction,
         addCombatLogEntry: addCombatLogEntryAction,
+        createNote: createNoteAction,
+        updateNote: updateNoteAction,
+        deleteNote: deleteNoteAction,
+        rollRequests,
+        sendRollRequest: sendRollRequestAction,
+        submitRollResponse: submitRollResponseAction,
       }}
     >
       {children}

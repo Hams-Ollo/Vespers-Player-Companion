@@ -365,6 +365,8 @@ const PartyRoster: React.FC<{ onClose: () => void }> = ({ onClose }) => {
             <select
               value={selectedWhisperTarget}
               onChange={(event) => setSelectedWhisperTarget(event.target.value)}
+              title="Select player to whisper"
+              aria-label="Select player to whisper"
               className="w-full bg-zinc-950 border border-zinc-700 rounded-lg p-2 text-xs text-white focus:outline-none focus:border-amber-500"
             >
               <option value="">All players</option>

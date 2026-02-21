@@ -1893,6 +1893,25 @@ export const CR_XP_TABLE: Record<string, number> = {
   '29': 135000,'30': 155000,
 };
 
+// ─── XP per Level (PHB p.15) ──────────────────────────────────────────────────
+/** Cumulative XP required to reach each level */
+export const XP_TO_LEVEL: Record<number, number> = {
+  1: 0,      2: 300,    3: 900,    4: 2700,   5: 6500,
+  6: 14000,  7: 23000,  8: 34000,  9: 48000,  10: 64000,
+  11: 85000, 12: 100000,13: 120000,14: 140000, 15: 165000,
+  16: 195000,17: 225000,18: 265000,19: 305000, 20: 355000,
+};
+
+/** Compute XP progress toward the next level */
+export function getXpProgress(currentXp: number, level: number): { current: number; needed: number; pct: number } {
+  const levelXp = XP_TO_LEVEL[level] ?? 0;
+  const nextXp = XP_TO_LEVEL[level + 1];
+  if (!nextXp || level >= 20) return { current: currentXp - levelXp, needed: 0, pct: 100 };
+  const range = nextXp - levelXp;
+  const progress = Math.max(0, currentXp - levelXp);
+  return { current: progress, needed: range, pct: Math.min(100, (progress / range) * 100) };
+}
+
 /** Get the encounter multiplier for a given number of monsters */
 export function getEncounterMultiplier(monsterCount: number): number {
   for (const { maxMonsters, multiplier } of ENCOUNTER_MULTIPLIERS) {

@@ -1,7 +1,7 @@
 
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import { CharacterData } from '../types';
-import { Plus, Play, Trash2, Scroll, Heart, Shield, Crown, Users, LogOut, User, Lock, Dices, AlertTriangle, Cloud, CloudOff, Upload } from 'lucide-react';
+import { Plus, Play, Trash2, Scroll, Heart, Shield, Crown, Users, LogOut, User, Lock, Dices, AlertTriangle, Cloud, CloudOff, Upload, Copy, FileInput } from 'lucide-react';
 import CharacterCreationWizard from './CharacterCreationWizard';
 import QuickRollModal from './QuickRollModal';
 import CampaignManager from './CampaignManager';
@@ -40,6 +40,41 @@ const CharacterSelection: React.FC<CharacterSelectionProps> = ({
     }
     setShowWizard(false);
     setShowQuickRoll(false);
+  };
+
+  const importRef = useRef<HTMLInputElement>(null);
+
+  const handleClone = (char: CharacterData, e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    if (isAtLimit) return;
+    const cloned: CharacterData = JSON.parse(JSON.stringify(char));
+    cloned.id = crypto.randomUUID();
+    cloned.name = `${char.name} (Copy)`;
+    (cloned as Partial<CharacterData> & Record<string, unknown>).campaignId = undefined;
+    cloned.campaign = undefined;
+    cloned.ownerUid = undefined;
+    handleCreate(cloned);
+  };
+
+  const handleImport = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = (evt) => {
+      try {
+        const parsed = JSON.parse(evt.target?.result as string) as CharacterData;
+        parsed.id = crypto.randomUUID();
+        parsed.campaign = undefined;
+        parsed.ownerUid = undefined;
+        (parsed as Partial<CharacterData> & Record<string, unknown>).campaignId = undefined;
+        handleCreate(parsed);
+      } catch {
+        console.error('[Import] Failed to parse character JSON');
+      }
+    };
+    reader.readAsText(file);
+    e.target.value = '';
   };
 
   const isAtLimit = (characters || []).length >= 20;
@@ -184,6 +219,32 @@ const CharacterSelection: React.FC<CharacterSelectionProps> = ({
                     </span>
                     <span className="text-zinc-600 text-xs mt-1 text-center px-4">AI generated guest character</span>
                 </button>
+
+                <button
+                    onClick={() => !isAtLimit && importRef.current?.click()}
+                    disabled={isAtLimit}
+                    className={`group relative h-[88px] w-full bg-zinc-900/40 border-2 border-dashed rounded-2xl flex items-center justify-center gap-3 transition-all duration-300 ${
+                    isAtLimit
+                    ? 'border-zinc-800 cursor-not-allowed opacity-60'
+                    : 'border-zinc-800 hover:border-emerald-500/50 hover:bg-zinc-900/60 hover:shadow-xl hover:-translate-y-0.5'
+                    }`}
+                >
+                    <div className={`w-9 h-9 rounded-full flex items-center justify-center border transition-all duration-300 ${
+                    isAtLimit
+                    ? 'bg-zinc-800 text-zinc-600 border-zinc-700'
+                    : 'bg-zinc-800/80 group-hover:bg-emerald-600 group-hover:text-white border-zinc-700'
+                    }`}>
+                    <FileInput size={18} strokeWidth={2} />
+                    </div>
+                    <div className="text-left">
+                    <span className={`block font-display font-bold text-sm tracking-wide ${
+                        isAtLimit ? 'text-zinc-600' : 'text-zinc-400 group-hover:text-white'
+                    }`}>Import Hero</span>
+                    <span className="text-zinc-600 text-xs">Load from JSON file</span>
+                    </div>
+                </button>
+                <label htmlFor="import-hero-file" className="sr-only">Import Hero JSON file</label>
+                <input ref={importRef} id="import-hero-file" type="file" accept=".json" className="hidden" onChange={handleImport} aria-label="Import Hero JSON file" />
             </div>
 
             {/* Existing Characters */}
@@ -224,7 +285,14 @@ const CharacterSelection: React.FC<CharacterSelectionProps> = ({
                                 <div className="absolute inset-0 bg-gradient-to-t from-zinc-950 via-zinc-950/80 to-transparent opacity-90 transition-opacity duration-500" />
                             </div>
 
-                            <div className="absolute top-4 right-4 z-30">
+                            <div className="absolute top-4 right-4 z-30 flex gap-1.5">
+                                <button
+                                onClick={(e) => handleClone(char, e)}
+                                className="p-2.5 bg-black/40 text-zinc-400 hover:text-amber-400 hover:bg-black/80 rounded-full transition-all border border-white/5 hover:border-amber-500/30 backdrop-blur-sm opacity-0 group-hover:opacity-100 focus:opacity-100"
+                                title="Clone Character"
+                                >
+                                    <Copy size={16} />
+                                </button>
                                 <button 
                                 onClick={(e) => { 
                                     e.preventDefault(); 

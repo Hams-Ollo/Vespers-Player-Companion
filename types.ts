@@ -85,6 +85,10 @@ export interface CharacterData {
   initiative: number;
   speed: number;
   passivePerception: number;
+  activeConditions?: string[];
+  exhaustionLevel?: number;
+  heroicInspiration?: boolean;
+  xp?: number;
   skills: Skill[];
   attacks: Attack[];
   features: Feature[];

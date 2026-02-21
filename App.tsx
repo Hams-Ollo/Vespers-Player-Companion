@@ -4,6 +4,7 @@ import CharacterSelection from './components/CharacterSelection';
 import Dashboard from './components/Dashboard';
 import DMDashboard from './components/DMDashboard';
 import ErrorBoundary from './components/ErrorBoundary';
+import RollRequestBanner from './components/RollRequestBanner';
 import { AuthProvider, useAuth } from './contexts/AuthContext';
 import { CharacterProvider, useCharacters } from './contexts/CharacterContext';
 import { CampaignProvider, useCampaign } from './contexts/CampaignContext';
@@ -49,6 +50,7 @@ const AppContent: React.FC = () => {
     return (
       <ErrorBoundary fallbackTitle="The Dashboard has collapsed">
         {saveError && <SaveErrorBanner message={saveError} />}
+        {!isDM && activeCampaign && <RollRequestBanner />}
         <Dashboard 
           data={activeCharacter}
           onUpdatePortrait={(url) => updatePortrait(url)}
@@ -70,6 +72,7 @@ const AppContent: React.FC = () => {
   return (
     <ErrorBoundary fallbackTitle="The Hall has collapsed">
       {saveError && <SaveErrorBanner message={saveError} />}
+      {!isDM && activeCampaign && <RollRequestBanner />}
       <CharacterSelection 
         characters={characters}
         onSelect={(id) => setActiveCharacterId(id)}
