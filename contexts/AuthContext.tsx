@@ -4,8 +4,7 @@ import { initializeApp, getApps } from 'firebase/app';
 import { 
   getAuth, 
   onAuthStateChanged, 
-  signInWithRedirect,
-  getRedirectResult,
+  signInWithPopup,
   GoogleAuthProvider, 
   signInAnonymously, 
   signOut
@@ -59,20 +58,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [signInError, setSignInError] = useState<string | null>(null);
 
   useEffect(() => {
-    // Only process redirect result if user actually initiated a Google sign-in
-    // this session. Avoids spurious errors on cold loads.
-    if (sessionStorage.getItem('googleSignInPending') === 'true') {
-      getRedirectResult(auth).then((result) => {
-        sessionStorage.removeItem('googleSignInPending');
-        if (result?.user) setSignInError(null);
-      }).catch((error: any) => {
-        sessionStorage.removeItem('googleSignInPending');
-        console.error("Redirect result error:", error?.code, error?.message);
-        const code = error?.code ? ` [${error.code}]` : '';
-        setSignInError((error?.message ?? 'Sign-in failed.') + code);
-      });
-    }
-
     return onAuthStateChanged(auth, (firebaseUser) => {
       if (firebaseUser) {
         setUser({
@@ -91,10 +76,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const signInWithGoogle = async () => {
     try {
       setSignInError(null);
-      sessionStorage.setItem('googleSignInPending', 'true');
-      await signInWithRedirect(auth, googleProvider);
+      await signInWithPopup(auth, googleProvider);
     } catch (error: any) {
-      sessionStorage.removeItem('googleSignInPending');
       console.error("Google Sign-In Error:", error);
       console.error("Error code:", error?.code);
       const code = error?.code ? ` [${error.code}]` : '';
