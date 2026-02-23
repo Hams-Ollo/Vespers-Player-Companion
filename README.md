@@ -21,7 +21,7 @@
 
 ## Chapter 1: Introduction
 
-**Ollo's Player Companion** is a mobile-first web application for managing D&D 5th Edition characters. Create heroes with a guided wizard, track stats and inventory, roll dice, level up with AI assistance, and consult an AI Dungeon Master grounded in official rulebook text.
+**Ollo's Player Companion** is a mobile-first web application for managing D&D 5th Edition characters and campaigns. Create heroes with a guided wizard, track stats and inventory, roll dice, level up with AI assistance, and consult an AI Dungeon Master grounded in official rulebook text.
 
 Whether you are a battle-scarred veteran of a hundred campaigns or a wide-eyed newcomer stepping into your first tavern, this companion will serve you well.
 
@@ -41,17 +41,18 @@ Whether you are a battle-scarred veteran of a hundred campaigns or a wide-eyed n
 | ⬆️ **Level Up Wizard** | AI-assisted ascension with HP rolls, ASI, new features, and spell slot updates |
 | 🤖 **Ask the DM** | Multi-turn AI chat grounded in uploaded PHB/DMG/MM/Basic Rules PDFs |
 | 🛏️ **Rest System** | Short & long rest with hit dice recovery, as the gods intended |
-| 🗺️ **Campaign Manager** | Create or join campaigns with shareable join codes, DM role confirmation, character assignment, email invites |
+| 🗂️ **Campaign Manager** | Create or join campaigns with shareable join codes, DM role confirmation, character assignment, email invites with 7-day expiry, player invite permissions |
 | 🔐 **Authentication** | Firebase Google sign-in + anonymous guest mode |
 | ☁️ **Cloud Sync** | Firestore character persistence — real-time sync across devices |
 | 🎨 **AI Portraits** | Gemini 2.5 Flash image model conjures character portraits from description |
-| 🎲 **Quick Roll** | One-click AI-generated character from a vibe prompt — stats, backstory, portrait |
+| 🎲 **Quick Roll** | One-click AI-generated character from a vibe prompt — stats, backstory, portrait; optional name input or AI-generated name |
 | 🎭 **Class Theming** | Dynamic color themes per D&D class — borders, gradients, and arcane glow effects |
-| 🎙️ **Voice Input** | Live audio transcription via Gemini Native Audio for hands-free DM chat |
-| 🛡️ **DM Dashboard** | Tabbed DM view with party overview, combat tracker, session notes, and campaign settings |
-| 👥 **Party Roster** | Live party member cards with HP bars, AC, level, and class info fetched from Firestore |
-| ⚔️ **Combat Strip** | At-a-glance initiative tracker and combat status bar |
+| 🎙️ **Voice Input** | Live audio transcription via Gemini Native Audio for hands-free DM chat (proxied via secure WS endpoint — API key never reaches browser) |
+| 🛡️ **DM Dashboard** | Full tabbed DM command centre — Party Overview, Combat Tracker (initiative order, HP, conditions, combat log), Encounter Generator (AI-drafted encounters with creature stat blocks), Campaign Journal (Markdown notes + tags), Roll Request system (DM creates group rolls; players respond inline), Campaign Settings |
+| 👥 **Party Roster** | Live party member cards with HP bars, AC, level, class info; DM can kick members |
+| ⚔️ **Combat Strip** | At-a-glance combat status bar with initiative display and roll hook |
 | 🎯 **Quick Action Bar** | Context-sensitive shortcut buttons for common actions |
+| ⚡ **Cloud Functions** | Server-side Firestore triggers auto-sync `memberUids` when players join/leave campaigns |
 
 ---
 
@@ -64,7 +65,7 @@ Whether you are a battle-scarred veteran of a hundred campaigns or a wide-eyed n
 |:------|:----------|
 | **Framework** | React 19.2 + TypeScript 5.8 |
 | **Forge** | Vite 6 |
-| **Styling** | Tailwind CSS (CDN) |
+| **Styling** | Tailwind CSS via Vite plugin (`@tailwindcss/vite`) |
 | **Iconography** | Lucide React |
 | **The Weave (AI)** | Google Gemini (`@google/genai` v1.41+) — `gemini-2.5-flash` (text), `gemini-2.5-flash-image` (portraits) |
 | **The Gate (Proxy)** | Express.js server — API proxy with auth middleware + rate limiting |
@@ -72,7 +73,8 @@ Whether you are a battle-scarred veteran of a hundred campaigns or a wide-eyed n
 | **Vault (Database)** | Cloud Firestore (character sync for authenticated users) |
 | **Scroll Case (Storage)** | localStorage (guest/offline fallback) |
 | **Shield (Secrets)** | Google Cloud Secret Manager (Gemini API key, never in browser) |
-| **Planar Gate (Deploy)** | Docker (multi-stage) → Google Cloud Run |
+| **Sentinels (Triggers)** | Firebase Cloud Functions v2 (Firestore document triggers for data consistency) |
+| **Planar Gate (Deploy)** | Docker (multi-stage) → Google Cloud Run + Cloud Build CI/CD (auto-deploys app, functions, and rules on push to main) |
 
 ---
 
@@ -179,6 +181,12 @@ npm run preview
 │       ├── auth.js               # 🔐 Token Verification — validates Firebase ID tokens
 │       └── rateLimit.js          # ⏱️ Rate Limiter — per-user & global request throttling
 │
+├── functions/
+│   ├── package.json              # ⚙️ Cloud Functions dependencies (Node 20)
+│   ├── tsconfig.json             # ⚙️ Cloud Functions TypeScript config
+│   └── src/
+│       └── index.ts              # ⚡ The Sentinels — Firestore triggers (onMemberCreated/Deleted)
+│
 ├── lib/
 │   ├── gemini.ts                 # 🤖 The Weave — proxy client (calls /api/gemini/*)
 │   ├── firestore.ts              # 🔥 The Vault — Firestore CRUD & real-time sync
@@ -241,9 +249,11 @@ Signed-in users (Google Auth) receive **automatic Firestore synchronization**:
 
 - Characters are stored in the `characters` collection, partitioned by `ownerUid`
 - Campaigns are stored in the `campaigns` collection with subcollections for `members`, `encounters`, `notes`, `templates`, `whispers`, and `rollRequests`
-- Invites are stored in a top-level `invites` collection with shareable 6-character join codes
+- Invites are stored in a top-level `invites` collection with shareable 6-character join codes and 7-day expiry
+- **Cloud Functions v2** automatically sync `campaign.memberUids[]` via Firestore document triggers when members join or leave
 - Real-time `onSnapshot` listeners keep multiple browser tabs and devices in sync
 - Writes are **debounced** (500ms) to avoid excessive Firestore operations during heated combat
+- DMs can remove members from campaigns; players can send invites when `allowPlayerInvites` is enabled
 - Guest adventurers continue using localStorage for characters with no cloud calls
 - Campaign features require Google authentication (no guest fallback)
 - First-time sign-in detects local characters and offers a one-click **migration** to the cloud
@@ -258,12 +268,14 @@ Signed-in users (Google Auth) receive **automatic Firestore synchronization**:
 
 The Companion employs a **defense-in-depth** strategy to protect the Gemini API key and prevent abuse:
 
-- **Server-side API proxy:** All Gemini requests route through an Express server (`server/index.js`). The API key **never** reaches the browser.
-- **Firebase token verification:** Every proxy request requires a valid Firebase ID token — unauthenticated requests receive `401`.
-- **Per-user rate limiting:** 20 requests/minute per Firebase UID (server-side, tamper-proof).
-- **Global rate limiting:** 200 requests/minute across all users — prevents runaway if user pool spikes.
-- **Google Cloud Secret Manager:** API key stored as a managed secret, injected at Cloud Run runtime.
+- **Server-side API proxy:** All Gemini requests route through an Express server (`server/index.js`). The API key **never** reaches the browser — including the Gemini Live Audio WebSocket, which is tunnelled through a `/api/gemini/live` WS proxy with token verification.
+- **Firebase Admin SDK token verification:** Every `/api/*` request requires a valid Firebase ID token. Tokens are cryptographically verified with revocation checking (`verifyIdToken(token, true)`) via the Firebase Admin SDK. A UID-keyed cache (4-min TTL, 500-entry LRU cap) keeps auth fast.
+- **Redis-backed rate limiting:** Per-user 20 req/min (atomic pipeline INCR+EXPIRE) with automatic in-memory fallback when Redis is unavailable. Global cap of 200 req/min across all users. Responses include `X-RateLimit-Remaining` and `Retry-After` headers.
+- **Security headers:** Full header suite on every response — CSP (13 directives including `frame-ancestors 'none'` and `upgrade-insecure-requests`), HSTS preload (`max-age=31536000; includeSubDomains; preload`), `X-Frame-Options: DENY`, `X-Content-Type-Options: nosniff`, `Referrer-Policy: strict-origin-when-cross-origin`, COOP `same-origin`, CORP `same-origin`, Permissions-Policy microphone=(self).
+- **Input validation:** Every route validates and caps payload sizes — prompts ≤20 KB, chat history ≤50 turns/10 KB per message, portrait parts ≤2/5 MB each, encounter fields capped.
+- **Google Cloud Secret Manager:** API key stored as a managed secret, injected at Cloud Run runtime — not baked into the Docker image.
 - **Budget alert:** $20/month billing alert with thresholds at 50/90/100/150%.
+- **0 npm vulnerabilities:** `package.json` overrides pin `minimatch` and `glob` to patched versions.
 - **Client-side throttle:** 2-second minimum between AI requests as a UX safeguard.
 
 ---
@@ -281,6 +293,19 @@ The Companion employs a **defense-in-depth** strategy to protect the Gemini API 
 | [📋 Roadmap & TODO](docs/TODO.md) | *The Quest Board* — planned features, enhancements, community requests |
 | [📊 Project Tracker](docs/PROJECT_TRACKER.md) | *The War Council's Ledger* — epics, features, user stories with status |
 | [☁️ Cloud Deployment](docs/CLOUD_RUN_DEPLOY.md) | *The Planar Gate Manual* — Docker → Cloud Run deployment guide |
+
+---
+
+## Chapter 9: Current Roadmap Snapshot
+
+> *"A quick report from the war council, for those who need present-tense status at a glance."*
+
+- **v0.5.1 (current):** Security hardening fully complete — Firebase Admin SDK cryptographic token verification, Redis-backed rate limiting, full CSP/HSTS header suite, WebSocket proxy for Live Audio, Firestore field-type validation + size caps, 0 npm vulnerabilities. DM suite UI complete — CombatTracker, EncounterGenerator, DMNotesPanel, RollRequestPanel, RollRequestBanner all live.
+- **v0.5.0 → v0.5.x remaining:** World-building layer not yet built — NPCRegistry, QuestTracker, FactionManager; `lib/combat.ts` service abstraction; premade character templates; save/load encounter templates from Firestore.
+- **v0.6.0 AI DM Co-Pilot:** DMAssistant (full campaign-context AI), shared handouts, SRD content browser.
+- **v0.7.0 Higher-Level Creation:** In progress — level 1–20 creation flow is live; multiclass support remains pending.
+
+For the authoritative live status, see [📋 Roadmap & TODO](docs/TODO.md) and [📊 Project Tracker](docs/PROJECT_TRACKER.md).
 
 ---
 

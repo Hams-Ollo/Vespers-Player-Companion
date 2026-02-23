@@ -1,70 +1,44 @@
-import React, { useState, useEffect } from 'react';
+import React, { useMemo, useState } from 'react';
 import { useCampaign } from '../contexts/CampaignContext';
-import { useAuth } from '../contexts/AuthContext';
-import { CharacterData, CampaignMember } from '../types';
-import { Crown, Users, Eye, Swords, ScrollText, Settings, LogOut, Hash, Copy, Check, Loader2 } from 'lucide-react';
+import { CampaignMemberCharacterSummary } from '../types';
+import { Crown, Users, Eye, Swords, ScrollText, Settings, LogOut, Hash, Copy, Check, RefreshCw } from 'lucide-react';
 import DMPartyOverview from './DMPartyOverview';
-import { doc, getDoc } from 'firebase/firestore';
-import { db } from '../lib/firestore';
+import EncounterGenerator from './EncounterGenerator';
+import CombatTracker from './CombatTracker';
+import DMNotesPanel from './DMNotesPanel';
+import RollRequestPanel from './RollRequestPanel';
 
 interface DMDashboardProps {
   onExit: () => void;
+  onReturnToCharacter?: () => void;
 }
 
-const DMDashboard: React.FC<DMDashboardProps> = ({ onExit }) => {
-  const { user } = useAuth();
+const DMDashboard: React.FC<DMDashboardProps> = ({ onExit, onReturnToCharacter }) => {
   const {
     activeCampaign,
     members,
-    isDM,
     activeEncounter,
-    notes,
     updateCampaign,
     archiveCampaign,
     setActiveCampaignId,
+    regenerateJoinCode,
   } = useCampaign();
 
   const [activeTab, setActiveTab] = useState<'overview' | 'combat' | 'notes' | 'settings'>('overview');
-  const [partyCharacters, setPartyCharacters] = useState<Map<string, CharacterData>>(new Map());
-  const [loadingChars, setLoadingChars] = useState(true);
   const [copiedCode, setCopiedCode] = useState(false);
+  const [regeneratingCode, setRegeneratingCode] = useState(false);
 
-  // Fetch all party characters
-  useEffect(() => {
-    if (!members.length) {
-      setPartyCharacters(new Map());
-      setLoadingChars(false);
-      return;
-    }
-
-    setLoadingChars(true);
-    const charMap = new Map<string, CharacterData>();
-    let loaded = 0;
-    const total = members.filter(m => m.characterId).length;
-
-    if (total === 0) {
-      setLoadingChars(false);
-      return;
-    }
-
-    members.forEach(async (member) => {
-      if (!member.characterId) return;
-      try {
-        const charDoc = await getDoc(doc(db, 'characters', member.characterId));
-        if (charDoc.exists()) {
-          charMap.set(member.uid, { id: charDoc.id, ...charDoc.data() } as CharacterData);
-        }
-      } catch {
-        // skip
-      } finally {
-        loaded++;
-        if (loaded >= total) {
-          setPartyCharacters(new Map(charMap));
-          setLoadingChars(false);
-        }
+  const partyCharacters = useMemo(() => {
+    const map = new Map<string, CampaignMemberCharacterSummary>();
+    members.forEach((member) => {
+      if (member.characterSummary) {
+        map.set(member.uid, member.characterSummary);
       }
     });
+    return map;
   }, [members]);
+
+  const loadingChars = false;
 
   const handleCopyCode = () => {
     if (activeCampaign?.joinCode) {
@@ -127,9 +101,21 @@ const DMDashboard: React.FC<DMDashboardProps> = ({ onExit }) => {
           </div>
 
           <div className="flex-1" />
-          <div className="flex items-center gap-2 text-xs text-zinc-600">
-            <Users size={14} />
-            <span>{members.length} member{members.length !== 1 ? 's' : ''}</span>
+          <div className="flex items-center gap-3">
+            {onReturnToCharacter && (
+              <button
+                onClick={onReturnToCharacter}
+                className="flex items-center gap-2 px-3 py-1.5 bg-zinc-900 hover:bg-zinc-800 text-zinc-400 hover:text-white border border-zinc-700 rounded-xl text-xs font-bold transition-all"
+                title="Return to your character sheet"
+              >
+                <LogOut size={13} className="rotate-180" />
+                My Sheet
+              </button>
+            )}
+            <div className="flex items-center gap-2 text-xs text-zinc-600">
+              <Users size={14} />
+              <span>{members.length} member{members.length !== 1 ? 's' : ''}</span>
+            </div>
           </div>
         </header>
 
@@ -168,30 +154,26 @@ const DMDashboard: React.FC<DMDashboardProps> = ({ onExit }) => {
         {/* Tab Content */}
         <div className="pb-20">
           {activeTab === 'overview' && (
-            <DMPartyOverview
-              members={members}
-              partyCharacters={partyCharacters}
-              loadingChars={loadingChars}
-            />
+            <div className="space-y-6">
+              <DMPartyOverview
+                members={members}
+                partyCharacters={partyCharacters}
+                loadingChars={loadingChars}
+              />
+              <RollRequestPanel members={members} />
+            </div>
           )}
 
           {activeTab === 'combat' && (
-            <div className="text-center py-20 border border-dashed border-zinc-800 rounded-2xl bg-zinc-900/30">
-              <Swords size={40} className="text-zinc-700 mx-auto mb-4" />
-              <h3 className="text-white font-bold text-lg mb-2">Initiative Tracker</h3>
-              <p className="text-zinc-600 text-sm">Coming in Phase 2 — Combat & Initiative Tracker</p>
+            <div>
+              {activeEncounter
+                ? <CombatTracker />
+                : <EncounterGenerator partyCharacters={partyCharacters} />}
             </div>
           )}
 
           {activeTab === 'notes' && (
-            <div className="text-center py-20 border border-dashed border-zinc-800 rounded-2xl bg-zinc-900/30">
-              <ScrollText size={40} className="text-zinc-700 mx-auto mb-4" />
-              <h3 className="text-white font-bold text-lg mb-2">DM Notes</h3>
-              <p className="text-zinc-600 text-sm">Coming in Phase 3 — DM Notes & Campaign Management</p>
-              {notes.length > 0 && (
-                <p className="text-zinc-500 text-xs mt-2">{notes.length} note{notes.length !== 1 ? 's' : ''} synced</p>
-              )}
-            </div>
+            <DMNotesPanel />
           )}
 
           {activeTab === 'settings' && (
@@ -213,8 +195,21 @@ const DMDashboard: React.FC<DMDashboardProps> = ({ onExit }) => {
                   <label className="text-xs font-bold text-zinc-500 uppercase tracking-widest block mb-1">Join Code</label>
                   <div className="flex items-center gap-2">
                     <span className="font-mono text-amber-500 font-bold text-lg">{activeCampaign.joinCode}</span>
-                    <button onClick={handleCopyCode} className="text-zinc-500 hover:text-white transition-colors">
+                    <button onClick={handleCopyCode} className="text-zinc-500 hover:text-white transition-colors" title="Copy code">
                       {copiedCode ? <Check size={14} className="text-green-400" /> : <Copy size={14} />}
+                    </button>
+                    <button
+                      onClick={async () => {
+                        if (!confirm('Regenerate join code? The old code will stop working.')) return;
+                        setRegeneratingCode(true);
+                        try { await regenerateJoinCode(); } catch {}
+                        finally { setRegeneratingCode(false); }
+                      }}
+                      disabled={regeneratingCode}
+                      className="text-zinc-500 hover:text-amber-400 transition-colors"
+                      title="Regenerate join code"
+                    >
+                      <RefreshCw size={14} className={regeneratingCode ? 'animate-spin' : ''} />
                     </button>
                   </div>
                 </div>
@@ -226,6 +221,30 @@ const DMDashboard: React.FC<DMDashboardProps> = ({ onExit }) => {
                   }`}>
                     {activeCampaign.status}
                   </span>
+                </div>
+
+                {/* Allow Player Invites Toggle */}
+                <div className="flex items-center justify-between py-2">
+                  <div>
+                    <label className="text-xs font-bold text-zinc-500 uppercase tracking-widest block">Allow Player Invites</label>
+                    <p className="text-[10px] text-zinc-600 mt-0.5">Let players send email invites to new members</p>
+                  </div>
+                  <button
+                    onClick={() => updateCampaign({
+                      settings: {
+                        ...activeCampaign.settings,
+                        allowPlayerInvites: !activeCampaign.settings?.allowPlayerInvites,
+                      },
+                    })}
+                    className={`relative w-11 h-6 rounded-full transition-colors ${
+                      activeCampaign.settings?.allowPlayerInvites ? 'bg-amber-600' : 'bg-zinc-700'
+                    }`}
+                    title="Toggle player invites"
+                  >
+                    <span className={`absolute top-0.5 left-0.5 w-5 h-5 bg-white rounded-full shadow transition-transform ${
+                      activeCampaign.settings?.allowPlayerInvites ? 'translate-x-5' : 'translate-x-0'
+                    }`} />
+                  </button>
                 </div>
               </div>
 

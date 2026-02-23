@@ -17,35 +17,41 @@ import JournalDetail from './details/JournalDetail';
 import SpellsDetail from './details/SpellsDetail';
 import DiceRollModal from './DiceRollModal';
 import PortraitGenerator from './PortraitGenerator';
+import PortraitLightbox from './PortraitLightbox';
 import AskDMModal from './AskDMModal';
 import SettingsModal from './SettingsModal';
 import ShopModal from './ShopModal';
 import LevelUpModal from './LevelUpModal';
 import ItemDetailModal from './ItemDetailModal';
 import RestModal from './RestModal';
+import ConditionsModal from './ConditionsModal';
 import PartyRoster from './PartyRoster';
 import ErrorBoundary from './ErrorBoundary';
 import { useCampaign } from '../contexts/CampaignContext';
-import { Heart, Sword, Brain, Edit2, MessageSquare, Settings, LogOut, Book, ShoppingBag, Wand2, Users, Swords, Scroll, Shield, Moon, ArrowUpCircle, Store, Stethoscope } from 'lucide-react';
+import { Heart, Sword, Brain, Edit2, MessageSquare, Settings, LogOut, Book, ShoppingBag, Wand2, Users, Swords, Scroll, Shield, Moon, ArrowUpCircle, Store, Stethoscope, Sparkles, Activity, Crown } from 'lucide-react';
 
 interface DashboardProps {
   data: CharacterData;
   onUpdatePortrait: (url: string) => void;
   onUpdateData: (newData: Partial<CharacterData>) => void;
   onExit: () => void;
+  onSwitchToDM?: () => void;
 }
 
-const Dashboard: React.FC<DashboardProps> = ({ data, onUpdatePortrait, onUpdateData, onExit }) => {
+const Dashboard: React.FC<DashboardProps> = ({ data, onUpdatePortrait, onUpdateData, onExit, onSwitchToDM }) => {
   const { activeCampaign, members, isDM, activeEncounter } = useCampaign();
   const [activeStack, setActiveStack] = useState<StackType | null>(null);
   const [rollResult, setRollResult] = useState<RollResult | null>(null);
   const [rollMode, setRollMode] = useState<RollMode>('normal');
+  const [showPortraitLightbox, setShowPortraitLightbox] = useState(false);
   const [showPortraitGen, setShowPortraitGen] = useState(false);
+  const [portraitGenInitialTab, setPortraitGenInitialTab] = useState<'text' | 'image'>('text');
   const [showAskDM, setShowAskDM] = useState(false);
   const [showSettings, setShowSettings] = useState(false);
   const [showShop, setShowShop] = useState(false);
   const [showLevelUp, setShowLevelUp] = useState(false);
   const [showRest, setShowRest] = useState(false);
+  const [showConditions, setShowConditions] = useState(false);
   const [selectedItemForDetail, setSelectedItemForDetail] = useState<Item | Feature | Spell | null>(null);
 
   const theme = getClassTheme(data.class);
@@ -93,8 +99,8 @@ const Dashboard: React.FC<DashboardProps> = ({ data, onUpdatePortrait, onUpdateD
                 <LogOut size={22} className="rotate-180" />
             </button>
 
-            {/* Portrait */}
-            <div className="relative group cursor-pointer" onClick={() => setShowPortraitGen(true)}>
+            {/* Portrait — click opens fullscreen lightbox */}
+            <div className="relative group cursor-pointer" onClick={() => setShowPortraitLightbox(true)}>
               <div className={`w-18 h-18 lg:w-24 lg:h-24 rounded-2xl overflow-hidden border-2 border-white/5 shadow-2xl ring-1 ${theme.ring} group-hover:ring-2 transition-all duration-500`}>
                  <img src={data.portraitUrl} alt={data.name} className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" />
                  <div className="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
@@ -142,12 +148,35 @@ const Dashboard: React.FC<DashboardProps> = ({ data, onUpdatePortrait, onUpdateD
                    ))}
                 </div>
                 <div className="h-10 w-px bg-zinc-800 mx-1" />
+                <button
+                  onClick={() => onUpdateData({ heroicInspiration: !data.heroicInspiration })}
+                  title={data.heroicInspiration ? 'Heroic Inspiration: Active — click to use' : 'Heroic Inspiration: Inactive'}
+                  className={`p-2.5 rounded-xl border transition-all ${
+                    data.heroicInspiration
+                      ? 'bg-amber-500/20 text-amber-400 border-amber-500/50 shadow-lg shadow-amber-900/30 animate-pulse'
+                      : 'bg-zinc-900 text-zinc-600 border-zinc-800 hover:text-zinc-400 hover:border-zinc-700'
+                  }`}
+                >
+                  <Sparkles size={18} />
+                </button>
                 <button onClick={() => setShowAskDM(true)} className="p-2.5 bg-amber-950/20 text-amber-500 border border-amber-500/20 rounded-xl hover:bg-amber-900/40 transition-all" title="Ask the DM">
                     <MessageSquare size={18} />
                 </button>
                 <button onClick={() => setShowSettings(true)} className="p-2.5 bg-zinc-900 text-zinc-500 border border-zinc-800 rounded-xl hover:text-white transition-all" title="Settings">
                     <Settings size={18} />
                 </button>
+                {onSwitchToDM && (
+                  <>
+                    <div className="h-10 w-px bg-zinc-800 mx-1" />
+                    <button
+                      onClick={onSwitchToDM}
+                      className="p-2.5 bg-amber-950/20 text-amber-600 border border-amber-500/20 rounded-xl hover:bg-amber-900/40 hover:text-amber-400 transition-all"
+                      title="Switch to DM Screen"
+                    >
+                      <Crown size={18} />
+                    </button>
+                  </>
+                )}
             </div>
          </header>
 
@@ -161,6 +190,23 @@ const Dashboard: React.FC<DashboardProps> = ({ data, onUpdatePortrait, onUpdateD
            onRollInitiative={() => handleRoll('Initiative', data.initiative, '1d20')}
            isCaster={isCaster}
          />
+
+         {/* ═══════════════════ ACTIVE CONDITIONS STRIP ═══════════════════ */}
+         {((data.activeConditions?.length ?? 0) > 0 || (data.exhaustionLevel ?? 0) > 0) && (
+           <button
+             onClick={() => setShowConditions(true)}
+             className="w-full flex items-center gap-2 flex-wrap px-3.5 py-2.5 bg-red-950/20 border border-red-900/30 rounded-xl hover:bg-red-950/30 transition-colors text-left"
+           >
+             <Activity size={12} className="text-red-400 shrink-0" />
+             <span className="text-[10px] font-black uppercase tracking-widest text-red-400 shrink-0 mr-1">Active</span>
+             {data.activeConditions?.map(c => (
+               <span key={c} className="text-[10px] px-2 py-0.5 rounded-full border bg-red-900/30 border-red-700/40 text-red-300 font-bold">{c}</span>
+             ))}
+             {(data.exhaustionLevel ?? 0) > 0 && (
+               <span className="text-[10px] px-2 py-0.5 rounded-full border bg-amber-900/30 border-amber-700/40 text-amber-300 font-bold">Exhaustion {data.exhaustionLevel}</span>
+             )}
+           </button>
+         )}
 
          {/* ═══════════════════ UTILITY ACTION BAR ═══════════════════ */}
          <div className="flex gap-2 overflow-x-auto no-scrollbar">
@@ -191,6 +237,22 @@ const Dashboard: React.FC<DashboardProps> = ({ data, onUpdatePortrait, onUpdateD
            >
              <Stethoscope size={14} />
              <span>Vitals</span>
+           </button>
+           <button
+             onClick={() => setShowConditions(true)}
+             className={`flex items-center gap-2 px-4 py-2.5 rounded-xl border text-xs font-bold whitespace-nowrap shrink-0 active:scale-95 transition-all duration-200 ${
+               (data.activeConditions?.length ?? 0) > 0 || (data.exhaustionLevel ?? 0) > 0
+                 ? 'border-red-700/60 bg-red-950/30 text-red-300 hover:bg-red-900/40 hover:border-red-600/60'
+                 : 'border-zinc-800/60 bg-zinc-900/20 text-zinc-500 hover:bg-zinc-800/30 hover:text-zinc-300 hover:border-zinc-700/60'
+             }`}
+           >
+             <Activity size={14} />
+             <span>Conditions</span>
+             {((data.activeConditions?.length ?? 0) + ((data.exhaustionLevel ?? 0) > 0 ? 1 : 0)) > 0 && (
+               <span className="w-4 h-4 bg-red-500 text-white text-[9px] font-black rounded-full flex items-center justify-center leading-none">
+                 {(data.activeConditions?.length ?? 0) + ((data.exhaustionLevel ?? 0) > 0 ? 1 : 0)}
+               </span>
+             )}
            </button>
          </div>
 
@@ -324,12 +386,40 @@ const Dashboard: React.FC<DashboardProps> = ({ data, onUpdatePortrait, onUpdateD
 
        {/* ═══════════════════ UTILITY MODALS ═══════════════════ */}
        <DiceRollModal result={rollResult} onClose={() => setRollResult(null)} />
-       {showPortraitGen && <PortraitGenerator currentPortrait={data.portraitUrl} onUpdate={onUpdatePortrait} onClose={() => setShowPortraitGen(false)} characterDescription={`${data.race} ${data.class}`} />}
+
+       {/* Portrait lightbox — fullscreen view with edit CTAs */}
+       {showPortraitLightbox && (
+         <PortraitLightbox
+           portraitUrl={data.portraitUrl}
+           characterName={data.name}
+           onClose={() => setShowPortraitLightbox(false)}
+           onEdit={(tab) => {
+             setPortraitGenInitialTab(tab);
+             setShowPortraitLightbox(false);
+             setShowPortraitGen(true);
+           }}
+         />
+       )}
+
+       {showPortraitGen && (
+         <PortraitGenerator
+           currentPortrait={data.portraitUrl}
+           onUpdate={onUpdatePortrait}
+           onClose={() => setShowPortraitGen(false)}
+           initialTab={portraitGenInitialTab}
+           characterDescription={[
+             `${data.race} ${data.class}`,
+             data.subclass ? `(${data.subclass})` : null,
+             data.background ? `${data.background} background` : null,
+           ].filter(Boolean).join(', ')}
+         />
+       )}
        {showAskDM && <AskDMModal onClose={() => setShowAskDM(false)} />}
        {showSettings && <SettingsModal data={data} onSave={onUpdateData} onClose={() => setShowSettings(false)} />}
        {showShop && <ShopModal data={data} onUpdate={onUpdateData} onClose={() => setShowShop(false)} />}
        {showLevelUp && <LevelUpModal data={data} onUpdate={onUpdateData} onClose={() => setShowLevelUp(false)} />}
        {showRest && <RestModal data={data} onUpdate={onUpdateData} onClose={() => setShowRest(false)} />}
+       {showConditions && <ConditionsModal data={data} onUpdate={onUpdateData} onClose={() => setShowConditions(false)} />}
        {selectedItemForDetail && <ItemDetailModal item={selectedItemForDetail} onClose={() => setSelectedItemForDetail(null)} />}
     </div>
   );
