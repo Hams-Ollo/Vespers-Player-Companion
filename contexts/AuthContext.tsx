@@ -4,7 +4,8 @@ import { initializeApp, getApps } from 'firebase/app';
 import { 
   getAuth, 
   onAuthStateChanged, 
-  signInWithPopup,
+  signInWithRedirect,
+  getRedirectResult,
   GoogleAuthProvider, 
   signInAnonymously, 
   signOut
@@ -58,6 +59,19 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [signInError, setSignInError] = useState<string | null>(null);
 
   useEffect(() => {
+    // Handle redirect result on page load (for signInWithRedirect flow)
+    getRedirectResult(auth).then((result) => {
+      if (result?.user) {
+        // User signed in via redirect — onAuthStateChanged will handle state
+        setSignInError(null);
+      }
+    }).catch((error: any) => {
+      console.error("Redirect result error:", error);
+      console.error("Error code:", error?.code);
+      const code = error?.code ? ` [${error.code}]` : '';
+      setSignInError((error?.message ?? 'Sign-in failed.') + code);
+    });
+
     return onAuthStateChanged(auth, (firebaseUser) => {
       if (firebaseUser) {
         setUser({
@@ -76,11 +90,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const signInWithGoogle = async () => {
     try {
       setSignInError(null);
-      await signInWithPopup(auth, googleProvider);
+      await signInWithRedirect(auth, googleProvider);
     } catch (error: any) {
       console.error("Google Sign-In Error:", error);
       console.error("Error code:", error?.code);
-      console.error("Error details:", JSON.stringify(error?.customData ?? {}));
       const code = error?.code ? ` [${error.code}]` : '';
       setSignInError((error?.message ?? 'Sign-in failed.') + code);
     }

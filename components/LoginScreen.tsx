@@ -82,7 +82,7 @@ const LoginScreen: React.FC = () => {
             <p className="text-xs text-red-400 text-center break-words">{signInError}</p>
             {signInError.includes('internal-error') && (
               <p className="text-[10px] text-red-500/70 text-center">
-                GCP OAuth client may still be propagating. Try again in a few minutes, or check browser DevTools Console for details.
+                Check that this domain is in Firebase Console → Authentication → Settings → Authorized Domains.
               </p>
             )}
             {signInError.includes('unauthorized-domain') && (
