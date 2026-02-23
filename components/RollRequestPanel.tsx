@@ -6,11 +6,14 @@ interface RollRequestPanelProps {
   members: CampaignMember[];
 }
 
-const ROLL_TYPES = [
-  'Perception', 'Stealth', 'Investigation', 'Insight',
-  'Persuasion', 'Deception', 'Intimidation',
-  'Saving Throw', 'Initiative', 'Custom',
-] as const;
+const ROLL_GROUPS: { label: string; rolls: string[] }[] = [
+  { label: 'STR', rolls: ['Athletics'] },
+  { label: 'DEX', rolls: ['Acrobatics', 'Sleight of Hand', 'Stealth'] },
+  { label: 'INT', rolls: ['Arcana', 'History', 'Investigation', 'Nature', 'Religion'] },
+  { label: 'WIS', rolls: ['Animal Handling', 'Insight', 'Medicine', 'Perception', 'Survival'] },
+  { label: 'CHA', rolls: ['Deception', 'Intimidation', 'Performance', 'Persuasion'] },
+  { label: 'OTHER', rolls: ['Saving Throw', 'Initiative', 'Custom'] },
+];
 
 const RollRequestPanel: React.FC<RollRequestPanelProps> = ({ members }) => {
   const [rollType, setRollType] = useState('Perception');
@@ -52,19 +55,26 @@ const RollRequestPanel: React.FC<RollRequestPanelProps> = ({ members }) => {
           <label className="text-xs font-bold text-zinc-500 uppercase tracking-widest block mb-2">
             Roll Type
           </label>
-          <div className="flex flex-wrap gap-1">
-            {ROLL_TYPES.map(t => (
-              <button
-                key={t}
-                onClick={() => setRollType(t)}
-                className={`px-3 py-1 rounded-lg text-xs font-bold border transition-all ${
-                  rollType === t
-                    ? 'bg-amber-900/30 text-amber-400 border-amber-500/30'
-                    : 'bg-zinc-800 text-zinc-500 border-zinc-700 hover:text-zinc-300'
-                }`}
-              >
-                {t}
-              </button>
+          <div className="space-y-2">
+            {ROLL_GROUPS.map(group => (
+              <div key={group.label}>
+                <span className="text-[10px] font-black text-zinc-600 uppercase tracking-widest block mb-1">{group.label}</span>
+                <div className="flex flex-wrap gap-1">
+                  {group.rolls.map(t => (
+                    <button
+                      key={t}
+                      onClick={() => setRollType(t)}
+                      className={`px-3 py-1 rounded-lg text-xs font-bold border transition-all ${
+                        rollType === t
+                          ? 'bg-amber-900/30 text-amber-400 border-amber-500/30'
+                          : 'bg-zinc-800 text-zinc-500 border-zinc-700 hover:text-zinc-300'
+                      }`}
+                    >
+                      {t}
+                    </button>
+                  ))}
+                </div>
+              </div>
             ))}
           </div>
         </div>

@@ -73,26 +73,43 @@ const CombatTracker: React.FC = () => {
           <span className="text-xs text-zinc-500">Round {activeEncounter.round}</span>
         </div>
         <div className="flex gap-2">
-          <button
-            onClick={handleAdvanceTurn}
-            disabled={advancing}
-            className="flex items-center gap-2 px-4 py-2 bg-zinc-800 hover:bg-zinc-700 disabled:opacity-40 text-zinc-300 text-sm font-bold rounded-xl transition-colors border border-zinc-700"
-          >
-            {advancing ? <Loader2 size={14} className="animate-spin" /> : <SkipForward size={14} />}
-            Next Turn
-          </button>
-          <button
-            onClick={handleEndCombat}
-            disabled={ending}
-            className={`flex items-center gap-2 px-4 py-2 text-sm font-bold rounded-xl transition-all border ${
-              confirmEnd
-                ? 'bg-red-700 hover:bg-red-600 text-white border-red-600 animate-pulse'
-                : 'bg-red-900/30 hover:bg-red-900/50 text-red-400 border-red-500/20'
-            }`}
-          >
-            {ending ? <Loader2 size={14} className="animate-spin" /> : <XCircle size={14} />}
-            {confirmEnd ? 'Confirm End' : 'End Combat'}
-          </button>
+          {confirmEnd ? (
+            <>
+              <button
+                onClick={() => setConfirmEnd(false)}
+                className="flex items-center gap-2 px-4 py-2 bg-zinc-800 hover:bg-zinc-700 text-zinc-300 text-sm font-bold rounded-xl transition-colors border border-zinc-700"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleEndCombat}
+                disabled={ending}
+                className="flex items-center gap-2 px-4 py-2 bg-red-700 hover:bg-red-600 disabled:opacity-40 text-white text-sm font-bold rounded-xl transition-colors border border-red-600"
+              >
+                {ending ? <Loader2 size={14} className="animate-spin" /> : <XCircle size={14} />}
+                Confirm End Combat
+              </button>
+            </>
+          ) : (
+            <>
+              <button
+                onClick={handleAdvanceTurn}
+                disabled={advancing}
+                className="flex items-center gap-2 px-4 py-2 bg-zinc-800 hover:bg-zinc-700 disabled:opacity-40 text-zinc-300 text-sm font-bold rounded-xl transition-colors border border-zinc-700"
+              >
+                {advancing ? <Loader2 size={14} className="animate-spin" /> : <SkipForward size={14} />}
+                Next Turn
+              </button>
+              <button
+                onClick={handleEndCombat}
+                disabled={ending}
+                className="flex items-center gap-2 px-4 py-2 bg-red-900/30 hover:bg-red-900/50 text-red-400 text-sm font-bold rounded-xl transition-all border border-red-500/20"
+              >
+                <XCircle size={14} />
+                End Combat
+              </button>
+            </>
+          )}
         </div>
       </div>
 
@@ -178,15 +195,7 @@ const CombatTracker: React.FC = () => {
         })}
       </div>
 
-      {/* Cancel end-combat confirm */}
-      {confirmEnd && !ending && (
-        <button
-          onClick={() => setConfirmEnd(false)}
-          className="text-xs text-zinc-500 hover:text-zinc-300 transition-colors w-full text-center pt-1"
-        >
-          Cancel
-        </button>
-      )}
+
     </div>
   );
 };
