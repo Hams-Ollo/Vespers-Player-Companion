@@ -4,7 +4,7 @@ import { useAuth } from '../contexts/AuthContext';
 import { Chrome, UserCircle, Shield, Sword, Crown } from 'lucide-react';
 
 const LoginScreen: React.FC = () => {
-  const { signInWithGoogle, signInAsGuest } = useAuth();
+  const { signInWithGoogle, signInAsGuest, signInError } = useAuth();
 
   return (
     <div className="min-h-screen bg-obsidian flex flex-col items-center justify-center relative overflow-hidden">
@@ -76,6 +76,12 @@ const LoginScreen: React.FC = () => {
         <p className="text-[10px] text-zinc-700 max-w-[240px] mx-auto leading-relaxed">
             By embarking, you accept our <span className="underline cursor-pointer">Covenant of Service</span>. May your rolls be high and your deaths few.
         </p>
+
+        {signInError && (
+          <div className="bg-red-900/30 border border-red-700/50 rounded-xl p-3 max-w-[320px] mx-auto">
+            <p className="text-xs text-red-400 text-center break-words">{signInError}</p>
+          </div>
+        )}
       </div>
     </div>
   );

@@ -45,6 +45,7 @@ const googleProvider = new GoogleAuthProvider();
 interface AuthContextType {
   user: UserProfile | null;
   loading: boolean;
+  signInError: string | null;
   signInWithGoogle: () => Promise<void>;
   signInAsGuest: () => Promise<void>;
   logout: () => Promise<void>;
@@ -55,11 +56,13 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [user, setUser] = useState<UserProfile | null>(null);
   const [loading, setLoading] = useState(true);
+  const [signInError, setSignInError] = useState<string | null>(null);
 
   // Handle the result after Google redirect returns to the page
   useEffect(() => {
-    getRedirectResult(auth).catch((error) => {
+    getRedirectResult(auth).catch((error: any) => {
       console.error('Redirect sign-in error:', error);
+      setSignInError(error?.message ?? 'Sign-in failed. Check Firebase authorized domains.');
     });
   }, []);
 
@@ -81,9 +84,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const signInWithGoogle = async () => {
     try {
+      setSignInError(null);
       await signInWithRedirect(auth, googleProvider);
-    } catch (error) {
+    } catch (error: any) {
       console.error("Google Sign-In Error:", error);
+      setSignInError(error?.message ?? 'Sign-in failed.');
     }
   };
 
@@ -118,7 +123,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   return (
-    <AuthContext.Provider value={{ user, loading, signInWithGoogle, signInAsGuest, logout }}>
+    <AuthContext.Provider value={{ user, loading, signInError, signInWithGoogle, signInAsGuest, logout }}>
       {children}
     </AuthContext.Provider>
   );
