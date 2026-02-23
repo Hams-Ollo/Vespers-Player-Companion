@@ -59,23 +59,19 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [signInError, setSignInError] = useState<string | null>(null);
 
   useEffect(() => {
-    // Handle redirect result on page load (for signInWithRedirect flow).
-    // Only surface errors to the UI if the user actually initiated a sign-in
-    // this session (tracked via sessionStorage), to avoid replaying stale errors.
-    const didInitiateSignIn = sessionStorage.getItem('googleSignInPending') === 'true';
-    getRedirectResult(auth).then((result) => {
-      sessionStorage.removeItem('googleSignInPending');
-      if (result?.user) {
-        setSignInError(null);
-      }
-    }).catch((error: any) => {
-      console.error("Redirect result error:", error?.code, error?.message);
-      sessionStorage.removeItem('googleSignInPending');
-      if (didInitiateSignIn) {
+    // Only process redirect result if user actually initiated a Google sign-in
+    // this session. Avoids spurious errors on cold loads.
+    if (sessionStorage.getItem('googleSignInPending') === 'true') {
+      getRedirectResult(auth).then((result) => {
+        sessionStorage.removeItem('googleSignInPending');
+        if (result?.user) setSignInError(null);
+      }).catch((error: any) => {
+        sessionStorage.removeItem('googleSignInPending');
+        console.error("Redirect result error:", error?.code, error?.message);
         const code = error?.code ? ` [${error.code}]` : '';
         setSignInError((error?.message ?? 'Sign-in failed.') + code);
-      }
-    });
+      });
+    }
 
     return onAuthStateChanged(auth, (firebaseUser) => {
       if (firebaseUser) {
