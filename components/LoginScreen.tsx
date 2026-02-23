@@ -78,8 +78,13 @@ const LoginScreen: React.FC = () => {
         </p>
 
         {signInError && (
-          <div className="bg-red-900/30 border border-red-700/50 rounded-xl p-3 max-w-[320px] mx-auto">
+          <div className="bg-red-900/30 border border-red-700/50 rounded-xl p-3 max-w-[320px] mx-auto space-y-1">
             <p className="text-xs text-red-400 text-center break-words">{signInError}</p>
+            {(signInError.includes('internal-error') || signInError.includes('unauthorized-domain')) && (
+              <p className="text-[10px] text-red-500/70 text-center">
+                This domain must be added to Firebase Console → Authentication → Settings → Authorized Domains.
+              </p>
+            )}
           </div>
         )}
       </div>
